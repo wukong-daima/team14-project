@@ -18,9 +18,9 @@ scripts/pr-week.sh 03           # 다 하면 커밋·푸시·PR 한 번에
 
 | 담당 | 주차 | 명령 |
 |---|---|---|
-| 손 | 1, 2 (완성) · 공통 | `scripts/new-week.sh 01` / `02` |
-| 조원 A | 3, 4 | `scripts/new-week.sh 03` / `04` |
-| 조원 B | 6, 8 | `scripts/new-week.sh 06` / `08` |
+| 담당 A | 1~4주차 (1·2 완성, 3·4 남음) | `scripts/new-week.sh 03` / `04` |
+| 담당 B | 5~7주차 (5·7은 휴강 추정, 실질 6주차) | `scripts/new-week.sh 06` |
+| 담당 C | 8~10주차 (8 브리프 있음, 9·10은 수업 후) | `scripts/new-week.sh 08` / `09` / `10` |
 
 ## 로컬에서 보기
 

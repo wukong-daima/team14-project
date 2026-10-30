@@ -3,125 +3,383 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- 작업 지시서: content/briefs/week03.md · 완성 예시: weeks/week02.html -->
   <title>3주차 · KV 캐시 압축과 DeepSeek-V4.1-Flash — Team14 랩</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/site.css">
   <style>
-    /* 이 주차 전용 스타일만 여기에. 공통 규칙은 assets/css/site.css */
+    .kv-bars .bar { transition: width .4s ease; }
+    .kv-bars text { font-family: var(--mono); font-size: 12px; }
+    .toggles { display: grid; gap: 8px 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin: 10px 0 14px; }
+    .toggles label { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--text); padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; }
+    .toggles label.on { border-color: var(--accent); background: var(--accent-soft); }
+    .toggles input { accent-color: var(--accent); width: auto; }
+    .toggles .step { font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+    .formula { font-family: var(--mono); font-size: .9rem; background: var(--surface-2); padding: 8px 12px; border-radius: 8px; display: inline-block; }
+    .mode-table td:first-child { font-weight: 700; white-space: nowrap; }
   </style>
 </head>
-<!-- [2] data-week 는 assets/js/weeks.js 의 id 와 같아야 prev/next 내비게이션이 붙습니다 -->
 <body data-week="week03">
   <header class="site-header"><div class="wrap"></div></header>
 
   <main class="wrap">
     <section class="week-header fade-in">
-      <div class="meta"><span class="pill accent">WEEK 03 · 아키텍처</span><span>담당: 조원 A</span><span>·</span><span>마지막 수정: 2026-11-xx</span></div>
+      <div class="meta"><span class="pill accent">WEEK 03 · 아키텍처</span><span>담당: 담당 A</span><span>·</span><span>마지막 수정: 2026-10-31</span><span>·</span><span>원본 27쪽 대조 완료</span></div>
       <h1>KV 캐시 압축과 DeepSeek-V4.1-Flash</h1>
-      <!-- [3] 한 줄 요약: 전공/쉬운 두 벌 -->
-      <div data-level="pro"><p class="lead">이 주차를 한 문장으로. 무엇을, 왜, 어떤 대가로.</p></div>
-      <div data-level="easy"><p>이 주차를 중학생에게 한 문장으로.</p></div>
+      <div data-level="pro"><p class="lead">긴 컨텍스트 시대의 병목은 가중치가 아니라 <b>KV 캐시</b>입니다. DeepSeek-V4.1-Flash는 "더 작게 저장(FP4) · 덜 저장(CSA2 압축) · 레이어 간 공유(cross-layer reuse) · 오래 들고 있지 않기(Bounded Replay) · 인코더만으로 prefill(CED)"을 한 아키텍처에 묶어 100만 토큰의 글로벌 KV를 약 0.89GB로 줄였습니다. 후반부의 Perceiver는 입력 길이 M과 무관한 고정 크기 latent N으로 어떤 모달리티든 O(MN)에 읽는 구조입니다.</p></div>
+      <div data-level="easy"><p>AI가 아주 긴 글을 읽으려면 "읽은 내용 메모(KV 캐시)"가 산더미처럼 쌓여요. 이번 주는 그 메모를 작게 쓰고, 합치고, 돌려 쓰고, 오래된 건 버리는 다섯 가지 정리법으로 100만 단어 분량 메모를 1GB 아래로 줄인 모델 이야기예요.</p></div>
     </section>
 
-      <div class="callout" style="border-left-color:var(--warn)"><b>작업 중인 페이지입니다.</b> 작업 지시서는 저장소의 <code>content/briefs/week03.md</code>, 완성 예시는 <a href="week02.html">2주차</a>를 보세요. 아래는 템플릿 뼈대입니다.</div>
     <div class="layout">
       <nav class="toc" aria-label="이 페이지 목차"></nav>
       <div>
 
-        <!-- ================= [4] 핵심 개념 지도 (SVG 한 장) ================= -->
         <h2 id="map">1. 한눈에 보기</h2>
         <figure class="figure">
-          <svg viewBox="0 0 800 220" role="img" aria-label="이 주차 개념 지도">
-            <!-- 박스/화살표로 개념 관계를 그립니다. 색은 currentColor 와 var(--accent) 만 쓰면 다크모드에서도 보입니다. -->
-            <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor">
-              <rect x="20" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="100" y="116" text-anchor="middle">개념 A</text>
-              <line x1="180" y1="110" x2="240" y2="110" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="240" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="320" y="116" text-anchor="middle">개념 B</text>
+          <svg viewBox="0 0 900 300" role="img" aria-label="KV 캐시 4대 압축 전략 지도: 가운데 KV 캐시, 네 방향으로 FP4, CSA2 압축, cross-layer reuse, Bounded Replay, 아래 CED">
+            <defs><marker id="ar3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+            <g font-family="Noto Sans KR, sans-serif" font-size="13" fill="currentColor">
+              <rect x="360" y="110" width="180" height="80" rx="14" fill="var(--accent)" opacity=".15"/>
+              <rect x="360" y="110" width="180" height="80" rx="14" fill="none" stroke="var(--accent)" stroke-width="2"/>
+              <text x="450" y="143" text-anchor="middle" font-weight="700" font-size="16">KV 캐시</text>
+              <text x="450" y="166" text-anchor="middle" font-size="11" opacity=".75">긴 컨텍스트의 진짜 병목</text>
+
+              <line x1="360" y1="130" x2="250" y2="70" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3a)"/>
+              <rect x="20" y="30" width="230" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="135" y="54" text-anchor="middle" font-weight="700">① 엔트리 하나를 더 작게</text>
+              <text x="135" y="74" text-anchor="middle" font-size="12" opacity=".8">FP4 (SWA KV는 FP8)</text>
+
+              <line x1="360" y1="170" x2="250" y2="230" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3a)"/>
+              <rect x="20" y="210" width="230" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="135" y="234" text-anchor="middle" font-weight="700">② 엔트리 수를 줄이기</text>
+              <text x="135" y="254" text-anchor="middle" font-size="12" opacity=".8">CSA2 압축 (m=2, 두 토큰당 1개)</text>
+
+              <line x1="540" y1="130" x2="650" y2="70" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3a)"/>
+              <rect x="650" y="30" width="230" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="765" y="54" text-anchor="middle" font-weight="700">③ 레이어마다 따로 두지 않기</text>
+              <text x="765" y="74" text-anchor="middle" font-size="12" opacity=".8">cross-layer reuse (Full→Reuse→Reindex)</text>
+
+              <line x1="540" y1="170" x2="650" y2="230" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3a)"/>
+              <rect x="650" y="210" width="230" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="765" y="234" text-anchor="middle" font-weight="700">④ 오래 들고 있지 않기</text>
+              <text x="765" y="254" text-anchor="middle" font-size="12" opacity=".8">Bounded Replay (마지막 128 토큰만)</text>
+
+              <line x1="450" y1="190" x2="450" y2="225" stroke="var(--easy)" stroke-width="1.5" marker-end="url(#ar3a)"/>
+              <rect x="330" y="228" width="240" height="52" rx="10" fill="none" stroke="var(--easy)" stroke-width="1.5" stroke-dasharray="6 4"/>
+              <text x="450" y="250" text-anchor="middle" font-weight="700" fill="var(--easy)">+ CED: prefill 연산 ≈ 절반</text>
+              <text x="450" y="268" text-anchor="middle" font-size="11" opacity=".8">(캐시 크기가 아니라 계산량을 줄임)</text>
+
+              <text x="450" y="18" text-anchor="middle" font-size="12" font-family="IBM Plex Mono, monospace">결과: 글로벌 KV 890 B/token → 1M 토큰 ≈ 0.89 GB</text>
             </g>
           </svg>
-          <figcaption>한 줄 캡션</figcaption>
+          <figcaption>V4.1-Flash의 거의 모든 설계가 이 네 화살표 중 하나를 겨냥합니다. CED는 캐시 크기가 아니라 prefill 계산량을 줄이는 별도의 축입니다.</figcaption>
         </figure>
 
-        <!-- ================= [5] 개념 카드 (반복) ================= -->
+        <div class="callout">
+          <b>이 PDF는 Week 3-1(27쪽)입니다.</b> 목차에 있는 Mamba · Gated Delta Networks · Hybrid(Kimi Linear, Qwen3.8-Flash-Next, Nemotron)는 이 파일에 없습니다(3-2 자료로 추정). 이 페이지는 실제로 있는 내용만 다룹니다.
+        </div>
+
         <h2 id="concepts">2. 핵심 개념</h2>
 
-        <section class="concept" id="c1">
-          <div class="card">
-            <div class="num">CONCEPT 01</div>
-            <h3>개념 이름 (영문 약어)</h3>
-            <div data-level="pro">
-              <p>전공 수준 설명 3~5문장. 정의 → 왜 필요한가 → 어떻게 동작 → 대가(트레이드오프).</p>
-            </div>
-            <div data-level="easy">
-              <p>중학생 비유 2~3문장. 일상 사물로.</p>
-            </div>
-            <!-- 요약본과 원본이 다를 때 -->
-            <div class="callout fix">요약본의 "X"는 원본 자료 기준 "Y"입니다 (슬라이드 p.NN).</div>
-            <figure class="figure">
-              <svg viewBox="0 0 600 160"><!-- 개념 도형 --></svg>
-              <figcaption>캡션</figcaption>
-            </figure>
+        <section class="concept" id="c1"><div class="card">
+          <div class="num">CONCEPT 01 · p.4</div>
+          <h3>KV 캐시 압축의 4대 전략</h3>
+          <div data-level="pro">
+            <p>긴 컨텍스트 추론에서 메모리를 지배하는 것은 모델 가중치가 아니라 토큰마다 쌓이는 KV 캐시입니다. V4.1-Flash는 이를 네 축으로 공략합니다. ① 각 엔트리를 더 작게 저장(FP4), ② 저장할 엔트리 수를 줄임(CSA2 compression), ③ 레이어마다 별도 KV 캐시를 두지 않음(CSA2 cross-layer reuse), ④ SWA KV를 오래 보관하지 않음(Bounded Replay). 여기에 CED가 prefill 연산 자체를 절반으로 줄입니다. 2주차의 GQA·MLA가 "헤드 수"를 줄였다면, 이번 주는 비트 수·엔트리 수·레이어 수·보관 기간을 동시에 줄입니다.</p>
           </div>
-        </section>
+          <div data-level="easy">
+            <p>책상 위에 메모지를 쌓아둔다고 생각해요. 메모를 더 작은 글씨로 쓰고(FP4), 두 장을 한 장으로 합치고(압축), 같은 메모를 서랍마다 복사하지 않고(공유), 최근 메모 몇 장만 남기고 버리는(Bounded Replay) 네 가지 정리법이에요.</p>
+          </div>
+        </div></section>
 
-        <!-- ================= [6] 직접 해보기 (주차당 대표 1개) ================= -->
+        <section class="concept" id="c2"><div class="card">
+          <div class="num">CONCEPT 02 · p.5</div>
+          <h3>DeepSeek-V4.1-Flash 구조 수치</h3>
+          <div class="callout fix">요약본의 "DeepSeek-V2 (Flash)"는 <b>DeepSeek-V4.1-Flash</b>입니다(논문 "DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression", arXiv 2026, p.2·4~13). 또 요약본의 "DSA (DeepSpeed Sparse Attention)"는 2주차 PDF 기준 <b>DeepSeek Sparse Attention</b>이며, 3주차 PDF는 DSA 대신 CSA2(희소 선택 512 토큰) 용어를 씁니다.</div>
+          <div data-level="pro">
+            <p>40개의 causal Transformer 레이어 = <b>20 Causal Encoder + 20 Causal Decoder</b>. 백본 파라미터 552B, 별도 Engram 파라미터 196B. 토큰당 활성 파라미터는 prefill 시 8B(인코더만), decoding 시 16B(인코더+디코더). 첫 두 레이어는 SWA만(윈도우 128), 나머지는 CSA2+SWA. 희소 어텐션이 고르는 토큰 수는 512. 프롬프트는 인코더로만 처리(prefill)되고, 생성 토큰은 인코더→디코더 파이프라인을 다시 통과합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>40층 건물인데 아래 20층은 "읽기 전담(인코더)", 위 20층은 "쓰기 전담(디코더)"이에요. 긴 질문을 읽을 땐 아래 20층만 돌고, 답을 한 글자씩 쓸 때만 40층을 다 돌아요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 360" role="img" aria-label="V4.1-Flash 구조: 아래 인코더 20층, 위 디코더 20층, 각 블록에 SWA와 CSA2 글로벌 어텐션, 인코더 최종 hidden state가 디코더 글로벌 KV의 재료">
+              <defs><marker id="ar3b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor">
+                <rect x="250" y="30" width="400" height="120" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="450" y="52" text-anchor="middle" font-weight="700" font-size="14">Causal Decoder × 20</text>
+                <rect x="275" y="68" width="160" height="30" rx="7" fill="currentColor" opacity=".12"/><text x="355" y="88" text-anchor="middle">SWA (윈도우 128)</text>
+                <rect x="465" y="68" width="160" height="30" rx="7" fill="var(--accent)" opacity=".2"/><text x="545" y="88" text-anchor="middle">CSA2 글로벌 (Top-512)</text>
+                <text x="450" y="124" text-anchor="middle" font-size="11" opacity=".8">글로벌 K,V는 인코더 hidden state에서 생성 · SWA KV는 자기 레이어에서</text>
+                <text x="450" y="140" text-anchor="middle" font-size="11" opacity=".8">decoding 시 활성 16B (인코더 8B + 디코더 8B)</text>
+
+                <rect x="250" y="200" width="400" height="120" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="450" y="222" text-anchor="middle" font-weight="700" font-size="14">Causal Encoder × 20</text>
+                <rect x="275" y="238" width="160" height="30" rx="7" fill="currentColor" opacity=".12"/><text x="355" y="258" text-anchor="middle">SWA (윈도우 128)</text>
+                <rect x="465" y="238" width="160" height="30" rx="7" fill="var(--accent)" opacity=".2"/><text x="545" y="258" text-anchor="middle">CSA2 글로벌 (Top-512)</text>
+                <text x="450" y="294" text-anchor="middle" font-size="11" opacity=".8">첫 2개 레이어는 SWA만 · prefill 시 활성 8B</text>
+                <text x="450" y="310" text-anchor="middle" font-size="11" opacity=".8">Engram 모듈: 레이어 1, 14 (0-indexed)</text>
+
+                <line x1="450" y1="200" x2="450" y2="150" stroke="var(--easy)" stroke-width="4" marker-end="url(#ar3b)"/>
+                <text x="462" y="180" font-size="11" fill="var(--easy)" font-weight="700">CED: 인코더 최종 hidden state → 디코더 글로벌 K,V</text>
+
+                <rect x="40" y="235" width="170" height="50" rx="10" fill="none" stroke="currentColor" stroke-dasharray="5 3"/>
+                <text x="125" y="256" text-anchor="middle" font-weight="700">프롬프트 (prefill)</text>
+                <text x="125" y="274" text-anchor="middle" font-size="11" opacity=".8">인코더만 통과</text>
+                <line x1="210" y1="260" x2="248" y2="260" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3b)"/>
+
+                <rect x="690" y="150" width="190" height="60" rx="10" fill="none" stroke="currentColor" stroke-dasharray="5 3"/>
+                <text x="785" y="173" text-anchor="middle" font-weight="700">생성 토큰 (decode)</text>
+                <text x="785" y="192" text-anchor="middle" font-size="11" opacity=".8">인코더 → 디코더 모두 통과</text>
+                <path d="M690 180 L670 180 L670 260 L652 260" stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#ar3b)"/>
+                <path d="M652 90 L670 90 L670 150" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>
+
+                <rect x="40" y="60" width="170" height="60" rx="10" fill="var(--easy)" opacity=".15"/>
+                <rect x="40" y="60" width="170" height="60" rx="10" fill="none" stroke="var(--easy)"/>
+                <text x="125" y="84" text-anchor="middle" font-weight="700">Engram 196B</text>
+                <text x="125" y="104" text-anchor="middle" font-size="11" opacity=".85">학습된 거대 사전 (백본 552B와 별도)</text>
+                <line x1="125" y1="120" x2="125" y2="232" stroke="var(--easy)" stroke-width="1" stroke-dasharray="3 3"/>
+
+                <text x="450" y="348" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace">40 = 20E + 20D · 백본 552B · Engram 196B · 활성 8B(prefill) / 16B(decode) · SWA 128 · Top-512</text>
+              </g>
+            </svg>
+            <figcaption>긴 프롬프트는 아래 20층만 지나갑니다. 굵은 주황 화살표(CED)가 "위 20층은 왜 프롬프트를 다시 안 읽어도 되는가"의 답입니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c3"><div class="card">
+          <div class="num">CONCEPT 03 · p.6</div>
+          <h3>Engram: 학습된 거대 사전</h3>
+          <div class="callout fix">요약본의 "바이그램·트라이그램 해시를 외부 메모리에 저장, O(1) 조회"는 PDF 문구에 없습니다. 슬라이드 표현은 "short local lexical pattern 자체를 memory address로 쓰는 massive learned dictionary"이며, 해시/O(1)/N-gram은 강의 구두 설명으로 보입니다(p.6). 또 "별도 외부 메모리"라기보다 레이어 1·14에 배치된 모듈이며 파라미터 196B입니다.</div>
+          <div data-level="pro">
+            <p>짧은 국소 어휘 패턴(short local lexical pattern) 자체를 메모리 주소로 쓰는 거대한 학습된 사전입니다. Transformer가 여러 레이어 연산을 거쳐 재구성해야 할 흔한 패턴을 빠른 조회(lookup)로 가져오므로, 본체는 장거리 문맥 이해에 연산을 집중할 수 있습니다. V4.1-Flash에서는 레이어 1과 14(0-indexed)에 Engram 모듈이 있고, 파라미터는 백본 552B와 별도로 196B입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>자주 쓰는 숙어는 머리로 매번 계산하지 않고 "숙어 사전"에서 바로 찾아보는 거예요. 본체는 어려운 긴 문맥 이해에만 집중할 수 있어요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c4"><div class="card">
+          <div class="num">CONCEPT 04 · p.7–8</div>
+          <h3>mHC (Manifold-Constrained Hyper-Connections) · Single-Pass mHC</h3>
+          <div class="callout fix">요약본의 "Single-Pass MHC"는 <b>Single-Pass mHC</b>(소문자 m, Manifold-Constrained Hyper-Connections)입니다(p.7~8).</div>
+          <div data-level="pro">
+            <p>Residual connection은 1차선 고속도로입니다. Hyper-Connections(HC)는 n개의 residual stream을 병렬로 유지하고, 각 블록(attention/MoE) 입력 전에 관련 stream을 섞습니다. mHC는 이 섞는 매핑을 무제한으로 두지 않고 <b>doubly stochastic matrix</b>(행·열 합이 1)로 제약해 변환이 안정 범위에 머물게 합니다. Single-Pass mHC는 이 변환을 한 번의 패스로 효율적으로 구현한 것입니다. 2주차의 Pre-Norm이 "잔차 경로를 건드리지 않아 안정"이었다면, mHC는 "잔차 경로를 넓히되 규칙을 걸어 안정"입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>고속도로를 1차선에서 여러 차선으로 넓히되, 차선 변경 규칙을 정해서(한 차선이 다 빨려 들어가거나 텅 비지 않게) 교통이 꼬이지 않게 만든 거예요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c5"><div class="card">
+          <div class="num">CONCEPT 05 · p.9–10</div>
+          <h3>CED (Causal Encoder-Decoder)</h3>
+          <div class="callout fix">요약본의 "CID"는 <b>CED</b>(Causal Encoder-Decoder)입니다. 또 "프롬프트는 인코더만 통과시켜 KV 캐시를 절반으로 줄임"은 부정확합니다. CED가 절반으로 줄이는 것은 <b>prefill 연산량</b>(N≫n_win일 때)이고, KV 캐시 크기 자체는 CSA2·FP4가 줄입니다(p.9~10).</div>
+          <div data-level="pro">
+            <p>"모든 입력 토큰을 모든 상위 레이어에 통과시켜야만 글로벌 KV를 만들 수 있는가?"에 대한 답입니다. CED는 각 디코더 레이어의 글로벌 K, V를 그 레이어의 hidden state가 아니라 <b>인코더 최종 hidden state로부터</b> 생성합니다(인코더의 K,V를 그대로 재사용하는 게 아니라 hidden state를 재료로 씀). 긴 입력은 대부분 20개 인코더 레이어만 통과하면 되므로 prefill 연산이 대략 절반입니다. 다만 디코더의 SWA(로컬) KV는 여전히 디코더 각 레이어의 hidden state에서 만들어야 하므로 Bounded Replay로 보완하고, CSA2 cross-layer sharing과 결합하면 인코더 유래 글로벌 KV를 여러 디코더 레이어가 공유합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>긴 책을 읽을 때 "읽기 담당(인코더)"이 요약 노트를 만들면, "쓰기 담당(디코더)"은 책을 처음부터 다시 읽지 않고 그 노트만 보고 글을 써요. 다만 마지막 몇 줄은 직접 읽어야 문맥이 이어져요(그게 Bounded Replay).</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c6"><div class="card">
+          <div class="num">CONCEPT 06 · p.11</div>
+          <h3>CSA2: 압축(m=2) + 레이어 간 공유(Full → Reuse → Reindex)</h3>
+          <div class="callout fix">요약본의 "여러 레이어에 걸쳐 재사용(Reuse)·재인덱스(Re-index)"의 정확한 패턴은 <b>Full → Reuse → Reuse → Reuse → Reindex</b>입니다. 또 "최근 128개 토큰만 풀 어텐션"이 아니라 <b>SWA(128)와 글로벌 희소 어텐션(Top-512)을 병행</b>하며, 첫 2개 레이어만 SWA 전용입니다(p.5, 11).</div>
+          <div data-level="pro">
+            <p><b>압축</b>: 보통 토큰당 KV 엔트리 1개인데 m=2면 두 토큰당 1개(차원별 가중 결합)로 저장합니다. <b>공유</b>: KV 공유는 메모리를, 희소 선택 위치(sparse position) 공유는 검색 연산을 줄이며 둘은 반드시 함께 쓰일 필요는 없습니다. 레이어 패턴은 Full → Reuse → Reuse → Reuse → Reindex. <b>Full</b>은 글로벌 KV와 Indexer K를 새로 만들고 Top-K도 새로 고릅니다. <b>Reuse</b>는 앞 Full 레이어의 KV와 선택 결과를 모두 재사용합니다. <b>Reindex</b>는 KV는 재사용하되 표현이 많이 바뀌었으므로 Top-K 선택만 현재 레이어에서 다시 계산합니다. 모든 모드에서 Main Q와 SWA KV는 현 레이어에서 따로 계산하고, Full/Reindex는 indexer Q도 계산합니다. CSA2의 풀네임은 슬라이드에 없어 논문 확인이 필요합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>반 전체 사진을 층마다 다시 찍지 않고 한 번 찍은 사진을 여러 층에서 돌려 쓰되, 몇 층 지나면 "누구를 자세히 볼지(Top-K)"만 다시 고르는 거예요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 200" role="img" aria-label="CSA2 레이어 패턴: Full, Reuse, Reuse, Reuse, Reindex 다섯 레이어에서 무엇을 새로 만들고 무엇을 재사용하는지">
+              <g id="fig-csa2" font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor"></g>
+            </svg>
+            <figcaption>다섯 레이어 한 묶음. 글로벌 KV는 Full에서 한 번만 만들어지고 나머지 네 층이 돌려 씁니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c7"><div class="card">
+          <div class="num">CONCEPT 07 · p.12</div>
+          <h3>FP4 글로벌 KV</h3>
+          <div data-level="pro">
+            <p>CSA2가 "몇 개를 저장할지"를 줄인다면 FP4는 "엔트리당 몇 비트"를 줄입니다. 글로벌 KV는 FP4로 저장하고, post-training 단계에서 quantization-aware training을 적용합니다. 양자화에 민감한 SWA KV는 FP8을 유지합니다. 결과적으로 글로벌 KV는 <b>890 bytes/token</b>, 100만 토큰에 약 <b>0.89GB</b>입니다. 2주차 계산기로 같은 길이의 GQA-8·FP16 모델을 재 보면 이 숫자가 얼마나 작은지 체감됩니다.</p>
+            <p class="small">공식: <span class="formula">890 B × 1,000,000 tokens ≈ 0.89 GB</span></p>
+          </div>
+          <div data-level="easy">
+            <p>메모를 깨알 글씨(4비트)로 쓰되, 틀리면 안 되는 최근 메모(SWA)는 조금 큰 글씨(8비트)로 써요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c8"><div class="card">
+          <div class="num">CONCEPT 08 · p.10, 13</div>
+          <h3>Bounded Replay</h3>
+          <div data-level="pro">
+            <p>CED로 글로벌 KV는 인코더에서 만들지만, 디코더의 SWA KV는 디코더 각 레이어의 hidden state에 의존합니다. SWA 윈도우가 128이라도 깊은 레이어의 정확한 SWA 상태 복원에는 레이어 수만큼 의존 범위가 누적되어 약 <b>20 × 128 = 2,560 토큰</b>이 필요합니다. Bounded Replay는 복원을 <b>마지막 128 프롬프트 토큰만 디코더에 재생</b>하는 것으로 제한해 근사 로컬 상태를 만듭니다. 정확 복원 대신 bounded recomputation을 택한 것입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>대화를 이어가려고 지난 대화 전체를 다시 읽는 대신 "마지막 몇 문장"만 다시 읽고 시작하는 거예요. 완벽하진 않지만 충분히 자연스러워요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c9"><div class="card">
+          <div class="num">CONCEPT 09 · p.15–22</div>
+          <h3>Perceiver: byte array M vs latent array N</h3>
+          <div data-level="pro">
+            <p>이미지·텍스트·3D 포인트클라우드를 한 구조로 다루려는 통합 모델입니다. 입력(byte array)은 M개 인덱스 × C 채널(ImageNet 224×224×3이면 M=50,176, C=3)이고, 입력에 self-attention을 걸면 O(M²)라 불가능합니다. Perceiver는 하이퍼파라미터 크기 N×D의 <b>latent array</b>가 입력을 cross-attention으로 읽고(Query N, Key M → O(MN)), latent끼리 self-attention(O(N²))을 반복한 뒤 마지막 latent를 pooling해 분류합니다. 입력이 아무리 커져도 latent 쪽 비용은 그대로입니다.</p>
+            <p class="small">복잡도: <span class="formula">self-attn(byte) O(M²) → cross-attn O(MN) + self-attn(latent) O(N²)</span></p>
+          </div>
+          <div data-level="easy">
+            <p>5만 장짜리 사진 뭉치를 전부 서로 비교하면 끝이 없으니, "메모장 N칸"이 사진 뭉치를 훑어 필요한 정보만 적고(cross-attention), 메모장끼리만 정리(self-attention)해요. 사진이 아무리 많아도 메모장 크기는 그대로예요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 250" role="img" aria-label="Perceiver와 Perceiver IO 흐름: byte array가 cross-attention으로 latent array에 읽히고, Perceiver IO는 출력 쿼리 배열로 구조화된 출력을 만든다">
+              <defs><marker id="ar3c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor">
+                <text x="20" y="24" font-weight="700" font-size="13">Perceiver</text>
+                <rect x="20" y="40" width="130" height="150" rx="10" fill="currentColor" opacity=".1"/>
+                <rect x="20" y="40" width="130" height="150" rx="10" fill="none" stroke="currentColor"/>
+                <text x="85" y="110" text-anchor="middle" font-weight="700">Byte array</text>
+                <text x="85" y="130" text-anchor="middle" font-size="11">M × C (M=50,176)</text>
+                <line x1="150" y1="115" x2="205" y2="115" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar3c)"/>
+                <text x="178" y="100" text-anchor="middle" font-size="10" fill="var(--accent)">cross-attn</text>
+                <text x="178" y="138" text-anchor="middle" font-size="10" fill="var(--accent)">O(MN)</text>
+                <rect x="210" y="85" width="80" height="60" rx="10" fill="var(--accent)" opacity=".2"/>
+                <rect x="210" y="85" width="80" height="60" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="250" y="110" text-anchor="middle" font-weight="700">Latent</text>
+                <text x="250" y="128" text-anchor="middle" font-size="11">N × D</text>
+                <path d="M290 100 C 330 70, 330 160, 290 130" stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#ar3c)"/>
+                <text x="345" y="110" font-size="10">self-attn O(N²) × L</text>
+                <line x1="250" y1="145" x2="250" y2="190" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar3c)"/>
+                <rect x="195" y="195" width="110" height="34" rx="8" fill="none" stroke="currentColor"/>
+                <text x="250" y="217" text-anchor="middle" font-size="11">pooling → 분류</text>
+                <text x="85" y="215" text-anchor="middle" font-size="11" fill="var(--danger)">self-attn 직접 적용 = O(M²) ✗</text>
+
+                <line x1="440" y1="30" x2="440" y2="235" stroke="currentColor" stroke-dasharray="4 4" opacity=".4"/>
+
+                <text x="470" y="24" font-weight="700" font-size="13">Perceiver IO</text>
+                <rect x="470" y="85" width="80" height="60" rx="10" fill="var(--accent)" opacity=".2"/>
+                <rect x="470" y="85" width="80" height="60" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="510" y="110" text-anchor="middle" font-weight="700">Latent</text>
+                <text x="510" y="128" text-anchor="middle" font-size="11">N × D</text>
+                <rect x="600" y="40" width="130" height="50" rx="10" fill="var(--easy)" opacity=".15"/>
+                <rect x="600" y="40" width="130" height="50" rx="10" fill="none" stroke="var(--easy)"/>
+                <text x="665" y="60" text-anchor="middle" font-weight="700">Output query</text>
+                <text x="665" y="78" text-anchor="middle" font-size="11">M개 (픽셀마다 질문)</text>
+                <line x1="550" y1="115" x2="625" y2="115" stroke="var(--easy)" stroke-width="2" marker-end="url(#ar3c)"/>
+                <line x1="665" y1="90" x2="665" y2="110" stroke="var(--easy)" stroke-width="1.5" marker-end="url(#ar3c)"/>
+                <text x="588" y="138" text-anchor="middle" font-size="10" fill="var(--easy)">cross-attn (Q=M, K=N)</text>
+                <rect x="630" y="115" width="130" height="80" rx="10" fill="currentColor" opacity=".1"/>
+                <rect x="630" y="115" width="130" height="80" rx="10" fill="none" stroke="currentColor"/>
+                <text x="695" y="150" text-anchor="middle" font-weight="700">Output array</text>
+                <text x="695" y="170" text-anchor="middle" font-size="11">M개 (분할 등)</text>
+                <text x="695" y="222" text-anchor="middle" font-size="11" opacity=".8">+ Graph Perceiver IO: 노드 간 관계 정보</text>
+              </g>
+            </svg>
+            <figcaption>왼쪽은 "크게 읽고 작게 요약", 오른쪽은 "작은 요약에서 다시 크게 그려내기". 둘 다 M끼리의 비교는 한 번도 하지 않습니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c10"><div class="card">
+          <div class="num">CONCEPT 10 · p.23–27</div>
+          <h3>Perceiver IO · Graph Perceiver IO</h3>
+          <div data-level="pro">
+            <p>Perceiver는 분류처럼 출력이 작을 때만 쓸 수 있습니다. Perceiver IO는 <b>출력 쿼리 배열(크기 M)</b>로 latent(N)를 cross-attention해(Query M, Key N → 출력 M) 분할(segmentation)처럼 입력 크기의 구조화된 출력을 만듭니다. 그러나 노드 간 관계(그래프)는 다루지 못하므로, Graph Perceiver IO가 관계 정보를 결합합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>메모장(N)만 보고 "사진 한 장 전체 크기의 답(M)"을 다시 그려내려면, "질문 카드"를 사진 픽셀 수만큼 만들어 메모장에 물어보는 식이에요. Graph 버전은 "이 픽셀과 저 픽셀이 연결돼 있다"는 관계까지 알려줘요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c11"><div class="card">
+          <div class="num">수업 중 토론 · PDF에 없음</div>
+          <h3>벤치마크 vs 실사용, 오픈 웨이트 보안, GPU 자원</h3>
+          <div class="callout">이 카드의 내용은 수업 요약본에만 있고 강의 슬라이드에는 없습니다. 수업 중 토론으로 표기합니다. 요약본의 "GPT-4, Claude 3 Opus와 대등한 벤치마크"도 PDF에 표가 없어 논문 확인 전에는 쓰지 않습니다.</div>
+          <div data-level="pro">
+            <p>벤치마크 점수가 높아도 실제 사용 시 체감 성능이 떨어질 수 있습니다. 벤치마크에 없는 다양한 실사용 프롬프트와 API 서빙 환경(하네스)의 차이가 원인으로 거론됐고, 이는 8주차의 "벤치마크 신뢰성" 주제로 이어집니다. 특정 국가에서 개발된 오픈 웨이트 모델에 학습 단계에서 심어진 백도어(특정 프롬프트에 반응)의 잠재 위험도 논의됐습니다. 마지막으로 DeepSeek식 아키텍처 실험의 성공은 막대한 GPU 자원 위의 수많은 시행착오의 결과일 가능성이 높아, GPU 자원이 연구의 폭과 깊이를 결정한다는 데 공감대가 있었습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>시험 점수가 높다고 실제 일을 잘하는 건 아닐 수 있고, 공짜로 받은 프로그램에 몰래 심어진 함정이 있을 수 있고, 새로운 설계를 많이 시도하려면 결국 비싼 컴퓨터가 많이 필요하다는 세 가지 이야기를 나눴어요.</p>
+          </div>
+        </div></section>
+
         <h2 id="play">3. 직접 해보기</h2>
         <section class="playground" id="playground">
-          <h3>🎮 인터랙션 제목</h3>
-          <p class="small muted">무엇을 조작하면 무엇이 바뀌는지 한 줄.</p>
+          <h3>🎮 100만 토큰 KV 캐시 다이어트</h3>
+          <p class="small muted">컨텍스트 길이를 정하고, V4.1-Flash의 네 가지 정리법을 하나씩 켜 보세요. 막대는 로그 눈금이라 "몇 배 줄었는가"를 길이로 읽을 수 있습니다.</p>
           <div class="controls">
-            <label>슬라이더 이름 <output id="o1">8</output>
-              <input type="range" id="r1" min="1" max="64" value="8"></label>
+            <label>컨텍스트 길이 N <output id="oN">1M</output>
+              <input type="range" id="rN" min="10" max="20" step="1" value="20"></label>
+          </div>
+          <div class="toggles" id="toggles">
+            <label><input type="checkbox" id="t1"> <span>① FP16 → FP4 양자화 <span class="step">÷4</span></span></label>
+            <label><input type="checkbox" id="t2"> <span>② CSA2 압축 m=2 <span class="step">÷2</span></span></label>
+            <label><input type="checkbox" id="t3"> <span>③ cross-layer reuse (Full→Reuse×3→Reindex) <span class="step">÷5</span></span></label>
+            <label><input type="checkbox" id="t4"> <span>④ SWA 128 + Bounded Replay <span class="step">SWA KV는 128 토큰만</span></span></label>
           </div>
           <div class="stage">
-            <svg id="stage-svg" viewBox="0 0 700 200" width="100%"></svg>
+            <svg id="kv-bars" class="kv-bars" viewBox="0 0 700 260" width="100%" role="img" aria-label="컨텍스트 길이에 따른 KV 캐시 메모리 막대: 기준선, 단계별 적용, 논문 수치"></svg>
           </div>
-          <div class="readout" id="readout"></div>
+          <div class="readout" id="kv-readout"></div>
+          <p class="small muted" style="margin-top:10px"><b>교육용 근사입니다.</b> 기준선은 "40층 · KV 헤드 8(GQA-8) · d_head 128 · FP16"이라는 <b>가정값</b>이고, 각 토글의 배율(÷4, ÷2, ÷5)은 강의의 설계 원리를 단순화한 것입니다. 맨 아래 막대만 논문 공개 수치(글로벌 KV 890 B/token)를 그대로 쓴 것이며, 근사 체인과 논문 수치의 차이는 논문의 실제 헤드 구성 등 공개되지 않은 세부 설정 때문입니다.</p>
         </section>
 
-        <!-- ================= [7] 모델 비교 ================= -->
         <h2 id="compare">4. 최신 모델과 비교하기</h2>
         <details class="compare" open>
-          <summary>⚖️ 수업 모델 vs Claude · GPT · 공개 모델</summary>
+          <summary>⚖️ 수업 모델(DeepSeek-V4.1-Flash · Perceiver) vs Claude · GPT · Gemini · 공개 모델</summary>
           <div class="body">
+            <p class="small">교육적 메시지: KV 캐시를 "어떻게" 줄이는지는 오픈 모델(DeepSeek)만 논문으로 공개합니다. Claude·GPT는 결과로 드러나는 제품 기능(컨텍스트 길이, 프롬프트 캐싱)만 비교할 수 있고, 내부 KV 기법은 전부 비공개입니다.</p>
             <table>
               <thead><tr><th>개념</th><th>수업에서 (DeepSeek 등)</th><th>Claude</th><th>GPT / Gemini / 공개 모델</th><th>출처</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>개념 A</td>
-                  <td>수업에서 다룬 방식</td>
-                  <td>공개 문서 범위의 사실 <span class="badge src">출처</span> / 또는 <span class="badge private">비공개</span></td>
-                  <td>Llama/Qwen 등 공개 모델은 config로 확인 가능</td>
-                  <td><a href="#">논문/문서 링크</a></td>
-                </tr>
+                <tr><td>컨텍스트 길이</td><td>V4.1-Flash: 1M 토큰 글로벌 KV를 0.89GB로 (논문 수치)</td><td>200K 컨텍스트가 기본, 일부 모델은 1M 제공 <span class="badge src">출처</span>. 내부 KV 캐시 기법 <span class="badge private">비공개</span></td><td>Gemini: 1M 이상 컨텍스트 공개. 최신 모델별 수치 <span class="badge check">확인 필요</span></td><td>Anthropic docs "Models overview", Google Gemini 문서</td></tr>
+                <tr><td>prefix/프롬프트 재사용</td><td>CED(인코더 hidden state 재사용), CSA2 cross-layer reuse</td><td>API <b>Prompt Caching</b>: 동일 prefix 처리 결과를 캐시해 비용·지연 절감 <span class="badge src">출처</span>. 캐시 내부 표현(KV인지) <span class="badge private">비공개</span></td><td>OpenAI, Gemini도 prompt/context caching 제공 <span class="badge check">확인 필요</span></td><td>Anthropic docs "Prompt caching"</td></tr>
+                <tr><td>KV 양자화 (FP4/FP8)</td><td>글로벌 KV FP4, SWA KV FP8, QAT</td><td><span class="badge private">비공개</span></td><td>오픈 모델 추론 엔진(vLLM 등)의 FP8 KV cache 옵션 공개. 지원 범위 <span class="badge check">확인 필요</span></td><td>vLLM 문서</td></tr>
+                <tr><td>어텐션 구조 (SWA + 희소 글로벌)</td><td>SWA 128 + Top-512 희소, 첫 2레이어 SWA만</td><td><span class="badge private">비공개</span></td><td>Gemma 2/3: 로컬 SWA 레이어와 글로벌 레이어 교차 배치 공개. Mistral 7B: SWA 4096 공개. 윈도우 수치 <span class="badge check">확인 필요</span></td><td>Gemma, Mistral 논문·모델 카드</td></tr>
+                <tr><td>인코더-디코더 분리 (CED)</td><td>20 causal encoder + 20 causal decoder</td><td><span class="badge private">비공개</span></td><td>대부분의 공개 LLM은 decoder-only. T5 계열은 비인과 인코더를 쓰는 전통적 encoder-decoder라 CED와 다름 <span class="badge src">출처</span></td><td>T5 논문</td></tr>
+                <tr><td>외부 사전 (Engram)</td><td>196B 학습 사전, 레이어 1·14</td><td><span class="badge private">비공개</span></td><td>유사 사례 <span class="badge check">확인 필요</span></td><td>—</td></tr>
+                <tr><td>Residual 확장 (mHC)</td><td>n개 residual stream, doubly stochastic 제약</td><td><span class="badge private">비공개</span></td><td>Hyper-Connections 원논문의 적용 모델 <span class="badge check">확인 필요</span></td><td>HC / mHC 논문</td></tr>
+                <tr><td>모달리티 통합 (Perceiver)</td><td>latent array로 O(MN)</td><td>이미지·PDF 입력 지원 <span class="badge src">출처</span>. 내부 비전 인코더 구조 <span class="badge private">비공개</span></td><td>Perceiver/Perceiver IO는 DeepMind 공개 연구. Flamingo의 Perceiver Resampler가 유사 아이디어 <span class="badge check">확인 필요</span></td><td>Jaegle et al. 2021</td></tr>
+                <tr><td>수업 토론: 오픈 웨이트 vs 클로즈드</td><td>DeepSeek 오픈 웨이트</td><td>closed weights(API 제공). 시스템 카드·안전성 평가 공개 <span class="badge src">출처</span></td><td>Llama / Qwen / DeepSeek: 오픈 웨이트</td><td>Anthropic system cards</td></tr>
               </tbody>
             </table>
-            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료면 "확인 필요".</p>
+            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 발표 전까지 "확인 필요" 배지는 공식 문서 링크로 교체하거나 "비공개"로 바꿉니다.</p>
           </div>
         </details>
 
-        <!-- ================= [8] 시험 포인트 ================= -->
         <h2 id="exam">5. 시험 포인트</h2>
         <section class="exam">
           <div class="card">
             <ul>
-              <li>클로즈북 기말에 나올 법한 포인트 1</li>
-              <li>포인트 2</li>
+              <li>KV 캐시 압축 4대 전략과 담당 기술 매칭: 엔트리 크기 ↓ FP4 / 엔트리 수 ↓ CSA2 compression / 레이어 중복 ↓ cross-layer reuse / 보관 기간 ↓ Bounded Replay</li>
+              <li>구조 수치: 40 = 20E + 20D, 552B 백본 + 196B Engram, 8B(prefill) / 16B(decode) 활성, SWA 128, Top-512</li>
+              <li>CED의 핵심: 디코더 글로벌 K,V를 <b>인코더 최종 hidden state</b>에서 생성(인코더 K,V 직접 재사용 아님) → 긴 입력의 prefill은 인코더 20층만 → 연산 ≈ 1/2. 캐시 크기를 줄이는 게 아니라 계산량을 줄임</li>
+              <li>CED가 못 없애는 것: 디코더 SWA KV → Bounded Replay(마지막 128 토큰만 재생, 이론 의존 범위 20×128 = 2,560)</li>
+              <li>CSA2 레이어 패턴 Full → Reuse×3 → Reindex, 각 모드에서 새로 만드는 것 / 재사용하는 것</li>
+              <li>FP4는 글로벌 KV만, SWA KV는 FP8(양자화 민감). 890 B/token → 1M ≈ 0.89GB</li>
+              <li>mHC: 다중 residual stream + doubly stochastic 제약으로 안정성</li>
+              <li>Perceiver: byte M vs latent N, O(M²) → O(MN) + O(N²). Perceiver IO는 출력 쿼리 M으로 구조화 출력. Graph Perceiver IO는 관계 정보</li>
             </ul>
           </div>
           <h3>예상 문제</h3>
-          <details class="quiz"><summary>Q1. 문제</summary><div class="answer">정답과 해설</div></details>
-          <details class="quiz"><summary>Q2. 문제</summary><div class="answer">정답과 해설</div></details>
+          <details class="quiz"><summary>Q1. DeepSeek-V4.1-Flash에서 글로벌 KV 캐시의 엔트리 수를 줄이는 기술과 엔트리당 비트 수를 줄이는 기술을 각각 쓰시오.</summary><div class="answer">엔트리 수 ↓ = CSA2 compression(m=2, 두 토큰당 엔트리 1개). 비트 수 ↓ = FP4 양자화(post-training에서 QAT 적용, SWA KV는 FP8 유지). 해설: 4대 전략 중 ①②에 해당(p.4, 11~12).</div></details>
+          <details class="quiz"><summary>Q2. CED(Causal Encoder-Decoder)가 prefill 연산을 절반으로 줄이는 원리를 설명하고, 그럼에도 Bounded Replay가 필요한 이유를 쓰시오.</summary><div class="answer">디코더 각 레이어의 글로벌 K,V를 인코더 최종 hidden state로부터 생성하므로, 긴 입력은 인코더 20층만 통과하면 된다(N≫n_win일 때 ≈ 1/2). 그러나 디코더의 SWA(로컬) KV는 디코더 레이어별 hidden state에 의존하므로, 마지막 128 토큰만 디코더에 재생해 근사 로컬 상태를 만든다(정확 복원은 약 20×128 토큰 필요).</div></details>
+          <details class="quiz"><summary>Q3. 글로벌 KV 캐시가 토큰당 890바이트일 때 1,000,000 토큰의 글로벌 KV 캐시 크기는? SWA KV가 FP8로 남는 이유도 쓰시오.</summary><div class="answer">890 × 1,000,000 ≈ 0.89 GB. SWA KV는 양자화에 더 민감하므로 FP4가 아닌 FP8을 유지한다. 위 인터랙션에서 N=1M으로 두고 네 토글을 모두 켜면 논문 수치 막대와 비교할 수 있다.</div></details>
+          <details class="quiz"><summary>Q4. (객관식) CSA2 레이어 패턴에서 "Reindex" 레이어가 하는 일로 옳은 것은? ① 글로벌 KV와 Top-K 선택을 모두 새로 계산 ② 글로벌 KV는 앞 Full 레이어 것을 재사용하고 Top-K 선택만 현재 레이어에서 재계산 ③ 모두 재사용 ④ SWA KV만 재사용</summary><div class="answer">②. ①은 Full, ③은 Reuse의 설명이다. 모든 모드에서 Main Q와 SWA KV는 현 레이어에서 계산하므로 ④는 틀리다.</div></details>
+          <details class="quiz"><summary>Q5. Perceiver가 224×224×3 이미지(M=50,176)에 self-attention을 직접 적용하지 않는 이유와, latent array(N)를 도입했을 때의 복잡도를 쓰시오. Perceiver IO는 무엇을 추가했는가?</summary><div class="answer">직접 self-attention은 O(M²)로 과도하다. latent N을 두어 cross-attention O(MN) + latent self-attention O(N²)로 줄이며, M이 커져도 latent 쪽 비용은 불변이다. Perceiver IO는 출력 쿼리 배열(크기 M)로 latent를 cross-attention(Query M, Key N → 출력 M)해 분할 같은 구조화된 출력을 가능하게 했다.</div></details>
         </section>
 
-        <!-- ================= [9] 출처 ================= -->
         <h2 id="refs">6. 출처</h2>
         <ul class="small">
-          <li>논문/문서 1</li>
+          <li>DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression, arXiv 2026 (슬라이드 p.4~13)</li>
+          <li>Jaegle, Andrew, et al. "Perceiver: General perception with iterative attention." ICML 2021 (p.15~22)</li>
+          <li>Jaegle, Andrew, et al. "Perceiver IO: A general architecture for structured inputs &amp; outputs." arXiv:2107.14795 (p.23~26)</li>
+          <li>Bae, Seyun, et al. "Graph Perceiver IO: A general architecture for graph structured data." arXiv:2209.06418 (p.27)</li>
+          <li>강의: 최신딥러닝이론및응용 Week 3-1 "Foundation Models II", 송경우 교수, 연세대 MLAI Lab (https://mlai.yonsei.ac.kr/)</li>
+          <li>비교표: Anthropic docs(Models overview, Prompt caching), Anthropic system cards, Google Gemini 문서, vLLM 문서, Gemma·Mistral 논문, T5 논문</li>
+          <li>목차에만 있고 이 PDF에 없는 항목(3-2 추정): Mamba/Mamba-2/Mamba-3, DeltaNet/GDN/KDA/GDN-2, Kimi Linear, Qwen3.8-Flash-Next, Nvidia Nemotron, PuRo-2B</li>
         </ul>
 
         <div id="week-nav"></div>
@@ -134,18 +392,109 @@
   <script src="../assets/js/weeks.js"></script>
   <script src="../assets/js/site.js"></script>
   <script>
-    // [10] 이 주차의 인터랙션 스크립트. 다른 주차와 충돌하지 않도록 IIFE 안에 둡니다.
-    (function () {
-      var r1 = document.getElementById("r1"), o1 = document.getElementById("o1");
-      var svg = document.getElementById("stage-svg"), readout = document.getElementById("readout");
-      function render() {
-        var v = +r1.value; o1.value = v;
-        svg.innerHTML = '<rect x="10" y="80" width="' + (v * 10) + '" height="40" rx="6" fill="var(--accent)"/>';
-        readout.textContent = "값: " + v;
-      }
-      r1.addEventListener("input", render);
-      render();
+  (function () {
+    var NS = "http://www.w3.org/2000/svg";
+    function el(tag, attrs, text) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text != null) e.textContent = text;
+      return e;
+    }
+
+    // ---------- 정적 도형: CSA2 레이어 패턴 ----------
+    (function drawCsa2() {
+      var g = document.getElementById("fig-csa2");
+      var layers = [
+        { name: "Full",    kv: "새로 생성", topk: "새로 선택", q: "Main Q · SWA KV · indexer Q", hot: true },
+        { name: "Reuse",   kv: "재사용",   topk: "재사용",   q: "Main Q · SWA KV" },
+        { name: "Reuse",   kv: "재사용",   topk: "재사용",   q: "Main Q · SWA KV" },
+        { name: "Reuse",   kv: "재사용",   topk: "재사용",   q: "Main Q · SWA KV" },
+        { name: "Reindex", kv: "재사용",   topk: "재계산",   q: "Main Q · SWA KV · indexer Q", warm: true }
+      ];
+      layers.forEach(function (L, i) {
+        var x = 15 + i * 176, w = 160;
+        var stroke = L.hot ? "var(--accent)" : L.warm ? "var(--easy)" : "currentColor";
+        g.appendChild(el("rect", { x: x, y: 20, width: w, height: 150, rx: 10, fill: L.hot ? "var(--accent)" : L.warm ? "var(--easy)" : "none", "fill-opacity": (L.hot || L.warm) ? .12 : 1, stroke: stroke, "stroke-width": 1.5 }));
+        g.appendChild(el("text", { x: x + w / 2, y: 44, "text-anchor": "middle", "font-weight": 700, "font-size": 14, fill: stroke === "currentColor" ? "currentColor" : stroke }, "L" + (i + 1) + " · " + L.name));
+        g.appendChild(el("text", { x: x + 12, y: 72, "font-size": 11, fill: "currentColor", opacity: .7 }, "글로벌 KV"));
+        g.appendChild(el("text", { x: x + w - 12, y: 72, "text-anchor": "end", "font-weight": 700, fill: L.kv === "재사용" ? "currentColor" : "var(--accent)" }, L.kv));
+        g.appendChild(el("text", { x: x + 12, y: 98, "font-size": 11, fill: "currentColor", opacity: .7 }, "Top-K 선택"));
+        g.appendChild(el("text", { x: x + w - 12, y: 98, "text-anchor": "end", "font-weight": 700, fill: L.topk === "재사용" ? "currentColor" : L.topk === "재계산" ? "var(--easy)" : "var(--accent)" }, L.topk));
+        g.appendChild(el("text", { x: x + 12, y: 126, "font-size": 11, fill: "currentColor", opacity: .7 }, "현 레이어 계산"));
+        g.appendChild(el("text", { x: x + w / 2, y: 148, "text-anchor": "middle", "font-size": 10, fill: "currentColor" }, L.q));
+        if (i < layers.length - 1) g.appendChild(el("line", { x1: x + w, y1: 95, x2: x + w + 16, y2: 95, stroke: "currentColor", "stroke-width": 1.5 }));
+      });
+      g.appendChild(el("text", { x: 15, y: 192, "font-size": 11, fill: "currentColor", opacity: .7 }, "KV 공유 = 메모리 절감 · 희소 선택 위치 공유 = 검색 연산 절감. 둘은 따로 적용할 수도 있다 (p.11)."));
     })();
+
+    // ---------- 인터랙션: 100만 토큰 KV 캐시 다이어트 ----------
+    var rN = document.getElementById("rN"), oN = document.getElementById("oN");
+    var toggles = ["t1", "t2", "t3", "t4"].map(function (id) { return document.getElementById(id); });
+    var bars = document.getElementById("kv-bars"), readout = document.getElementById("kv-readout");
+
+    // 가정 기준선: 40층 · KV 헤드 8 · d_head 128 · FP16 (GQA-8 계열 모델의 흔한 설정)
+    var LAYERS = 40, HKV = 8, DHEAD = 128;
+    var BASE_FP16 = 2 * LAYERS * HKV * DHEAD * 2;   // bytes/token (글로벌 KV, FP16)
+    var MHA_FP16 = 2 * LAYERS * 32 * DHEAD * 2;     // 비교용 MHA (KV 헤드 32 가정)
+    var PAPER = 890;                                // 논문 수치 bytes/token
+    var SWA_FP8 = 2 * LAYERS * HKV * DHEAD * 1;     // SWA KV bytes/token (FP8 가정)
+    var LOG_MIN = Math.log10(1024 * 1024), LOG_MAX = Math.log10(1024 * 1024 * 1024 * 1024); // 1MB ~ 1TB
+
+    function fmtLen(N) { return N >= 1048576 ? (N / 1048576) + "M" : (N / 1024) + "K"; }
+    function xOf(bytes) { var t = (Math.log10(Math.max(bytes, 1)) - LOG_MIN) / (LOG_MAX - LOG_MIN); return 150 + Math.max(0, Math.min(1, t)) * 440; }
+
+    function render() {
+      var N = Math.pow(2, +rN.value); oN.value = fmtLen(N);
+      var on = toggles.map(function (t) { return t.checked; });
+      toggles.forEach(function (t) { t.parentElement.classList.toggle("on", t.checked); });
+
+      var perTok = BASE_FP16;
+      if (on[0]) perTok /= 4;
+      if (on[1]) perTok /= 2;
+      if (on[2]) perTok /= 5;
+      var globalBytes = perTok * N;
+      var swaBytes = SWA_FP8 * (on[3] ? Math.min(N, 128) : N);
+
+      var items = [
+        { name: "MHA 비교", bytes: MHA_FP16 * N, color: "var(--danger)", note: "KV 헤드 32 가정" },
+        { name: "기준선 GQA-8", bytes: BASE_FP16 * N, color: "currentColor", note: "FP16 · 40층" },
+        { name: "정리법 적용", bytes: globalBytes, color: "var(--accent)", hot: true, note: on.slice(0, 3).filter(Boolean).length ? ("①②③ 중 " + on.slice(0, 3).filter(Boolean).length + "개") : "아직 없음" },
+        { name: "SWA KV", bytes: swaBytes, color: "var(--warn)", note: on[3] ? "128 토큰만 보관" : "전체 보관(가정)" },
+        { name: "논문 수치", bytes: PAPER * N, color: "var(--easy)", note: "890 B/token" }
+      ];
+
+      bars.innerHTML = "";
+      bars.appendChild(el("text", { x: 150, y: 14, "font-size": 10, fill: "currentColor", opacity: .6 }, "1 MB"));
+      bars.appendChild(el("text", { x: 590, y: 14, "text-anchor": "end", "font-size": 10, fill: "currentColor", opacity: .6 }, "1 TB (로그 눈금)"));
+      [[16, "노트북 16GB"], [80, "GPU 80GB"]].forEach(function (ref) {
+        var x = xOf(ref[0] * 1073741824);
+        bars.appendChild(el("line", { x1: x, y1: 20, x2: x, y2: 228, stroke: "currentColor", "stroke-dasharray": "4 3", opacity: .4 }));
+        bars.appendChild(el("text", { x: ref[0] === 16 ? x - 4 : x + 4, y: 242, "text-anchor": ref[0] === 16 ? "end" : "start", "font-size": 10, fill: "currentColor", opacity: .7 }, ref[1]));
+      });
+      items.forEach(function (it, i) {
+        var y = 26 + i * 40, w = xOf(it.bytes) - 150;
+        bars.appendChild(el("text", { x: 8, y: y + 16, fill: "currentColor", "font-weight": it.hot ? 700 : 400 }, it.name));
+        bars.appendChild(el("rect", { x: 150, y: y, width: 440, height: 22, rx: 6, fill: "currentColor", opacity: .07 }));
+        bars.appendChild(el("rect", { class: "bar", x: 150, y: y, width: Math.max(2, w), height: 22, rx: 6, fill: it.color, opacity: it.color === "currentColor" ? .55 : .9 }));
+        bars.appendChild(el("text", { x: 598, y: y + 16, fill: "currentColor" }, T14.bytes(it.bytes)));
+        // 설명 라벨: 막대가 길면 막대 안쪽(왼쪽)에, 짧으면 막대 오른쪽에. 오른쪽 수치(x=598)와 겹치지 않게 x 상한을 둠.
+        var inside = w > 170;
+        bars.appendChild(el("text", { x: inside ? 156 : Math.min(150 + Math.max(2, w) + 6, 470), y: y + 15, "font-size": 10,
+          fill: inside && it.color !== "currentColor" ? "#fff" : "currentColor", opacity: inside ? .95 : .75 }, it.note));
+      });
+
+      var total = globalBytes + swaBytes;
+      readout.innerHTML =
+        "N = " + fmtLen(N) + " 토큰 · 글로벌 KV " + T14.fmt(perTok, 0) + " B/token → <b>" + T14.bytes(globalBytes) + "</b>" +
+        " · SWA KV " + T14.bytes(swaBytes) + " · 합계 " + T14.bytes(total) + "<br>" +
+        "기준선 대비 " + (BASE_FP16 * N / globalBytes).toFixed(1) + "배 절약 · 논문 수치(" + T14.bytes(PAPER * N) + ")와의 차이 " + (globalBytes / (PAPER * N)).toFixed(1) + "배" +
+        (on.every(Boolean) ? " · 네 가지를 모두 켰습니다. 남은 차이는 공개되지 않은 세부 설정 몫입니다." : "");
+    }
+
+    rN.addEventListener("input", render);
+    toggles.forEach(function (t) { t.addEventListener("change", render); });
+    render();
+  })();
   </script>
 </body>
 </html>

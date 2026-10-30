@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team14 발표 · 최신딥러닝 인터랙티브 랩</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/white.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .reveal { font-family: "Noto Sans KR", sans-serif; }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: inherit; text-transform: none; letter-spacing: -.01em; }
+    .reveal h1 { font-size: 2.2em; } .reveal h2 { font-size: 1.5em; }
+    .reveal p, .reveal li { font-size: .78em; line-height: 1.5; }
+    .reveal .small { font-size: .6em; color: #666; }
+    .reveal iframe { width: 100%; height: 620px; border: 1px solid #ddd; border-radius: 12px; background: #fff; }
+    .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; text-align: left; }
+    .reveal .tag { display: inline-block; background: #e6ecff; color: #2d5bff; border-radius: 999px; padding: 2px 12px; font-size: .55em; font-weight: 700; }
+    .reveal table { font-size: .6em; }
+    .reveal .note { position: absolute; bottom: 10px; right: 20px; font-size: .45em; color: #999; }
+  </style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+  <section>
+    <span class="tag">연세대 공학대학원 인공지능학과 · 최신딥러닝이론및응용</span>
+    <h1>수업에서 배운 모델의 '속'을<br>직접 만져보며 공부하는 랩</h1>
+    <p>14조 · 손 · 조원 A · 조원 B</p>
+    <p class="small">→ 키로 넘기세요 · ESC 로 전체 보기 · S 로 발표자 노트</p>
+    <aside class="notes">인사. 우리 조는 "공부 도구를 만들었다"가 아니라 "공부의 하네스를 설계했다"로 시작.</aside>
+  </section>
+
+  <section>
+    <h2>왜 이걸 만들었나</h2>
+    <div class="cols">
+      <div>
+        <p><b>1주차</b> · AI는 '정의된 문제'를 넘어 '열린 문제'를 정의하는 쪽으로 간다.</p>
+        <p><b>8주차</b> · 모델은 고정하고 <b>하네스</b>를 바꾸는 것이 성능을 좌우한다.</p>
+      </div>
+      <div>
+        <p>그래서 우리는 <b>학습자(모델)는 그대로</b> 두고, <b>공부의 하네스</b>를 바꿨다.</p>
+        <ul>
+          <li>도형·인터랙션으로 개념을 '조작'하게</li>
+          <li>버튼 하나로 중학생 수준 설명으로</li>
+          <li>수업 모델 vs Claude·GPT 비교로 '왜 다른가'를</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>구조</h2>
+    <p>강의 요약·자료 → 공통 템플릿 → 주차 페이지 × 6 → GitHub Pages</p>
+    <table>
+      <tr><th>주차</th><th>주제</th><th>대표 인터랙션</th><th>담당</th></tr>
+      <tr><td>1</td><td>열린 문제와 에이전트</td><td>자가 진화 루프 시뮬레이터</td><td>손</td></tr>
+      <tr><td>2</td><td>파운데이션 모델 아키텍처</td><td>KV 캐시 계산기 (MHA→GQA→MQA)</td><td>손</td></tr>
+      <tr><td>3</td><td>KV 캐시 압축 · DeepSeek-V4.1-Flash</td><td>100만 토큰 KV 캐시 다이어트</td><td>조원 A</td></tr>
+      <tr><td>4</td><td>RLHF · DPO · GRPO · OPD</td><td>GRPO 그룹 롤아웃 시뮬레이터</td><td>조원 A</td></tr>
+      <tr><td>6</td><td>에이전트: Reasoning · Memory · Planning</td><td>에이전트 루프 스텝 실행</td><td>조원 B</td></tr>
+      <tr><td>8</td><td>하네스 엔지니어링</td><td>성능 분해 Δ = O + T + G</td><td>조원 B</td></tr>
+    </table>
+    <p class="small">각자 브랜치에서 같은 템플릿으로 작업 → PR 리뷰 → main 머지 → 즉시 배포</p>
+  </section>
+
+  <section>
+    <h2>데모 1 · 도형을 움직여 보기</h2>
+    <iframe src="../weeks/week02.html#play" loading="lazy" title="2주차 KV 캐시 계산기"></iframe>
+    <div class="note">weeks/week02.html</div>
+    <aside class="notes">헤드 수 슬라이더를 32→8 그룹으로 바꾸며 KV 캐시 막대가 줄어드는 것을 보여준다.</aside>
+  </section>
+
+  <section>
+    <h2>데모 2 · 중학생 수준으로 이해하기</h2>
+    <iframe src="../weeks/week02.html?easy#concepts" loading="lazy" title="2주차 쉬운 모드"></iframe>
+    <aside class="notes">같은 페이지, 버튼 하나. 설명·비유·캡션이 모두 바뀐다.</aside>
+  </section>
+
+  <section>
+    <h2>데모 3 · 최신 모델과 비교하기</h2>
+    <iframe src="../weeks/week02.html#compare" loading="lazy" title="2주차 모델 비교"></iframe>
+    <aside class="notes">비교의 원칙: 공개 자료만, 출처 표기, 모르면 '비공개'. 교수님 질문에 무너지지 않는 비교.</aside>
+  </section>
+
+  <section>
+    <h2>정직한 비교의 원칙</h2>
+    <ul>
+      <li><b>공개 모델</b>(DeepSeek, Qwen, Llama)은 config·논문으로 구조를 검증한다.</li>
+      <li><b>Claude · GPT · Gemini</b>는 시스템 카드·공식 블로그·논문 범위만 쓴다.</li>
+      <li>모르면 <b>비공개</b>, 2차 자료면 <b>확인 필요</b> 배지를 붙인다.</li>
+      <li>요약본과 원본이 다르면 <b>정정</b> 박스로 드러낸다. (예: DeepSpeed → DeepSeek Sparse Attention)</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>우리가 배운 것 · 다음 단계</h2>
+    <ul>
+      <li>요약본은 자주 틀린다. 원본 대조가 공부의 절반이었다.</li>
+      <li>'쉽게 설명하기'가 가장 어려운 이해도 테스트였다.</li>
+      <li>다음: 예상 문제 확장, 모델 비교 출처 보강, 발표 후 피드백 반영.</li>
+    </ul>
+    <p class="small">https://wukong-daima.github.io/team14-project/</p>
+  </section>
+
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
+<script>
+  Reveal.initialize({ hash: true, width: 1280, height: 760, margin: 0.04, plugins: [RevealNotes] });
+</script>
+</body>
+</html>

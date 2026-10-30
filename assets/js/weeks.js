@@ -1,0 +1,22 @@
+// 주차 매니페스트: index, 주차 페이지 내비게이션, 발표 슬라이드가 공유합니다.
+// 새 주차를 추가하면 여기에 한 줄만 추가하면 됩니다. (path는 weeks/ 기준)
+window.WEEKS = [
+  { id: "week01", num: 1, title: "열린 문제와 AI 에이전트", tag: "개요",
+    summary: "정의된 문제를 푸는 AI에서, 문제를 스스로 정의하는 '모델 디스커버리 에이전트'로.",
+    owner: "손", status: "done", hero: "자가 진화 루프 시뮬레이터" },
+  { id: "week02", num: 2, title: "파운데이션 모델 아키텍처", tag: "아키텍처",
+    summary: "토크나이저 · MHA/GQA · RoPE · DSA · Pre-Norm · MoE · OPD · Speculative Decoding · MTP",
+    owner: "손", status: "done", hero: "KV 캐시 계산기 (MHA→GQA→MQA)" },
+  { id: "week03", num: 3, title: "KV 캐시 압축과 DeepSeek-V4.1-Flash", tag: "아키텍처",
+    summary: "CID · Engram · mHC · KV 재사용 · 슬라이딩 윈도우로 긴 컨텍스트를 싸게 처리하기",
+    owner: "조원 A", status: "todo", hero: "컨텍스트 길이 → KV 캐시 메모리 비교" },
+  { id: "week04", num: 4, title: "LLM 학습 방법론: RLHF · DPO · GRPO · OPD", tag: "학습",
+    summary: "보상 희소성, 추론-학습 불일치, 그리고 선호도 튜닝에서 추론 강화까지의 레시피",
+    owner: "조원 A", status: "todo", hero: "GRPO 그룹 롤아웃 시뮬레이터" },
+  { id: "week06", num: 6, title: "AI 에이전트: Reasoning · Memory · Planning", tag: "에이전트",
+    summary: "에이전트의 세 구성요소와 학습 동향, 평가의 어려움",
+    owner: "조원 B", status: "todo", hero: "에이전트 루프 한 스텝씩 실행하기" },
+  { id: "week08", num: 8, title: "하네스 엔지니어링과 자가 진화 에이전트", tag: "하네스",
+    summary: "하네스 디자인 패턴, 컨텍스트·워크플로우 최적화, 성능 향상의 정체(O·T·G 분해)",
+    owner: "조원 B", status: "todo", hero: "성능 분해 시뮬레이터 Δ = O + T + G" },
+];

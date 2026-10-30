@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team14 · 최신딥러닝 인터랙티브 랩</title>
+  <meta name="description" content="연세대 공학대학원 인공지능학과 '최신딥러닝이론및응용' 14조 조별과제. 주차별 강의 내용을 도형과 인터랙션으로 공부하고, 수업에서 다룬 모델(DeepSeek 등)과 Claude·GPT 등 최신 모델의 동작을 비교합니다.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <style>
+    .pillars { margin-top: 28px; }
+    .pillars .card h3 { margin-top: 6px; }
+    .pillars .icon { font-size: 1.6rem; }
+    .week-card { display: flex; flex-direction: column; gap: 8px; transition: transform .12s ease; position: relative; }
+    .week-card:hover { transform: translateY(-2px); text-decoration: none; }
+    .week-card .num { font-family: var(--mono); color: var(--accent); font-size: .8rem; }
+    .week-card h3 { margin: 0; color: var(--text); }
+    .week-card .summary { color: var(--muted); font-size: .9rem; flex: 1; }
+    .week-card .foot { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: .8rem; color: var(--muted); }
+    .week-card.todo { opacity: .75; }
+    .seen { position: absolute; top: 14px; right: 14px; color: var(--ok); font-size: .8rem; font-weight: 700; }
+    .concept-fig { margin: 20px 0; }
+    .concept-fig svg { width: 100%; height: auto; background: var(--surface-2); border-radius: 12px; }
+    .team table td:first-child { white-space: nowrap; font-weight: 600; }
+    .demo-level { margin: 14px 0; }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="wrap"></div></header>
+
+  <main class="wrap">
+    <section class="hero fade-in">
+      <div class="kicker">연세대 공학대학원 인공지능학과 · 최신딥러닝이론및응용 · 14조</div>
+      <h1>수업에서 배운 모델의 '속'을<br>직접 만져보며 공부하는 랩</h1>
+      <p class="lead">
+        강의 요약과 자료를 바탕으로 주차별 핵심 개념을 <b>도형과 인터랙션</b>으로 설명합니다.
+        버튼 하나로 <b>중학생 수준</b>의 설명으로 바꿀 수 있고, 수업에서 다룬 DeepSeek 계열 기법이
+        <b>Claude · GPT · 공개 모델</b>에서는 어떻게 다른지 공개 자료 범위에서 비교합니다. 목표는 하나, 12월 14일 기말고사.
+      </p>
+      <div class="row">
+        <a class="btn primary" href="#weeks">주차별 공부 시작</a>
+        <a class="btn" href="weeks/week02.html?easy">🧒 쉬운 모드 미리보기</a>
+        <a class="btn" href="slides/index.html">발표 모드 열기</a>
+      </div>
+    </section>
+
+    <section class="pillars grid">
+      <div class="card">
+        <div class="icon">🔷</div>
+        <h3>도형으로 이해하기</h3>
+        <p class="small muted">MHA에서 GQA로 가면 KV 캐시가 얼마나 줄어드는지, GRPO가 왜 전부 실패한 그룹에서는 학습이 멈추는지. 슬라이더를 움직이면 도형이 바뀝니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🧒</div>
+        <h3>중학생 수준으로 이해하기</h3>
+        <p class="small muted">모든 개념에 '전공 설명'과 '중학생 설명' 두 벌이 있습니다. 헤더의 버튼 한 번으로 사이트 전체가 쉬운 말로 바뀝니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚖️</div>
+        <h3>최신 모델과 비교하기</h3>
+        <p class="small muted">수업은 주로 DeepSeek·Qwen 등 공개 모델로 설명합니다. 같은 문제를 Claude·GPT·Gemini는 어떻게 푸는지, <b>공개된 정보만</b> 출처와 함께 비교합니다. 모르는 건 '비공개'라고 씁니다.</p>
+      </div>
+    </section>
+
+    <section id="weeks">
+      <h2>주차별 공부</h2>
+      <p class="muted small">카드를 누르면 해당 주차 페이지로 이동합니다. 각 주차는 <b>핵심 개념 → 직접 해보기 → 모델 비교 → 시험 포인트</b> 순서로 구성됩니다.</p>
+      <div class="grid" id="week-grid"></div>
+    </section>
+
+    <section id="concept">
+      <h2>프로젝트 컨셉</h2>
+      <p>
+        1주차 강의는 AI가 '정의된 문제'를 푸는 단계를 넘어 '열린 문제'를 스스로 정의하는 에이전트로 가야 한다고 말했고,
+        8주차 강의는 모델 가중치를 고정한 채 <b>하네스</b>(모델이 언제·어떻게 생각하고 실행할지를 제어하는 외부 시스템)를 설계하는 것이 성능을 좌우한다고 했습니다.
+        이 사이트는 그 두 생각을 공부 도구에 적용한 것입니다. 모델(우리)은 그대로 두고, 공부라는 작업의 하네스를 바꿉니다.
+      </p>
+      <figure class="concept-fig">
+        <svg viewBox="0 0 900 260" role="img" aria-label="프로젝트 구조: 강의 자료가 템플릿을 거쳐 주차 페이지가 되고, 전공/쉬운 모드와 모델 비교가 붙는다">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor" color="currentColor">
+            <rect x="20" y="90" width="170" height="80" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="105" y="124" text-anchor="middle" font-weight="700">강의 요약 + 자료</text>
+            <text x="105" y="146" text-anchor="middle" font-size="12" opacity=".7">(원본은 비공개)</text>
+
+            <line x1="190" y1="130" x2="250" y2="130" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <rect x="255" y="60" width="200" height="140" rx="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <text x="355" y="88" text-anchor="middle" font-weight="700">공통 템플릿 (하네스)</text>
+            <text x="355" y="114" text-anchor="middle" font-size="12">개념 카드 · 도형(SVG)</text>
+            <text x="355" y="136" text-anchor="middle" font-size="12">직접 해보기 · 비교 패널</text>
+            <text x="355" y="158" text-anchor="middle" font-size="12">시험 포인트 · 예상 문제</text>
+            <text x="355" y="184" text-anchor="middle" font-size="12" opacity=".7">조원 3명이 같은 틀로 작업</text>
+
+            <line x1="455" y1="130" x2="515" y2="130" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <rect x="520" y="20" width="150" height="56" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="595" y="54" text-anchor="middle">1·2주차</text>
+            <rect x="520" y="102" width="150" height="56" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="595" y="136" text-anchor="middle">3·4주차</text>
+            <rect x="520" y="184" width="150" height="56" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="595" y="218" text-anchor="middle">6·8주차</text>
+
+            <line x1="670" y1="48" x2="730" y2="110" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="670" y1="130" x2="730" y2="130" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="670" y1="212" x2="730" y2="150" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <rect x="735" y="90" width="150" height="80" rx="12" fill="#2d5bff" opacity=".15"/>
+            <rect x="735" y="90" width="150" height="80" rx="12" fill="none" stroke="#2d5bff" stroke-width="2"/>
+            <text x="810" y="124" text-anchor="middle" font-weight="700">GitHub Pages</text>
+            <text x="810" y="146" text-anchor="middle" font-size="12">사이트 = 발표 자료</text>
+          </g>
+        </svg>
+        <figcaption class="small muted">세 사람이 각자 브랜치에서 같은 템플릿으로 주차를 채우고, main에 머지하면 그대로 발표 페이지가 됩니다.</figcaption>
+      </figure>
+
+      <div class="demo-level card">
+        <b>이 버튼이 핵심 기능입니다.</b> 아래 문단에서 바로 확인해 보세요.
+        <div class="row" style="margin:10px 0"><button class="btn level-toggle" type="button"></button></div>
+        <div data-level="pro">
+          <p>GQA(Grouped-Query Attention)는 쿼리 헤드 여러 개가 하나의 K/V 헤드를 공유하여, 헤드 수에 비례해 커지는 KV 캐시 메모리를 그룹 수에 비례하도록 줄인다. MHA와 MQA의 절충안으로, 품질 저하를 최소화하면서 긴 컨텍스트 서빙 비용을 낮추기 때문에 현재 대부분의 LLM이 채택하고 있다.</p>
+        </div>
+        <div data-level="easy">
+          <p>교실에 학생(쿼리)이 32명인데, 원래는 학생마다 사물함(K/V) 하나씩 줬어요. 사물함이 너무 많아서 복도가 꽉 찹니다. GQA는 4명이 사물함 하나를 같이 쓰게 하는 거예요. 복도는 넓어지고, 각자 필요한 건 거의 그대로 꺼낼 수 있어요.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" class="team">
+      <h2>팀 · 역할 · 일정</h2>
+      <table>
+        <thead><tr><th>담당</th><th>맡은 것</th><th>브랜치</th></tr></thead>
+        <tbody>
+          <tr><td>손 (통합)</td><td>공통 템플릿·스타일·스크립트, 랜딩, 발표 모드, 1·2주차, 최종 머지</td><td><code>feat/week01</code>, <code>feat/week02</code>, <code>feat/site</code></td></tr>
+          <tr><td>조원 A</td><td>3주차(KV 캐시 압축), 4주차(학습 방법론)</td><td><code>feat/week03</code>, <code>feat/week04</code></td></tr>
+          <tr><td>조원 B</td><td>6주차(에이전트), 8주차(하네스)</td><td><code>feat/week06</code>, <code>feat/week08</code></td></tr>
+        </tbody>
+      </table>
+      <ul class="small" style="margin-top:12px">
+        <li><b>11/15</b> 주제·중간발표 자료 제출 → <b>11/23</b> 중간발표(9~15팀) → <b>11/30 · 12/7</b> 최종발표 → <b>12/14</b> 기말고사(클로즈북)</li>
+        <li>자세한 계획과 작업 규칙은 저장소의 <code>PLAN.md</code>, <code>CONTRIBUTING.md</code>, 주차별 <code>content/briefs/</code>를 보세요.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="wrap">
+    Team14 · 최신딥러닝이론및응용 (2026 가을) · 강의 자료 원본은 포함하지 않으며, 모든 설명과 도형은 팀이 재작성한 것입니다. 모델 비교는 공개 자료만 사용하며 출처를 표기합니다.
+  </div></footer>
+
+  <script src="assets/js/weeks.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script>
+    (function () {
+      var grid = document.getElementById("week-grid");
+      var seen = {};
+      try { seen = JSON.parse(localStorage.getItem("t14.seen") || "{}"); } catch (e) {}
+      grid.innerHTML = window.WEEKS.map(function (w) {
+        var done = w.status === "done";
+        return '<a class="card week-card ' + w.status + '" href="weeks/' + w.id + '.html">' +
+          (seen[w.id] ? '<span class="seen">✓ 봤음</span>' : '') +
+          '<span class="num">WEEK ' + String(w.num).padStart(2, "0") + ' · ' + w.tag + '</span>' +
+          '<h3>' + w.title + '</h3>' +
+          '<div class="summary">' + w.summary + '</div>' +
+          '<div class="foot"><span class="pill ' + (done ? "ok" : "todo") + '">' + (done ? "완성" : "작업 중") + '</span>' +
+          '<span class="pill accent">🎮 ' + w.hero + '</span><span>담당 ' + w.owner + '</span></div></a>';
+      }).join("");
+    })();
+  </script>
+</body>
+</html>

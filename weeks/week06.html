@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 작업 지시서: content/briefs/week06.md · 완성 예시: weeks/week02.html -->
+  <title>6주차 · AI 에이전트: Reasoning · Memory · Planning — Team14 랩</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <style>
+    /* 이 주차 전용 스타일만 여기에. 공통 규칙은 assets/css/site.css */
+  </style>
+</head>
+<!-- [2] data-week 는 assets/js/weeks.js 의 id 와 같아야 prev/next 내비게이션이 붙습니다 -->
+<body data-week="week06">
+  <header class="site-header"><div class="wrap"></div></header>
+
+  <main class="wrap">
+    <section class="week-header fade-in">
+      <div class="meta"><span class="pill accent">WEEK 06 · 에이전트</span><span>담당: 조원 B</span><span>·</span><span>마지막 수정: 2026-11-xx</span></div>
+      <h1>AI 에이전트: Reasoning · Memory · Planning</h1>
+      <!-- [3] 한 줄 요약: 전공/쉬운 두 벌 -->
+      <div data-level="pro"><p class="lead">이 주차를 한 문장으로. 무엇을, 왜, 어떤 대가로.</p></div>
+      <div data-level="easy"><p>이 주차를 중학생에게 한 문장으로.</p></div>
+    </section>
+
+      <div class="callout" style="border-left-color:var(--warn)"><b>작업 중인 페이지입니다.</b> 작업 지시서는 저장소의 <code>content/briefs/week06.md</code>, 완성 예시는 <a href="week02.html">2주차</a>를 보세요. 아래는 템플릿 뼈대입니다.</div>
+    <div class="layout">
+      <nav class="toc" aria-label="이 페이지 목차"></nav>
+      <div>
+
+        <!-- ================= [4] 핵심 개념 지도 (SVG 한 장) ================= -->
+        <h2 id="map">1. 한눈에 보기</h2>
+        <figure class="figure">
+          <svg viewBox="0 0 800 220" role="img" aria-label="이 주차 개념 지도">
+            <!-- 박스/화살표로 개념 관계를 그립니다. 색은 currentColor 와 var(--accent) 만 쓰면 다크모드에서도 보입니다. -->
+            <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor">
+              <rect x="20" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
+              <text x="100" y="116" text-anchor="middle">개념 A</text>
+              <line x1="180" y1="110" x2="240" y2="110" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="240" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
+              <text x="320" y="116" text-anchor="middle">개념 B</text>
+            </g>
+          </svg>
+          <figcaption>한 줄 캡션</figcaption>
+        </figure>
+
+        <!-- ================= [5] 개념 카드 (반복) ================= -->
+        <h2 id="concepts">2. 핵심 개념</h2>
+
+        <section class="concept" id="c1">
+          <div class="card">
+            <div class="num">CONCEPT 01</div>
+            <h3>개념 이름 (영문 약어)</h3>
+            <div data-level="pro">
+              <p>전공 수준 설명 3~5문장. 정의 → 왜 필요한가 → 어떻게 동작 → 대가(트레이드오프).</p>
+            </div>
+            <div data-level="easy">
+              <p>중학생 비유 2~3문장. 일상 사물로.</p>
+            </div>
+            <!-- 요약본과 원본이 다를 때 -->
+            <div class="callout fix">요약본의 "X"는 원본 자료 기준 "Y"입니다 (슬라이드 p.NN).</div>
+            <figure class="figure">
+              <svg viewBox="0 0 600 160"><!-- 개념 도형 --></svg>
+              <figcaption>캡션</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <!-- ================= [6] 직접 해보기 (주차당 대표 1개) ================= -->
+        <h2 id="play">3. 직접 해보기</h2>
+        <section class="playground" id="playground">
+          <h3>🎮 인터랙션 제목</h3>
+          <p class="small muted">무엇을 조작하면 무엇이 바뀌는지 한 줄.</p>
+          <div class="controls">
+            <label>슬라이더 이름 <output id="o1">8</output>
+              <input type="range" id="r1" min="1" max="64" value="8"></label>
+          </div>
+          <div class="stage">
+            <svg id="stage-svg" viewBox="0 0 700 200" width="100%"></svg>
+          </div>
+          <div class="readout" id="readout"></div>
+        </section>
+
+        <!-- ================= [7] 모델 비교 ================= -->
+        <h2 id="compare">4. 최신 모델과 비교하기</h2>
+        <details class="compare" open>
+          <summary>⚖️ 수업 모델 vs Claude · GPT · 공개 모델</summary>
+          <div class="body">
+            <table>
+              <thead><tr><th>개념</th><th>수업에서 (DeepSeek 등)</th><th>Claude</th><th>GPT / Gemini / 공개 모델</th><th>출처</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>개념 A</td>
+                  <td>수업에서 다룬 방식</td>
+                  <td>공개 문서 범위의 사실 <span class="badge src">출처</span> / 또는 <span class="badge private">비공개</span></td>
+                  <td>Llama/Qwen 등 공개 모델은 config로 확인 가능</td>
+                  <td><a href="#">논문/문서 링크</a></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료면 "확인 필요".</p>
+          </div>
+        </details>
+
+        <!-- ================= [8] 시험 포인트 ================= -->
+        <h2 id="exam">5. 시험 포인트</h2>
+        <section class="exam">
+          <div class="card">
+            <ul>
+              <li>클로즈북 기말에 나올 법한 포인트 1</li>
+              <li>포인트 2</li>
+            </ul>
+          </div>
+          <h3>예상 문제</h3>
+          <details class="quiz"><summary>Q1. 문제</summary><div class="answer">정답과 해설</div></details>
+          <details class="quiz"><summary>Q2. 문제</summary><div class="answer">정답과 해설</div></details>
+        </section>
+
+        <!-- ================= [9] 출처 ================= -->
+        <h2 id="refs">6. 출처</h2>
+        <ul class="small">
+          <li>논문/문서 1</li>
+        </ul>
+
+        <div id="week-nav"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="wrap">Team14 · 최신딥러닝이론및응용 · 설명과 도형은 팀이 재작성했습니다.</div></footer>
+
+  <script src="../assets/js/weeks.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script>
+    // [10] 이 주차의 인터랙션 스크립트. 다른 주차와 충돌하지 않도록 IIFE 안에 둡니다.
+    (function () {
+      var r1 = document.getElementById("r1"), o1 = document.getElementById("o1");
+      var svg = document.getElementById("stage-svg"), readout = document.getElementById("readout");
+      function render() {
+        var v = +r1.value; o1.value = v;
+        svg.innerHTML = '<rect x="10" y="80" width="' + (v * 10) + '" height="40" rx="6" fill="var(--accent)"/>';
+        readout.textContent = "값: " + v;
+      }
+      r1.addEventListener("input", render);
+      render();
+    })();
+  </script>
+</body>
+</html>

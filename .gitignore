@@ -1,0 +1,8 @@
+.DS_Store
+*.pdf
+*.pptx
+*.key
+raw/
+private/
+node_modules/
+.playwright-mcp/

@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1주차 · 열린 문제와 AI 에이전트 — Team14 랩</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <style>
+    /* 1주차 전용 */
+    .w1-stage { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 820px) { .w1-stage { grid-template-columns: 3fr 2fr; } }
+    .w1-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .w1-panel h4 { margin: 0 0 6px; font-size: .9rem; color: var(--muted); }
+    .w1-dna { display: block; width: 100%; height: auto; }
+    .w1-code { font-family: var(--mono); font-size: .82rem; background: var(--surface-2); border-left: 3px solid var(--accent); padding: 8px 10px; border-radius: 0 8px 8px 0; white-space: pre-wrap; margin: 6px 0; }
+    .w1-code.hist { opacity: .45; border-left-color: var(--line); font-size: .76rem; }
+    .w1-thought { border: 1px solid var(--line); background: var(--surface-2); border-radius: 12px; padding: 10px 14px; position: relative; min-height: 54px; font-size: .92rem; }
+    .w1-thought::before { content: "🤖 에이전트의 사고"; display: block; font-size: .75rem; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+    .w1-radio { display: flex; gap: 14px; flex-wrap: wrap; }
+    .w1-radio label { display: flex; align-items: center; gap: 6px; font-size: .9rem; color: var(--text); cursor: pointer; }
+    .w1-loop .phase rect { fill: var(--surface); stroke: currentColor; transition: fill .2s ease, stroke .2s ease; }
+    .w1-loop .phase.on rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.5; }
+    .w1-loop .phase.on text { fill: var(--accent); font-weight: 700; }
+    .w1-bar { transition: width .5s ease; }
+    .w1-steps { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+  </style>
+</head>
+<body data-week="week01">
+  <header class="site-header"><div class="wrap"></div></header>
+
+  <main class="wrap">
+    <section class="week-header fade-in">
+      <div class="meta"><span class="pill accent">WEEK 01 · 개요</span><span>담당: 손</span><span>·</span><span>마지막 수정: 2026-10-31</span></div>
+      <h1>열린 문제와 AI 에이전트</h1>
+      <div data-level="pro"><p class="lead">현재 AI는 라벨·보상·과업이 미리 주어진 '정의된 문제'에는 강력하지만, 아직 아무도 문제라고 부르지 않은 <b>현상</b>에서 "다음에 무엇을 물을 것인가"를 알아보는 <b>열린 문제(Open-Beginning Problem)</b>는 서툴다. 이 수업의 목표는 그 간극을 메우는 자율적·자가진화·신뢰 가능한 에이전트다.</p></div>
+      <div data-level="easy"><p>시험 문제를 잘 푸는 AI는 이미 많아요. 이 수업은 "문제를 안 줬는데도 세상을 보고 스스로 질문을 만드는 AI"를 어떻게 만들지 공부하는 수업이에요.</p></div>
+    </section>
+
+    <div class="layout">
+      <nav class="toc" aria-label="이 페이지 목차"></nav>
+      <div>
+
+        <!-- ================= 한눈에 보기 ================= -->
+        <h2 id="map">1. 한눈에 보기</h2>
+        <figure class="figure">
+          <svg viewBox="0 0 900 260" role="img" aria-label="AI의 3단계: 기존 AI는 문제에서 답을, 가설 생성 AI는 문제에서 가설과 검증을, Open-Beginningness는 현상에서 문제 정의를 만든다">
+            <defs>
+              <marker id="w1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+            </defs>
+            <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor" color="currentColor">
+              <text x="20" y="42" font-size="12" font-weight="700" fill="var(--accent)">③ Open-Beginningness</text>
+              <g>
+                <rect x="20" y="52" width="150" height="46" rx="9" fill="none" stroke="currentColor"/>
+                <text x="95" y="80" text-anchor="middle">수많은 현상 ○○○○</text>
+                <line x1="170" y1="75" x2="200" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr)"/>
+                <rect x="204" y="52" width="150" height="46" rx="9" fill="none" stroke="currentColor"/>
+                <text x="279" y="80" text-anchor="middle">무엇이 중요한지 선택</text>
+                <line x1="354" y1="75" x2="384" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr)"/>
+                <rect x="388" y="52" width="180" height="46" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+                <text x="478" y="80" text-anchor="middle" font-weight="700">질문·문제 생성 / 재정의</text>
+                <line x1="568" y1="75" x2="598" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr)"/>
+                <rect x="602" y="52" width="110" height="46" rx="9" fill="none" stroke="currentColor"/>
+                <text x="657" y="80" text-anchor="middle">탐구</text>
+              </g>
+              <text x="20" y="126" font-size="12" font-weight="700">② 가설 생성 AI</text>
+              <g>
+                <rect x="20" y="136" width="150" height="46" rx="9" fill="none" stroke="currentColor"/>
+                <text x="95" y="164" text-anchor="middle">문제</text>
+                <line x1="170" y1="159" x2="200" y2="159" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr)"/>
+                <rect x="204" y="136" width="150" height="46" rx="9" fill="none" stroke="currentColor"/>
+                <text x="279" y="164" text-anchor="middle">가설 1 · 2 · 3</text>
+                <line x1="354" y1="159" x2="384" y2="159" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr)"/>
+                <rect x="388" y="136" width="150" height="46" rx="9" fill="none" stroke="currentColor"/>
+                <text x="463" y="164" text-anchor="middle">검증</text>
+              </g>
+              <text x="20" y="210" font-size="12" font-weight="700">① 기존 AI</text>
+              <g>
+                <rect x="20" y="220" width="150" height="36" rx="9" fill="none" stroke="currentColor"/>
+                <text x="95" y="244" text-anchor="middle">문제</text>
+                <line x1="170" y1="238" x2="200" y2="238" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr)"/>
+                <rect x="204" y="220" width="150" height="36" rx="9" fill="none" stroke="currentColor"/>
+                <text x="279" y="244" text-anchor="middle">해답 탐색</text>
+              </g>
+              <line x1="800" y1="240" x2="800" y2="60" stroke="var(--accent)" stroke-width="3" marker-end="url(#w1-arr)" color="var(--accent)"/>
+              <text x="812" y="130" font-size="12" fill="var(--accent)">입력: 문제 → 현상</text>
+              <text x="812" y="150" font-size="12" fill="var(--accent)">출력: 답 → 문제 정의</text>
+            </g>
+          </svg>
+          <figcaption>AI의 3단 사다리. 위로 갈수록 입력이 '문제'에서 '현상'으로, 출력이 '답'에서 '문제 정의'로 바뀐다 (슬라이드 p.23).</figcaption>
+        </figure>
+
+        <!-- ================= 핵심 개념 ================= -->
+        <h2 id="concepts">2. 핵심 개념</h2>
+
+        <section class="concept" id="c1">
+          <div class="card">
+            <div class="num">CONCEPT 01</div>
+            <h3>Agentic AI의 "권한" — 데이터를 읽는 게 아니라 코드를 짜게 한다</h3>
+            <div data-level="pro">
+              <p>사람 DNA 시퀀스는 약 30억 길이라 어떤 LLM의 컨텍스트(최대 약 100만 토큰)에도 직접 넣을 수 없다. 전통적 접근(Option 1)은 전문가가 수십 년 지식으로 feature(예: A/C 동시 등장 개수)를 추출해 30억을 10만으로 줄인 뒤 XGBoost·TabPFN 같은 표 형식 모델에 넣는다. 이 방식은 feature가 고정되어 성능 개선에 천장이 있다.</p>
+              <p>Option 2는 Self-evolving Agentic AI에게 DNA 파일에 <b>접근할 권한</b>을 준다. 파일을 통째로 읽는 것이 아니라 구조를 파악하고 유의미한 feature를 뽑는 <b>코드를 작성</b>하게 한다. 입력은 "기존 feature들과 각각의 성능 + DNA 파일", 사고는 "stage 1 성능이 낮네 → A와 B의 장점을 결합한 C feature를 만들면?", 출력은 "C feature 추출 코드"다(Any to Code, Code to Any). 이 루프가 반복되면서 feature가 진화한다.</p>
+            </div>
+            <div data-level="easy">
+              <p>30억 쪽짜리 책을 통째로 읽을 수 있는 사람은 없어요. 대신 똑똑한 조수에게 "이 책에서 중요한 부분만 찾아내는 <b>검색 프로그램</b>을 직접 짜라"고 시키는 거예요. 결과가 별로면 "다시 짜봐"라고 하고요. 조수는 책을 외우는 게 아니라, 책을 뒤지는 도구를 만들어요.</p>
+            </div>
+            <figure class="figure">
+              <svg viewBox="0 0 900 300" role="img" aria-label="Option 1: 전문가 feature가 고정된 파이프라인. Option 2: 에이전트가 DNA 파일 접근 권한을 받아 feature 추출 코드를 쓰고 성능 피드백으로 개선">
+                <defs>
+                  <marker id="w1-arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+                </defs>
+                <g font-family="Noto Sans KR, sans-serif" font-size="13" fill="currentColor" color="currentColor">
+                  <text x="20" y="30" font-weight="700">Option 1 · 전문가 feature 고정</text>
+                  <rect x="20" y="44" width="200" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="120" y="66" text-anchor="middle">기구축 feature (전문가 지식)</text>
+                  <text x="120" y="86" text-anchor="middle" font-size="12" opacity=".7">30억 → 10만</text>
+                  <line x1="220" y1="71" x2="270" y2="71" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr2)"/>
+                  <rect x="274" y="44" width="170" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="359" y="66" text-anchor="middle">AI 모델</text>
+                  <text x="359" y="86" text-anchor="middle" font-size="12" opacity=".7">XGBoost · TabPFN</text>
+                  <line x1="444" y1="71" x2="494" y2="71" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr2)"/>
+                  <rect x="498" y="44" width="110" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="553" y="76" text-anchor="middle">결과</text>
+                  <text x="640" y="76" font-size="12" fill="var(--easy)" font-weight="700">성능 개선 제한적 (천장)</text>
+
+                  <line x1="20" y1="128" x2="880" y2="128" stroke="currentColor" stroke-dasharray="4 4" opacity=".4"/>
+
+                  <text x="20" y="160" font-weight="700" fill="var(--accent)">Option 2 · 에이전트가 feature를 진화시킨다</text>
+                  <rect x="20" y="176" width="150" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="95" y="198" text-anchor="middle">DNA 시퀀스 파일</text>
+                  <text x="95" y="218" text-anchor="middle" font-size="12" opacity=".7">CRAM, 30억 길이</text>
+                  <line x1="170" y1="203" x2="220" y2="203" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr2)"/>
+                  <text x="195" y="195" text-anchor="middle" font-size="11" opacity=".8">접근 권한</text>
+                  <rect x="224" y="176" width="190" height="54" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+                  <text x="319" y="198" text-anchor="middle" font-weight="700">Self-evolving Agentic AI</text>
+                  <text x="319" y="218" text-anchor="middle" font-size="12" opacity=".8">파일을 읽지 않고 코드를 쓴다</text>
+                  <line x1="414" y1="203" x2="464" y2="203" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr2)"/>
+                  <rect x="468" y="176" width="160" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="548" y="198" text-anchor="middle">추출된 feature</text>
+                  <text x="548" y="218" text-anchor="middle" font-size="12" opacity=".7">코드로 생성</text>
+                  <line x1="628" y1="203" x2="668" y2="203" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr2)"/>
+                  <rect x="672" y="176" width="100" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="722" y="208" text-anchor="middle">AI 모델</text>
+                  <line x1="772" y1="203" x2="802" y2="203" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr2)"/>
+                  <rect x="806" y="176" width="74" height="54" rx="9" fill="none" stroke="currentColor"/>
+                  <text x="843" y="208" text-anchor="middle">결과</text>
+                  <path d="M843 230 L843 268 L319 268 L319 236" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#w1-arr2)" color="var(--accent)"/>
+                  <text x="580" y="262" text-anchor="middle" font-size="12" fill="var(--accent)">성능 피드백 → 다음 feature 코드</text>
+                  <text x="20" y="290" font-size="12" opacity=".7">"Any to Code, Code to Any"</text>
+                </g>
+              </svg>
+              <figcaption>Option 1은 feature가 고정되어 천장이 있고, Option 2는 성능 피드백이 에이전트로 되돌아가 feature가 진화한다 (p.11–15).</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="concept" id="c2">
+          <div class="card">
+            <div class="num">CONCEPT 02</div>
+            <h3>개인 연구개발 루프로서의 Agentic AI — Sid Sijbrandij 사례</h3>
+            <div data-level="pro">
+              <p>GitLab 공동창업자 Sid Sijbrandij는 골육종(T5 척추 약 6cm 종양, 2022 진단 → 2023 표준치료 → 2024 재발)을 겪으며, 의료 비전문가임에도 스캔·혈액검사·조직 샘플·논문 정보를 모아 AI와 함께 분석하는 개인 R&amp;D 루프를 구축했다. 자연어로 "지금 내 혈액·종양 데이터에서 무엇을 봐야 하나?"를 물으면 AI가 논문을 찾고 볼 마커를 정하고 분석 파이프라인을 구성해 약 60만 개 단일세포 데이터를 분석하고, 결론·인터랙티브 플롯·Python 코드·분석 이력을 함께 산출한다.</p>
+              <p>의료진과 협업해 데이터 연결, 변화 신호 조기 포착, 새 치료(FAP 표적 방사성 리간드 치료) 탐색을 공격적으로 수행했다. 핵심 메시지는 "시간 투자를 전제로, 비전문가도 에이전트와 함께 전문가 수준의 탐색이 가능하다"는 것이다.</p>
+            </div>
+            <div data-level="easy">
+              <p>의사가 아닌 프로그래머가 자기 병을 고치려고 "AI 연구 조수"를 두고 매일 숙제를 시킨 거예요. 조수는 논문도 찾고, 그래프도 그리고, 코드도 짜서 "이번엔 이걸 확인해보자"를 반복했어요. 혼자가 아니라 진짜 의사 선생님들과 같이요.</p>
+            </div>
+            <div class="callout fix">요약본의 "GPT-4 기반 · 1년간의 분석"은 강의 슬라이드(p.5–6)에 명시되어 있지 않습니다. 슬라이드는 "AI와 함께 분석하는 개인 연구개발 루프"로만 기술하고, 치료법은 FAP 표적 방사성 리간드 치료를 구체적으로 언급합니다. 모델명·기간은 수업 구두 설명으로 구분해 두세요.</div>
+          </div>
+        </section>
+
+        <section class="concept" id="c3">
+          <div class="card">
+            <div class="num">CONCEPT 03</div>
+            <h3>"정의된 문제" vs "열린 문제(Open-Beginning Problem)"</h3>
+            <div data-level="pro">
+              <p>지도학습은 목표값·라벨이, 강화학습은 보상·환경이 주어졌다고 가정하고, Agentic AI도 미리 정해진 문제의 틀을 물려받는다. 셋 모두 주어진 문제 공간 안에서 명시된 목표를 최적화하며 과업 정의가 고정됐다고 가정한다. 반면 현실의 중요한 문제는 "찾으려던 것도 아니고 현재 문제 정의에 표현돼 있지도 않은 <b>현상(phenomenon)</b>"으로 등장한다.</p>
+              <p>Open-Beginning Problem이란 "중요하다는 증거가 아직 없는 상황에서 어떤 현상에 지속적으로 관심을 기울여야 하는지, 그 현상으로 새 문제를 만들지 기존 문제를 재구성할지를 어떻게 판단하는가"의 문제다. 어려운 이유는 일곱 가지다: 해석 가치의 판단 기준 부재, 맥락(변수·비교집단·시간범위) 부재, 약하고 분산된 증거, 문제 정의가 내생적·재귀적(정의가 다음 데이터를 바꿈), 즉시 평가할 정답 부재, "모든 것에 의미 부여 vs 아무것도 못 봄"의 딜레마, 그리고 데이터나 모델이 아니라 <b>문제 자체의 불확실성</b>.</p>
+            </div>
+            <div data-level="easy">
+              <p>시험 문제를 잘 푸는 것과, 아무도 문제로 내지 않은 이상한 현상을 보고 "어? 이거 왜 이러지?" 하고 질문을 만드는 것은 달라요. 지금 AI는 앞의 것은 1등인데, 뒤의 것은 아직 서툴러요. 답이 없는 게 아니라 <b>문제가 아직 없는</b> 상황이 제일 어려운 거예요.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="concept" id="c4">
+          <div class="card">
+            <div class="num">CONCEPT 04</div>
+            <h3>열린 문제가 중요한 이유 — McClintock과 현실 사례</h3>
+            <div data-level="pro">
+              <p>유전자 교란 실험에서 목표(세포 성장)와 무관한 미묘한 형태(morphology) 변화가 관찰됐을 때, 잡음으로 버릴지 연구를 재구성할지 결정하는 것이 핵심 판단이다. Barbara McClintock은 옥수수 색소 패턴 변화를 불규칙성으로 치부하지 않고 세대 간 유전을 추적해 <b>이동성 유전요소(mobile genetic elements)</b>를 추론했다. 1951년 발표 당시에는 무시당했지만 1983년 노벨 생리의학상을 단독 수상했다. 결정적 행위는 현상의 "설명"이 아니라 "설명할 가치가 있음을 알아본 것"이었다.</p>
+              <p>같은 구조의 사례가 현실에 많다. 병원 환자 흐름 시스템이 추적 진료 누락과 피할 수 있었던 응급실 입원 패턴을 발견하면 진료 연속성이 더 근본적 문제임을 알게 되고, 의사결정 지원 시스템이 기존 질병 범주에 맞지 않는 증상 조합을 발견하면 신종 질병이 되며, 제품 채택 최적화 시스템이 설계 의도와 다른 기능 조합을 발견하면 신제품이 된다.</p>
+            </div>
+            <div data-level="easy">
+              <p>옥수수 알갱이 색이 이상하게 얼룩진 걸 보고 "그냥 불량이네" 하고 넘긴 사람과, "왜 저럴까?" 하고 수십 년 추적해서 노벨상을 받은 사람의 차이예요. 발견은 답이 아니라 <b>질문을 알아보는 눈</b>에서 시작해요.</p>
+            </div>
+            <div class="callout fix">요약본의 "이동 유전체 현상"은 정확히는 <b>이동성 유전요소(mobile genetic elements)</b>입니다. McClintock의 옥수수 연구, 1951년 발표 → 1983년 노벨 생리의학상 (p.21).</div>
+          </div>
+        </section>
+
+        <section class="concept" id="c5">
+          <div class="card">
+            <div class="num">CONCEPT 05</div>
+            <h3>AI의 3단계 진화: 기존 AI → 가설 생성 AI → Open-Beginningness</h3>
+            <div data-level="pro">
+              <p>기존 AI는 "문제 → 해답 탐색", 가설 생성 AI는 "문제 → 여러 가설 생성 → 검증", Open-Beginningness는 "수많은 현상 → 무엇이 중요한지 선택 → 질문/문제 자체를 생성 또는 재정의 → 탐구"다. 단계가 올라갈수록 입력이 '문제'에서 '현상'으로 바뀌고, 출력이 '답'에서 '문제 정의'로 바뀐다. 슬라이드의 표현을 빌리면, 진짜 발견은 정답을 잘 찾는 데서가 아니라 아직 아무도 문제라고 부르지 않은 현상에서 "다음에 무엇을 물어야 하는가"를 알아보는 데서 시작된다. (위 '한눈에 보기' 그림)</p>
+            </div>
+            <div data-level="easy">
+              <p>1단계는 "문제 주면 답 찾기", 2단계는 "문제 주면 답 후보를 여러 개 내고 실험으로 고르기", 3단계는 "문제도 안 줬는데 세상을 보고 스스로 문제를 만들기"예요. 지금 AI는 대부분 1~2단계에 있어요.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="concept" id="c6">
+          <div class="card">
+            <div class="num">CONCEPT 06</div>
+            <h3>Model Discovery Agent (MDA): LLM + Bayesian Inference + Value of Information</h3>
+            <div data-level="pro">
+              <p>Open-Beginningness를 구현하기 위한 핵심 <b>inner loop</b>다. 목표는 "지금 가능한 실험 중 어떤 실험을 하면 어떤 메커니즘이 맞는지 가장 많이 알 수 있을까?"에 답하는 것이다. 세 요소를 결합한다. (1) <b>LLM</b>이 현실 현상을 설명하는 새 mechanistic model(과학적·수학적 world model) 후보를 제안하고, (2) <b>Bayesian Inference</b>로 어떤 모델이 현재 증거를 가장 잘 설명하는지 확률적으로 평가하며, (3) <b>Value of Information</b>으로 후보 모델들을 가장 잘 구분할 다음 실험을 선택한다. 출처 논문은 "Model Discovery Agent: LLM-assisted Bayesian experiment design for data-efficient discovery of mechanistic world models"이다.</p>
+            </div>
+            <div data-level="easy">
+              <p>탐정 놀이예요. AI가 "범인 후보(가설)"를 여러 명 내고, 지금까지 단서로 각 후보가 얼마나 그럴듯한지 점수를 매긴 뒤, "어떤 질문을 하면 후보가 가장 확 갈릴까?"를 골라 그 질문부터 해요. 질문을 적게 하고도 범인을 찾는 게 목표예요.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="concept" id="c7">
+          <div class="card">
+            <div class="num">CONCEPT 07</div>
+            <h3>자가진화형 과학 발견 시스템 4단계와 수업 구조</h3>
+            <div data-level="pro">
+              <p>Step 1 Knowledge Foundation(무엇을 알고 있는가) → Step 2 Mechanism Discovery(왜 그렇게 되는가) → Step 3 Knowledge Discovery(무엇을 새로 만들 것인가) → Step 4 Open-Beginning &amp; Self-Evolving Scientific Reasoning(무엇을 다음에 검증할지, 현재 문제 정의가 맞는지, 새 개념·실험이 더 필요한지). AI가 기존 과학 지식을 구축·통합하고, 데이터·실험으로 새 기전과 법칙을 발견하며, 가설·해결책을 생성한 뒤 가장 가치 있는 후속 실험을 능동적으로 선택·검증해 <b>지식과 연구 전략을 함께 진화</b>시킨다.</p>
+              <p>수업 주제도 이 4단계에 대응한다. Knowledge Foundation(Agentic AI 입문, Multi-Agent) / Mechanism Discovery(실험 설계·인과 추론, 과학 법칙 발견) / Knowledge Discovery(수학·알고리즘 발견, 자율 과학 발견 시스템) / Open-Beginning &amp; Self-Evolving(열린 과학 추론, 자가개선 에이전트, 신뢰·재현·자기교정 AI 과학).</p>
+            </div>
+            <div data-level="easy">
+              <p>공부하기 → 원리 이해하기 → 새 발명하기 → "그런데 내가 풀던 문제가 맞는 문제였나?" 되묻기. 마지막 단계가 있어야 혼자서 계속 똑똑해질 수 있어요.</p>
+            </div>
+            <div class="callout fix">요약본의 커리큘럼("에이전트, 멀티 에이전트, 능동적 데이터 수집, 정의된 문제 해결, 열린 문제 정의")은 슬라이드 p.29의 공식 15주 계획과 다릅니다. 공식 순서: Orientation → Introduction to Agentic AI → Multi-Agent Systems → Experimental Design and Causal Reasoning → AI for Scientific Law and Mechanism Discovery → AI for Mathematical and Algorithmic Discovery → Autonomous Scientific Discovery Systems → Open-Beginning Scientific Reasoning → Self-Improving and Self-Evolving Scientific Agents → Trustworthy, Reproducible, and Self-Correcting AI Science → 피드백 I/II → 발표 I/II → 기말. 평가는 출석 10 / 기말 60(전 범위 closed-book) / 팀과제 30(피드백 + 발표 1회).</div>
+            <div class="callout fix">프로젝트 권장 기준은 슬라이드 p.31 기준 다섯 가지 중 <b>최소 한 가지</b>를 만족하면 됩니다: ① 도발적인 것 ② 새로운 관점 제시 ③ SoTA 성능(유명 리더보드) ④ 새로운 평가방법·지표·벤치마크·데이터셋 ⑤ 기업이 바로 가져다 쓰고 싶은 것. "도전적이라고 큰 계산자원이 필요한 건 아님"을 강조합니다.</div>
+            <figure class="figure">
+              <svg viewBox="0 0 900 330" role="img" aria-label="자가진화형 과학 발견 시스템 4단계와 Step 2 안의 MDA inner loop">
+                <defs>
+                  <marker id="w1-arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+                </defs>
+                <g font-family="Noto Sans KR, sans-serif" font-size="13" fill="currentColor" color="currentColor">
+                  <path d="M120 200 C 120 40, 780 40, 780 200" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#w1-arr3)" color="var(--accent)"/>
+                  <rect x="300" y="52" width="300" height="50" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+                  <text x="450" y="73" text-anchor="middle" font-weight="700" fill="var(--accent)">Step 4 · Open-Beginning &amp; Self-Evolving</text>
+                  <text x="450" y="92" text-anchor="middle" font-size="11">다음 검증은? 문제 정의가 맞나? 새 개념·실험이 더 필요한가?</text>
+
+                  <rect x="40" y="200" width="200" height="70" rx="10" fill="none" stroke="currentColor"/>
+                  <text x="140" y="224" text-anchor="middle" font-weight="700">Step 1 · Knowledge Foundation</text>
+                  <text x="140" y="244" text-anchor="middle" font-size="12">무엇을 알고 있는가</text>
+                  <text x="140" y="262" text-anchor="middle" font-size="11" opacity=".7">Agentic AI 입문 · Multi-Agent</text>
+                  <line x1="240" y1="235" x2="290" y2="235" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr3)"/>
+
+                  <rect x="294" y="160" width="312" height="150" rx="10" fill="none" stroke="currentColor"/>
+                  <text x="450" y="182" text-anchor="middle" font-weight="700">Step 2 · Mechanism Discovery</text>
+                  <text x="450" y="200" text-anchor="middle" font-size="12">왜 그렇게 되는가</text>
+                  <rect x="310" y="214" width="84" height="34" rx="8" fill="none" stroke="currentColor" stroke-dasharray="3 3"/>
+                  <text x="352" y="236" text-anchor="middle" font-size="11">LLM: 모델 제안</text>
+                  <line x1="394" y1="231" x2="408" y2="231" stroke="currentColor" marker-end="url(#w1-arr3)"/>
+                  <rect x="410" y="214" width="84" height="34" rx="8" fill="none" stroke="currentColor" stroke-dasharray="3 3"/>
+                  <text x="452" y="236" text-anchor="middle" font-size="11">Bayes: 증거 평가</text>
+                  <line x1="494" y1="231" x2="508" y2="231" stroke="currentColor" marker-end="url(#w1-arr3)"/>
+                  <rect x="510" y="214" width="84" height="34" rx="8" fill="none" stroke="currentColor" stroke-dasharray="3 3"/>
+                  <text x="552" y="236" text-anchor="middle" font-size="11">VoI: 실험 선택</text>
+                  <path d="M552 248 L552 270 L352 270 L352 250" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#w1-arr3)"/>
+                  <text x="452" y="266" text-anchor="middle" font-size="10" opacity=".8">실험 결과</text>
+                  <text x="450" y="298" text-anchor="middle" font-size="11" fill="var(--accent)" font-weight="700">MDA inner loop</text>
+                  <line x1="606" y1="235" x2="656" y2="235" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr3)"/>
+
+                  <rect x="660" y="200" width="200" height="70" rx="10" fill="none" stroke="currentColor"/>
+                  <text x="760" y="224" text-anchor="middle" font-weight="700">Step 3 · Knowledge Discovery</text>
+                  <text x="760" y="244" text-anchor="middle" font-size="12">무엇을 새로 만들 것인가</text>
+                  <text x="760" y="262" text-anchor="middle" font-size="11" opacity=".7">수학·알고리즘 발견 · 자율 과학 시스템</text>
+                </g>
+              </svg>
+              <figcaption>4단계 시스템. Step 4가 호(arc)로 앞 단계 전체를 되묻고, Step 2 안에서 MDA 루프가 돈다 (p.24–25).</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="concept" id="c8">
+          <div class="card">
+            <div class="num">CONCEPT 08</div>
+            <h3>Turing(1948) — 경험으로 배우는 기계</h3>
+            <div data-level="pro">
+              <p>"기계가 당신 대신 생각하게 할 수는 없다"는 통념에 의문을 제기한 1948년 논문 "Intelligent Machinery"다. 같은 실수를 반복하고 스스로 고치지 못하는 고정된 기계는 지능의 증거가 아니며, 결정적 단계는 <b>경험으로 배우는 것(learn by experience)</b>이고, 학습에는 심리적 보상·벌에 해당하는 "유리한/불리한 결과"의 개념이 필요하다고 썼다. 강화학습과 자가진화 에이전트의 사상적 뿌리다.</p>
+            </div>
+            <div data-level="easy">
+              <p>80년 전에 튜링이 이미 "진짜 똑똑한 기계는 혼나고 칭찬받으면서 스스로 고치는 기계"라고 말했어요. 지금의 강화학습과 자가진화 에이전트가 바로 그 아이디어예요.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 직접 해보기 ================= -->
+        <h2 id="play">3. 직접 해보기</h2>
+        <section class="playground" id="playground">
+          <h3>🎮 Self-evolving Feature Loop — DNA 암 스크리닝 시뮬레이터</h3>
+          <p class="small muted">에이전트가 DNA 파일을 "읽는" 대신 feature 추출 코드를 쓰고, 성능 피드백을 받아 코드를 고쳐 쓰는 루프를 돌려 보세요. Option 1로 바꾸면 feature가 고정되어 막대가 거의 움직이지 않습니다. (수치는 교육용 시나리오이며 실제 데이터가 아닙니다.)</p>
+          <div class="controls">
+            <div class="w1-radio" role="radiogroup" aria-label="접근 방식">
+              <label><input type="radio" name="w1-opt" value="1"> Option 1 · 전문가 feature 고정</label>
+              <label><input type="radio" name="w1-opt" value="2" checked> Option 2 · 에이전트가 feature 진화</label>
+            </div>
+            <div class="row">
+              <button class="btn primary small" type="button" id="w1-step">루프 1회 실행</button>
+              <button class="btn small" type="button" id="w1-auto">자동 실행</button>
+              <button class="btn small" type="button" id="w1-reset">초기화</button>
+              <span class="w1-steps" id="w1-count">루프 0회</span>
+            </div>
+          </div>
+
+          <div class="stage">
+            <svg class="w1-loop" viewBox="0 0 700 70" width="100%" aria-label="루프 단계: 입력, 사고, 코드 출력, 평가">
+              <defs>
+                <marker id="w1-arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+              </defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" color="currentColor">
+                <g class="phase" id="w1-ph0"><rect x="10" y="14" width="140" height="40" rx="8"/><text x="80" y="39" text-anchor="middle">입력: feature + 성능 + 파일</text></g>
+                <line x1="150" y1="34" x2="178" y2="34" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr4)"/>
+                <g class="phase" id="w1-ph1"><rect x="180" y="14" width="120" height="40" rx="8"/><text x="240" y="39" text-anchor="middle">사고</text></g>
+                <line x1="300" y1="34" x2="328" y2="34" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr4)"/>
+                <g class="phase" id="w1-ph2"><rect x="330" y="14" width="150" height="40" rx="8"/><text x="405" y="39" text-anchor="middle">출력: feature 추출 코드</text></g>
+                <line x1="480" y1="34" x2="508" y2="34" stroke="currentColor" stroke-width="1.5" marker-end="url(#w1-arr4)"/>
+                <g class="phase" id="w1-ph3"><rect x="510" y="14" width="120" height="40" rx="8"/><text x="570" y="39" text-anchor="middle">모델 학습·평가</text></g>
+                <path d="M630 34 L660 34 L660 64 L80 64 L80 56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#w1-arr4)"/>
+              </g>
+            </svg>
+
+            <div class="w1-stage" style="margin-top:12px">
+              <div class="w1-panel">
+                <h4>DNA 시퀀스 파일 (30억 길이) + 현재 feature 코드</h4>
+                <svg class="w1-dna" viewBox="0 0 520 40" aria-hidden="true">
+                  <rect x="4" y="12" width="512" height="16" rx="8" fill="var(--surface-2)" stroke="currentColor" opacity=".6"/>
+                  <g id="w1-dna-marks"></g>
+                  <text x="260" y="38" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6" font-family="IBM Plex Mono, monospace">ACGTTGCA…(3,000,000,000)…GATTACA</text>
+                </svg>
+                <div class="w1-code" id="w1-code"></div>
+                <div id="w1-hist"></div>
+              </div>
+              <div class="w1-panel">
+                <h4>stage별 조기 발견 성능 (교육용 수치)</h4>
+                <svg viewBox="0 0 300 150" width="100%" aria-label="stage 1부터 4까지 성능 막대">
+                  <g font-family="Noto Sans KR, sans-serif" font-size="11" fill="currentColor">
+                    <text x="2" y="24">stage 1</text><rect x="52" y="12" width="220" height="16" rx="4" fill="var(--surface-2)"/><rect class="w1-bar" id="w1-b0" x="52" y="12" width="0" height="16" rx="4" fill="var(--accent)"/><text id="w1-t0" x="278" y="24" font-family="IBM Plex Mono, monospace"></text>
+                    <text x="2" y="58">stage 2</text><rect x="52" y="46" width="220" height="16" rx="4" fill="var(--surface-2)"/><rect class="w1-bar" id="w1-b1" x="52" y="46" width="0" height="16" rx="4" fill="var(--accent)"/><text id="w1-t1" x="278" y="58" font-family="IBM Plex Mono, monospace"></text>
+                    <text x="2" y="92">stage 3</text><rect x="52" y="80" width="220" height="16" rx="4" fill="var(--surface-2)"/><rect class="w1-bar" id="w1-b2" x="52" y="80" width="0" height="16" rx="4" fill="var(--accent)"/><text id="w1-t2" x="278" y="92" font-family="IBM Plex Mono, monospace"></text>
+                    <text x="2" y="126">stage 4</text><rect x="52" y="114" width="220" height="16" rx="4" fill="var(--surface-2)"/><rect class="w1-bar" id="w1-b3" x="52" y="114" width="0" height="16" rx="4" fill="var(--accent)"/><text id="w1-t3" x="278" y="126" font-family="IBM Plex Mono, monospace"></text>
+                    <text x="150" y="146" text-anchor="middle" font-size="9" opacity=".6">조기 단계(stage 1·2)에서 찾을수록 생존율이 크게 오른다</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div class="w1-thought" id="w1-thought" style="margin-top:12px"></div>
+          </div>
+          <div class="readout" id="w1-readout"></div>
+        </section>
+
+        <!-- ================= 모델 비교 ================= -->
+        <h2 id="compare">4. 최신 모델과 비교하기</h2>
+        <details class="compare" open>
+          <summary>⚖️ 수업의 '코드를 쓰는 에이전트' vs Claude · GPT · Gemini · 공개 모델</summary>
+          <div class="body">
+            <table>
+              <thead><tr><th>개념</th><th>수업에서 (p.)</th><th>Claude</th><th>GPT / Gemini / 공개 모델</th><th>출처</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>긴 컨텍스트 한계<br><span class="small muted">30억 DNA vs 100만 토큰</span></td>
+                  <td>"GPT/Gemini는 최대 약 100만 토큰"이라 DNA 직접 분석 불가 (p.9)</td>
+                  <td>표준 200K 토큰 컨텍스트, 일부 모델은 1M 토큰 제공 <span class="badge src">출처</span>. 베타·티어 조건은 <span class="badge check">확인 필요</span>. 어느 쪽이든 30억에는 턱없이 부족하므로 수업의 결론(코드로 feature 추출)은 Claude에도 동일하게 적용</td>
+                  <td>Gemini Pro: 1M 토큰(일부 2M) <span class="badge check">확인 필요</span>; GPT-4.1: 1M 토큰 <span class="badge src">출처</span>; Llama 4 Scout: 10M 토큰 주장, 실효성 <span class="badge check">확인 필요</span></td>
+                  <td>Anthropic docs "Context windows"; Google AI Gemini 모델 페이지; OpenAI GPT-4.1 발표문; Meta Llama 4 블로그</td>
+                </tr>
+                <tr>
+                  <td>코드를 짜서 데이터에 접근<br><span class="small muted">Any to Code</span></td>
+                  <td>Self-evolving Agentic AI가 DNA 파일 접근 권한을 받아 feature 추출 코드 작성 (p.14–15)</td>
+                  <td>tool use / code execution tool, Claude Code(파일 시스템·셸 접근), Agent SDK로 동일 패턴 구현 가능 <span class="badge src">출처</span>. 수업의 "권한을 준다"는 Claude에서는 도구(tool) 정의로 접근 범위를 명시하는 것에 해당</td>
+                  <td>OpenAI: Code Interpreter / Responses API tools, Agents SDK <span class="badge src">출처</span>; Gemini: code execution tool <span class="badge src">출처</span>; 공개 모델: Qwen-Agent, Llama + 외부 프레임워크(LangGraph 등)</td>
+                  <td>Anthropic docs "Tool use", "Code execution tool", Claude Code docs; OpenAI Agents SDK docs; Gemini API code execution docs</td>
+                </tr>
+                <tr>
+                  <td>성능 피드백으로 코드를 개선하는 루프<br><span class="small muted">Self-evolving</span></td>
+                  <td>feature 성능을 입력받아 새 feature 코드 생성을 반복 (p.15)</td>
+                  <td>Anthropic 블로그 "Building effective agents"(2024.12)의 evaluator-optimizer 패턴이 같은 구조 <span class="badge src">출처</span>. Claude 자체가 가중치를 바꾸는 게 아니라 <b>하네스(외부 루프)</b>가 진화시킴 → 8주차 하네스 주제와 연결</td>
+                  <td>AlphaEvolve(Google DeepMind, 2025): Gemini가 코드를 진화시켜 알고리즘 발견, 수업의 Option 2에 가장 가까운 공개 사례 <span class="badge src">출처</span>; OpenAI: 동등한 공개 사례 <span class="badge check">확인 필요</span></td>
+                  <td>Anthropic "Building effective agents"; DeepMind AlphaEvolve 블로그/백서</td>
+                </tr>
+                <tr>
+                  <td>경험으로 배우는 기계<br><span class="small muted">Turing 1948 → 보상 기반 학습</span></td>
+                  <td>보상·벌 개념은 RL의 뿌리 (p.16)</td>
+                  <td>RLHF + Constitutional AI(RLAIF)로 학습됐다고 공개 <span class="badge src">출처</span>. 세부 레시피는 <span class="badge private">비공개</span>. 4주차 DPO/GRPO와 비교 포인트</td>
+                  <td>DeepSeek-R1: GRPO 공개 <span class="badge src">출처</span>; Llama/Qwen: DPO·RLHF를 논문·모델 카드로 공개 <span class="badge src">출처</span></td>
+                  <td>Anthropic "Constitutional AI" 논문(2022), Claude 모델 카드; DeepSeek-R1 논문</td>
+                </tr>
+                <tr>
+                  <td>열린 문제 / 가설 생성</td>
+                  <td>현재 AI는 정의된 문제만 강함 (p.18)</td>
+                  <td>Claude가 Open-Beginning 능력을 가진다는 공개 주장은 없음 → <span class="badge private">비공개 / 해당 없음</span>. 연구자 지원 프로그램("Claude for Science") 존재 여부는 <span class="badge check">확인 필요</span></td>
+                  <td>Google "AI co-scientist"(2025, Gemini 기반 다중 에이전트 가설 생성): 수업의 2단계 '가설 생성 AI'에 해당하는 공개 사례 <span class="badge src">출처</span>; Sakana AI "AI Scientist" <span class="badge src">출처</span></td>
+                  <td>Google Research "AI co-scientist" 블로그; Sakana AI Scientist 논문</td>
+                </tr>
+                <tr>
+                  <td>Model Discovery Agent<br><span class="small muted">LLM + Bayesian + VoI</span></td>
+                  <td>MDA 논문 (p.24)</td>
+                  <td>관련 공개 사례 없음 → <span class="badge private">해당 없음</span></td>
+                  <td>MDA 논문이 어떤 LLM을 썼는지 <span class="badge check">확인 필요</span></td>
+                  <td>MDA 논문 (arXiv, 제목으로 검색)</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료면 "확인 필요". 발표 전 "확인 필요" 배지는 공식 문서 링크를 확인해 "출처"로 바꾸거나 "비공개"로 정리합니다.</p>
+          </div>
+        </details>
+
+        <!-- ================= 시험 포인트 ================= -->
+        <h2 id="exam">5. 시험 포인트</h2>
+        <section class="exam">
+          <div class="card">
+            <ul>
+              <li><b>정의된 문제 vs 열린 문제</b>: 지도학습(라벨 가정)·강화학습(보상·환경 가정)·Agentic AI(문제 틀 상속)는 모두 "문제 정의가 고정"을 가정. Open-Beginning Problem은 <b>문제 자체의 불확실성</b>을 다룬다.</li>
+              <li><b>Open-Beginning Problem의 정의</b>: 증거가 없는 상황에서 (i) 어떤 현상에 지속적 관심을 둘지, (ii) 새 문제를 만들지 vs 기존 문제를 재구성할지 판단하는 문제.</li>
+              <li><b>어려운 점 7가지</b> 중 특히 문제 정의가 내생적·재귀적, 즉시 평가할 정답 없음, "모든 것에 의미 부여 vs 아무것도 못 봄"의 딜레마.</li>
+              <li><b>McClintock</b>: 옥수수 색소 패턴 → 이동성 유전요소, 1951 발표 → 1983 노벨상. 핵심 행위 = "설명할 가치가 있음을 알아본 것".</li>
+              <li><b>DNA 사례의 논리</b>: 30억 길이 → 컨텍스트 한계 → Option 1(전문가 feature, 천장) vs Option 2(접근 권한 → 코드로 feature 추출 → 성능 피드백 루프). "파일을 읽는 게 아니라 코드를 짠다".</li>
+              <li><b>MDA 3요소</b>: LLM(모델 제안) + Bayesian Inference(증거 평가) + Value of Information(실험 선택). Open-Beginningness의 inner loop.</li>
+              <li><b>AI 3단계</b>: 문제→답 / 문제→가설→검증 / 현상→선택→문제 생성→탐구.</li>
+              <li><b>4 Step 시스템</b>: Knowledge Foundation → Mechanism Discovery → Knowledge Discovery → Open-Beginning &amp; Self-Evolving Reasoning.</li>
+              <li><b>Turing 1948</b>: learn by experience, 보상·벌 개념이 학습에 필요.</li>
+            </ul>
+          </div>
+          <h3>예상 문제</h3>
+          <details class="quiz"><summary>Q1. (단답) Model Discovery Agent(MDA)를 구성하는 세 가지 요소와 각각의 역할을 쓰시오.</summary><div class="answer">① LLM — 가능한 새 mechanistic model(가설) 제안 ② Bayesian Inference — 어떤 모델이 현재 증거를 가장 잘 설명하는지 확률적 평가 ③ Value of Information — 후보 모델을 가장 잘 구분할 다음 실험 선택. MDA는 Open-Beginningness 구현의 inner loop이며, "어떤 실험을 하면 어떤 메커니즘이 맞는지 가장 많이 알 수 있을까"가 목표다.</div></details>
+          <details class="quiz"><summary>Q2. (서술) 지도학습·강화학습·Agentic AI가 공통으로 가정하는 것은 무엇이며, Open-Beginning Problem은 이와 어떻게 다른지 설명하시오.</summary><div class="answer">셋 모두 문제가 이미 정의되어 있다고 가정한다(지도학습: 목표값·라벨, 강화학습: 보상·환경, Agentic AI: 미리 정해진 문제 틀). 즉 주어진 문제 공간 안에서 명시된 목표를 최적화한다. Open-Beginning Problem은 찾으려던 것도 아니고 현재 문제 정의에 없는 <b>현상</b>을 마주쳤을 때, 그 현상에 관심을 둘지와 새 문제를 만들지/기존 문제를 재구성할지를 판단하는 문제로, 데이터/모델의 불확실성이 아니라 <b>문제 자체의 불확실성</b>을 다룬다.</div></details>
+          <details class="quiz"><summary>Q3. (서술) 30억 길이의 DNA 시퀀스로 암을 스크리닝할 때, LLM의 컨텍스트 한계에도 불구하고 Agentic AI가 기여할 수 있는 방식을 Option 1과 비교하여 설명하시오.</summary><div class="answer">Option 1은 전문가 지식으로 feature를 추출(30억→10만)해 XGBoost/TabPFN에 넣는 방식으로 성능 개선이 제한적이다. Option 2는 Agentic AI에 DNA 파일 <b>접근 권한</b>을 주되, 파일을 통째로 읽는 것이 아니라 파일 구조를 파악해 유의미한 feature를 추출하는 <b>코드를 작성</b>하게 한다. 입력은 기존 feature들과 성능, 출력은 새 feature 추출 코드이며, 성능 피드백을 받아 "A와 B를 결합한 C feature" 같은 개선을 반복하는 self-evolving 루프를 돈다(Any to Code, Code to Any).</div></details>
+          <details class="quiz"><summary>Q4. (단답) Barbara McClintock의 옥수수 연구가 Open-Beginningness의 예시로 제시되는 이유를 한 문장으로 쓰시오.</summary><div class="answer">불규칙성으로 치부될 수 있었던 색소 패턴 변화를 "설명할 가치가 있는 현상"으로 알아보고 세대 간 추적해 이동성 유전요소(mobile genetic elements)를 발견했기 때문(1951 발표, 1983 노벨 생리의학상).</div></details>
+          <details class="quiz"><summary>Q5. (빈칸) 자가진화형 과학 발견 시스템의 4단계를 순서대로 쓰고, Step 4가 던지는 질문 세 가지를 쓰시오.</summary><div class="answer">Knowledge Foundation(무엇을 알고 있는가) → Mechanism Discovery(왜 그렇게 되는가) → Knowledge Discovery(무엇을 새로 만들 것인가) → Open-Beginning &amp; Self-Evolving Scientific Reasoning. Step 4의 질문: 무엇을 다음에 검증해야 하는가? 현재의 문제 정의가 맞는가? 더 필요한 새로운 개념 및 실험은 없는가?</div></details>
+          <details class="quiz"><summary>Q6. (보너스, 단답) Turing(1948)이 "지능의 증거"로 본 결정적 단계는 무엇인가?</summary><div class="answer">경험으로 배우는 것(learn by experience). 같은 실수를 반복하고 고치지 못하는 고정된 기계는 지능의 증거가 아니며, 학습에는 보상·벌에 해당하는 유리/불리한 결과의 개념이 필요하다.</div></details>
+        </section>
+
+        <!-- ================= 출처 ================= -->
+        <h2 id="refs">6. 출처</h2>
+        <ul class="small">
+          <li>Sid Sijbrandij 사례: <a href="https://centuryofbio.com/p/sid" target="_blank" rel="noopener">centuryofbio.com/p/sid</a> (p.5–6)</li>
+          <li>Turing, Alan. "Intelligent machinery (1948)." B. Jack Copeland (ed.), <i>The Essential Turing</i> (2004), p.395 (p.16)</li>
+          <li>"From Phenomena to Problems: Open-Beginningness and the Next Frontier of AI" (p.18–23; 저자·연도는 슬라이드에 미표기, 확인 필요)</li>
+          <li>"Model Discovery Agent: LLM-assisted Bayesian experiment design for data-efficient discovery of mechanistic world models" (p.24; arXiv 확인 필요)</li>
+          <li>Nicholas Carlini, "How to win a best paper award" (2026): <a href="https://nicholas.carlini.com/writing/2026/how-to-win-a-best-paper-award.html" target="_blank" rel="noopener">nicholas.carlini.com</a> (p.31)</li>
+          <li>참고 강의 (p.32): UW–Madison CS839 (AI Agents), UC Berkeley CDSS94, CMU 11-711 (Advanced NLP), Stanford CS224R (Deep RL), Stanford CS329A (Self-Improving AI Agents), UC Berkeley CS294/194-280 (Advanced LLM Agents), Boston University AI Methods for Science, AAAI 2026 Tutorial "Agentic AI for Scientific Discovery"</li>
+          <li>연구실: <a href="https://mlai.yonsei.ac.kr/" target="_blank" rel="noopener">mlai.yonsei.ac.kr</a> (p.1)</li>
+        </ul>
+
+        <div id="week-nav"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="wrap">Team14 · 최신딥러닝이론및응용 · 설명과 도형은 팀이 재작성했습니다.</div></footer>
+
+  <script src="../assets/js/weeks.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script>
+    // 1주차 인터랙션: Self-evolving Feature Loop 시뮬레이터
+    (function () {
+      "use strict";
+      var $ = function (id) { return document.getElementById(id); };
+      var stepBtn = $("w1-step"), autoBtn = $("w1-auto"), resetBtn = $("w1-reset");
+      var countEl = $("w1-count"), codeEl = $("w1-code"), histEl = $("w1-hist");
+      var thoughtEl = $("w1-thought"), readout = $("w1-readout"), marks = $("w1-dna-marks");
+      var bars = [$("w1-b0"), $("w1-b1"), $("w1-b2"), $("w1-b3")];
+      var labels = [$("w1-t0"), $("w1-t1"), $("w1-t2"), $("w1-t3")];
+      var phases = [$("w1-ph0"), $("w1-ph1"), $("w1-ph2"), $("w1-ph3")];
+      var BAR_W = 220;
+      var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // 교육용 시나리오 (실제 데이터 아님)
+      var BASE = [42, 58, 71, 80];
+      var INITIAL_CODE = "feature A = count(A, C adjacent)\n# 전문가가 수십 년 지식으로 설계한 feature\n# 30억 길이 → 10만 개 feature";
+      var SCENARIO = [
+        { thought: "stage 1 성능(42%)이 가장 낮다. A는 국소 패턴만 본다 → 전역 구성을 보는 B: 윈도우별 GC 비율을 만들어 보자.",
+          code: "feature B = gc_ratio(seq, window=1000)\nreturn [A, B]", delta: [6, 3, 2, 1] },
+        { thought: "A는 국소, B는 전역. 둘의 장점을 결합한 C = A·B 가중합을 만들면 stage 1이 더 오를 것 같다.",
+          code: "feature C = combine(A, B, w=0.6)\nreturn [A, B, C]", delta: [7, 4, 2, 1] },
+        { thought: "stage 1 오탐이 많다. 반복 서열(repeat)이 조기 변화와 관련 있다는 논문이 있다 → D: k-mer 반복 횟수를 세자.",
+          code: "feature D = count_repeats(seq, k=6)\nreturn [C, D]", delta: [5, 3, 1, 1] },
+        { thought: "C보다 D의 기여가 크다. D의 k를 8로 올리고 C와 합친 E를 시험해 보자.",
+          code: "feature D2 = count_repeats(seq, k=8)\nfeature E = combine(C, D2, w=0.4)\nreturn [E]", delta: [4, 2, 1, 0] },
+        { thought: "메틸화 사이트(CpG) 근처 윈도우에 집중하면 신호가 더 선명할 것이다 → F.",
+          code: "feature F = cpg_window_stats(seq, radius=500)\nreturn [E, F]", delta: [4, 2, 1, 1] },
+        { thought: "성능이 포화한다. 틀린 샘플만 다시 보니 특정 염색체 영역에 몰려 있다 → 영역별 feature G.",
+          code: "feature G = region_profile(seq, chrom=[7, 17])\nreturn [E, F, G]", delta: [2, 1, 1, 0] },
+        { thought: "개선 폭이 1% 아래로 떨어졌다. 다음 루프는 feature가 아니라 모델 선택(TabPFN ↔ XGBoost)을 바꿔 보자.",
+          code: "model = TabPFN(features=[E, F, G])\nreturn evaluate(model)", delta: [1, 1, 0, 0] }
+      ];
+      var OPT1_THOUGHTS = [
+        "feature는 전문가가 고정했다. 모델 하이퍼파라미터만 다시 조정한다.",
+        "학습률과 트리 깊이를 바꿔 본다. feature는 그대로다.",
+        "교차 검증 fold를 늘려 본다. 성능은 거의 그대로다.",
+        "앙상블 가중치를 조정한다. feature의 천장은 넘지 못한다."
+      ];
+
+      var state, timer = null, phaseTimers = [];
+
+      function init() {
+        state = { perf: BASE.slice(), step: 0, history: [], code: INITIAL_CODE, rand: T14.rand(14) };
+        clearTimeout(timer); timer = null; autoBtn.textContent = "자동 실행";
+        phaseTimers.forEach(clearTimeout); phaseTimers = [];
+        phases.forEach(function (p) { p.classList.remove("on"); });
+        thoughtEl.textContent = "루프를 실행하면 에이전트의 사고 과정이 여기에 표시됩니다.";
+        drawMarks(6);
+        render();
+      }
+
+      function option() {
+        var r = document.querySelector('input[name="w1-opt"]:checked');
+        return r ? r.value : "2";
+      }
+
+      function drawMarks(n) {
+        var html = "", r = T14.rand(7);
+        for (var i = 0; i < n; i++) {
+          var x = 10 + Math.floor(r() * 500);
+          html += '<rect x="' + x + '" y="12" width="3" height="16" fill="var(--accent)" opacity=".8"/>';
+        }
+        marks.innerHTML = html;
+      }
+
+      function render() {
+        for (var i = 0; i < 4; i++) {
+          var v = Math.min(99, state.perf[i]);
+          bars[i].setAttribute("width", String(Math.round(BAR_W * v / 100)));
+          labels[i].textContent = Math.round(v) + "%";
+        }
+        countEl.textContent = "루프 " + state.step + "회";
+        codeEl.textContent = state.code;
+        histEl.innerHTML = state.history.slice(-4).reverse().map(function (c) {
+          return '<div class="w1-code hist">' + escapeHtml(c) + '</div>';
+        }).join("");
+        var gain = state.perf[0] - BASE[0];
+        readout.textContent = "stage 1 누적 개선: +" + gain.toFixed(1) + "%p · 방식: Option " + option() +
+          (option() === "1" ? " (feature 고정 → 천장)" : " (feature 진화)");
+      }
+
+      function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+      function highlight(done) {
+        phaseTimers.forEach(clearTimeout); phaseTimers = [];
+        phases.forEach(function (p) { p.classList.remove("on"); });
+        if (reduced) { phases[3].classList.add("on"); done(); return; }
+        var k = 0;
+        (function next() {
+          phases.forEach(function (p) { p.classList.remove("on"); });
+          phases[k].classList.add("on");
+          k++;
+          if (k < 4) phaseTimers.push(setTimeout(next, 220));
+          else phaseTimers.push(setTimeout(done, 120));
+        })();
+      }
+
+      function runStep() {
+        var opt = option();
+        if (opt === "2" && state.step >= SCENARIO.length) {
+          thoughtEl.textContent = "시나리오 끝. 초기화 후 Option 1과 비교해 보세요.";
+          stopAuto(); return;
+        }
+        highlight(function () {
+          if (opt === "2") {
+            var s = SCENARIO[state.step];
+            state.history.push(state.code);
+            state.code = s.code;
+            for (var i = 0; i < 4; i++) state.perf[i] += s.delta[i] + (state.rand() - 0.5) * 0.8;
+            thoughtEl.textContent = s.thought;
+            drawMarks(6 + state.step * 3);
+          } else {
+            state.history.push(state.code);
+            state.code = INITIAL_CODE + "\n# (변경 없음) 하이퍼파라미터 재조정 #" + (state.step + 1);
+            for (var j = 0; j < 4; j++) state.perf[j] += state.rand() * 0.6;
+            thoughtEl.textContent = OPT1_THOUGHTS[state.step % OPT1_THOUGHTS.length];
+          }
+          state.step++;
+          render();
+        });
+      }
+
+      function stopAuto() { if (timer) { clearTimeout(timer); timer = null; } autoBtn.textContent = "자동 실행"; }
+      function startAuto() {
+        autoBtn.textContent = "정지";
+        (function tick() {
+          runStep();
+          if (option() === "2" && state.step >= SCENARIO.length) { stopAuto(); return; }
+          if (option() === "1" && state.step >= 8) { stopAuto(); return; }
+          timer = setTimeout(tick, reduced ? 900 : 1500);
+        })();
+      }
+
+      stepBtn.addEventListener("click", function () { stopAuto(); runStep(); });
+      autoBtn.addEventListener("click", function () { if (timer) stopAuto(); else startAuto(); });
+      resetBtn.addEventListener("click", init);
+      document.querySelectorAll('input[name="w1-opt"]').forEach(function (r) { r.addEventListener("change", init); });
+
+      init();
+    })();
+  </script>
+</body>
+</html>

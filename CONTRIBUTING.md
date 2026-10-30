@@ -7,14 +7,23 @@
 - 한 주차 = 한 파일(`weeks/weekNN.html`) 이므로 다른 사람과 충돌할 일이 거의 없습니다.
   **공통 파일**(`assets/`, `index.html`, `slides/`)을 고칠 때는 PR 설명에 이유를 쓰고 통합 담당(손)이 리뷰합니다.
 
-## 새 주차 만들기
+## 새 주차 만들기 (한 줄)
+
+```bash
+scripts/new-week.sh 03      # feat/week03 브랜치로 전환 + weeks/week03.html 준비
+# ... content/briefs/week03.md 를 보며 작업, python3 -m http.server 8080 으로 확인 ...
+scripts/pr-week.sh 03 "week03: 1차 콘텐츠"   # 커밋 + 푸시 + main 으로 PR
+```
+
+- 주차 브랜치 `feat/week03`, `feat/week04`, `feat/week06`, `feat/week08` 은 원격에 미리 만들어져 있습니다.
+  스크립트는 원격에 있으면 그것을, 없으면 main 최신에서 새로 만듭니다. 같은 주차를 이어서 작업할 때도 같은 명령입니다.
+- `gh` CLI 가 없으면 `scripts/pr-week.sh` 대신 `git push -u origin feat/week03` 후 GitHub 에서 PR 버튼을 누르세요.
+- 수동으로 하고 싶다면:
 
 ```bash
 git checkout main && git pull
 git checkout -b feat/week03
-cp weeks/_template.html weeks/week03.html
-# content/briefs/week03.md 를 열어 두고 템플릿의 [1]~[10] 슬롯을 채웁니다
-python3 -m http.server 8080   # 로컬 확인
+cp weeks/_template.html weeks/week03.html   # 이미 뼈대가 있으면 생략
 git add weeks/week03.html && git commit -m "week03: 1차 콘텐츠"
 git push -u origin feat/week03
 gh pr create --fill --base main

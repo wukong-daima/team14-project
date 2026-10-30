@@ -3,125 +3,263 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- 작업 지시서: content/briefs/week04.md · 완성 예시: weeks/week02.html -->
   <title>4주차 · LLM 학습 방법론: RLHF · DPO · GRPO · OPD — Team14 랩</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/site.css">
   <style>
-    /* 이 주차 전용 스타일만 여기에. 공통 규칙은 assets/css/site.css */
+    .formula { font-family: var(--mono); font-size: .9rem; background: var(--surface-2); padding: 8px 12px; border-radius: 8px; display: inline-block; }
+    .playground select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+    .grpo-cards rect.card-r { transition: fill .25s ease; }
+    .grpo-cards rect.adv { transition: height .3s ease, y .3s ease; }
+    .grpo-cards text { font-family: var(--mono); font-size: 11px; }
+    .gauge .fill { transition: width .35s ease; }
+    .warn-box { border: 1px solid var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); padding: 8px 12px; border-radius: 8px; font-size: .9rem; margin-top: 8px; display: none; }
+    .warn-box.show { display: block; }
+    .stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin-top: 8px; }
   </style>
 </head>
-<!-- [2] data-week 는 assets/js/weeks.js 의 id 와 같아야 prev/next 내비게이션이 붙습니다 -->
 <body data-week="week04">
   <header class="site-header"><div class="wrap"></div></header>
 
   <main class="wrap">
     <section class="week-header fade-in">
-      <div class="meta"><span class="pill accent">WEEK 04 · 학습</span><span>담당: 조원 A</span><span>·</span><span>마지막 수정: 2026-11-xx</span></div>
+      <div class="meta"><span class="pill accent">WEEK 04 · 학습</span><span>담당: 담당 A</span><span>·</span><span>마지막 수정: 2026-10-31</span><span>·</span><span>원본: week2_fm p.56~90 + week4_agent p.84~93</span></div>
       <h1>LLM 학습 방법론: RLHF · DPO · GRPO · OPD</h1>
-      <!-- [3] 한 줄 요약: 전공/쉬운 두 벌 -->
-      <div data-level="pro"><p class="lead">이 주차를 한 문장으로. 무엇을, 왜, 어떤 대가로.</p></div>
-      <div data-level="easy"><p>이 주차를 중학생에게 한 문장으로.</p></div>
+      <div data-level="pro"><p class="lead">사전학습된 LLM을 "사람이 선호하는 답"과 "정답이 검증되는 추론"으로 끌어올리는 레시피(SFT → 선호 튜닝 → 추론 RL → 증류)를 배우고, 수백 스텝짜리 에이전트 과제에서 <b>보상 희소성</b>과 <b>추론-학습 불일치</b>를 어떻게 푸는지 봅니다. <a href="week02.html#c9">2주차 개념 9·10</a>의 심화 편입니다.</p></div>
+      <div data-level="easy"><p>책을 많이 읽어 말을 배운 AI를 "사람 마음에 드는 답"과 "수학 문제를 맞히는 실력"으로 훈련시키는 방법을 배워요. 그리고 300단계짜리 긴 숙제를 시킬 때 생기는 문제도요.</p></div>
     </section>
 
-      <div class="callout" style="border-left-color:var(--warn)"><b>작업 중인 페이지입니다.</b> 작업 지시서는 저장소의 <code>content/briefs/week04.md</code>, 완성 예시는 <a href="week02.html">2주차</a>를 보세요. 아래는 템플릿 뼈대입니다.</div>
     <div class="layout">
       <nav class="toc" aria-label="이 페이지 목차"></nav>
       <div>
 
-        <!-- ================= [4] 핵심 개념 지도 (SVG 한 장) ================= -->
         <h2 id="map">1. 한눈에 보기</h2>
         <figure class="figure">
-          <svg viewBox="0 0 800 220" role="img" aria-label="이 주차 개념 지도">
-            <!-- 박스/화살표로 개념 관계를 그립니다. 색은 currentColor 와 var(--accent) 만 쓰면 다크모드에서도 보입니다. -->
-            <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor">
-              <rect x="20" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="100" y="116" text-anchor="middle">개념 A</text>
-              <line x1="180" y1="110" x2="240" y2="110" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="240" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="320" y="116" text-anchor="middle">개념 B</text>
-            </g>
+          <svg viewBox="0 0 900 230" role="img" aria-label="학습 파이프라인 레일: pt, cpt, SFT, PFT, RFT, OPD 각 역의 데이터와 모델 수">
+            <defs><marker id="ar4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+            <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-rail"></g>
           </svg>
-          <figcaption>한 줄 캡션</figcaption>
+          <figcaption>왼쪽에서 오른쪽으로 갈수록 데이터는 "코퍼스 → 지시쌍 → 선호쌍 → 검증기 → 교사"로, 동시에 띄우는 모델 수는 1 → 2~4 → 2로 바뀝니다. 이 주차는 색칠된 세 역을 다룹니다.</figcaption>
         </figure>
 
-        <!-- ================= [5] 개념 카드 (반복) ================= -->
+        <div class="callout">
+          <b>원본 위치 주의.</b> 이 주차 요약의 선호 튜닝 내용은 2주차 PDF(week2_fm) 56~57, 68~90쪽에, 롱 호라이즌·추론-학습 불일치 내용은 week4_agent 84~93쪽에 있습니다. 2주차 페이지가 개요라면 이 페이지는 수식 구조와 에이전트 학습까지 들어가는 심화입니다.
+        </div>
+
         <h2 id="concepts">2. 핵심 개념</h2>
 
-        <section class="concept" id="c1">
-          <div class="card">
-            <div class="num">CONCEPT 01</div>
-            <h3>개념 이름 (영문 약어)</h3>
-            <div data-level="pro">
-              <p>전공 수준 설명 3~5문장. 정의 → 왜 필요한가 → 어떻게 동작 → 대가(트레이드오프).</p>
-            </div>
-            <div data-level="easy">
-              <p>중학생 비유 2~3문장. 일상 사물로.</p>
-            </div>
-            <!-- 요약본과 원본이 다를 때 -->
-            <div class="callout fix">요약본의 "X"는 원본 자료 기준 "Y"입니다 (슬라이드 p.NN).</div>
-            <figure class="figure">
-              <svg viewBox="0 0 600 160"><!-- 개념 도형 --></svg>
-              <figcaption>캡션</figcaption>
-            </figure>
+        <section class="concept" id="c1"><div class="card">
+          <div class="num">CONCEPT 01 · week2_fm p.56–57</div>
+          <h3>LLM 학습 파이프라인 (pt → cpt → SFT → PFT → RFT)</h3>
+          <div class="callout fix">요약본의 "Pre-training → SFT → DPO → GRPO → OPD"는 교수님 구두 설명에 가깝고, 슬라이드의 단계 표기는 <b>pt → cpt → SFT/IFT → PFT → RFT</b>입니다 (p.57). DPO·GRPO·OPD는 각각 PFT·RFT·증류 단계에서 쓰는 알고리즘 이름입니다.</div>
+          <div data-level="pro">
+            <p>베이스 모델은 대규모 코퍼스로 사전학습(pt)하고 도메인 데이터로 이어서 사전학습(cpt)합니다. 그 위에 지시-응답 쌍으로 SFT/IFT를 하고, 사람 선호를 반영하는 Preference Fine-Tuning(RLHF 또는 DPO), 마지막으로 검증 가능한 보상으로 Reinforcement Fine-Tuning(PPO 또는 GRPO)을 합니다. 각 단계는 반복될 수 있고, 강한 교사 모델이 있으면 증류(OPD)가 추가됩니다. Tulu 3, Nemotron Nano 2 같은 공개 레시피가 이 순서를 따릅니다.</p>
           </div>
-        </section>
+          <div data-level="easy">
+            <p>책을 엄청 많이 읽어 말을 배우고(사전학습), 선생님이 문제와 답 예시를 보여주고(SFT), 두 답 중 사람들이 더 좋아하는 쪽을 배우고(선호 튜닝), 수학 문제를 풀어 채점받으며 실력을 올려요(강화 학습). 순서대로 한 번씩이 아니라 여러 번 돌 수도 있어요.</p>
+          </div>
+        </div></section>
 
-        <!-- ================= [6] 직접 해보기 (주차당 대표 1개) ================= -->
+        <section class="concept" id="c2"><div class="card">
+          <div class="num">CONCEPT 02 · week2_fm p.72–79, 84</div>
+          <h3>RLHF (Reinforcement Learning from Human Feedback)</h3>
+          <div class="callout fix">요약본의 "RLHF는 최대 4개 모델"은 슬라이드상 <b>PPO</b> 설명(p.84)에서 policy · reference · reward · value 네 모델을 말한 것입니다. RLHF를 PPO로 구현할 때라는 뜻이므로 의미는 같습니다.</div>
+          <div data-level="pro">
+            <p>사람이 매긴 응답 쌍의 선호로 <b>보상 모델(Reward Model)</b>을 먼저 학습하고, 정책 모델이 그 보상을 최대화하도록 PPO 같은 온라인 RL로 학습합니다. 레퍼런스 모델과의 KL 페널티가 분포 붕괴를 막습니다. 정책 · 레퍼런스 · 보상 · 가치 모델까지 최대 4개를 동시에 띄워야 해 메모리와 불안정성이 크고, 보상 모델의 허점(예: 긴 답변에 높은 점수)을 정책이 파고드는 <b>reward hacking</b>에 취약합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>심사위원 로봇(보상 모델)을 먼저 만들고, 학생 로봇이 그 심사위원 점수를 올리려고 연습해요. 그런데 심사위원이 "길게 쓰면 점수 잘 줌" 같은 버릇이 있으면 학생이 내용은 안 보고 그 버릇만 노려요. 이게 보상 해킹이에요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c3"><div class="card">
+          <div class="num">CONCEPT 03 · week2_fm p.80–82</div>
+          <h3>DPO (Direct Preference Optimization)</h3>
+          <div data-level="pro">
+            <p>RLHF의 보상 모델을 닫힌 형태로 정책 비율에 흡수해, 선호 응답 y_w의 로그확률은 올리고 비선호 y_l은 내리는 분류 손실 하나로 학습합니다. β는 레퍼런스에서 얼마나 벗어나도 되는지를 조절합니다. 롤아웃 없이 고정 데이터셋으로 학습하므로 <b>오프라인</b>이고 정책 + 레퍼런스 2개 모델만 필요합니다. 안정성과 단순함 덕분에 업계 표준이 됐습니다.</p>
+            <p class="small"><span class="formula">L = −log σ( β [ log πθ(y_w|x)/π_ref(y_w|x) − log πθ(y_l|x)/π_ref(y_l|x) ] )</span></p>
+          </div>
+          <div data-level="easy">
+            <p>심사위원 로봇을 따로 만들지 않고, "이 답이 저 답보다 낫다"는 정답지를 보고 바로 공부해요. 준비물이 절반이라 빠르고 실수도 적어요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 250" role="img" aria-label="RLHF/PPO, DPO, GRPO 세 방식의 모델 구성도">
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-models"></g>
+            </svg>
+            <figcaption>동시에 띄워야 하는 모델이 4개(PPO) → 2개(DPO) → 2개 + 검증기(GRPO)로 줄어듭니다. GRPO는 critic(가치 모델) 자리를 "그룹 G개의 상대 비교"로 대신합니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c4"><div class="card">
+          <div class="num">CONCEPT 04 · week2_fm p.84</div>
+          <h3>PPO와 가치 모델: 추론 RL의 출발점</h3>
+          <div data-level="pro">
+            <p>PPO는 확률비 r = πθ/π_old를 클리핑해 한 번의 업데이트가 과도하지 않게 합니다. 가치 모델(critic)이 상태별 기대 리턴의 베이스라인을 제공하고 GAE로 어드밴티지 A를 계산합니다. 정책 · 레퍼런스 · 보상 · 가치 4개 모델과 반복 롤아웃이 필요해 비용이 크고, 하이퍼파라미터와 보상 모델 오류에 민감합니다. 이 비용이 GRPO가 등장한 이유입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>"지난번보다 얼마나 잘했나"를 재려면 기준점(가치 모델)이 필요하고, 한 번에 너무 크게 바꾸지 않도록 안전벨트(클리핑)를 매요. 기준점을 재는 로봇을 하나 더 키워야 해서 비싸요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c5"><div class="card">
+          <div class="num">CONCEPT 05 · week2_fm p.85–89</div>
+          <h3>GRPO (Group Relative Policy Optimization)</h3>
+          <div class="callout fix">요약본의 "Group-wise Reward-based Policy Optimization"은 <b>Group Relative Policy Optimization</b>입니다 (DeepSeekMath 2024, DeepSeek-R1; 슬라이드 p.89 "Group-relative advantage"). 또 "롤아웃이 전부 실패하면 학습 불가"는 절반만 맞습니다. 그룹 내 분산이 0이면 되므로 <b>전부 성공해도</b> 어드밴티지는 0이고 학습 신호가 없습니다.</div>
+          <div data-level="pro">
+            <p>같은 프롬프트에 G개의 응답을 샘플링하고, 그룹 내 보상의 평균과 표준편차로 정규화한 상대 어드밴티지를 씁니다. 그러면 PPO의 가치(critic) 모델이 필요 없습니다. 확률비와 클리핑은 PPO와 같고, 수학 · 코딩처럼 정답 검증이 가능한 보상(RLVR)에 쓰입니다. 그룹 정규화 덕분에 쉬운 문제(대부분 성공)보다 어려운 문제에서 드물게 성공한 샘플이 큰 가중치를 받습니다.</p>
+            <p class="small"><span class="formula">Â_i = (r_i − mean(r₁..r_G)) / std(r₁..r_G)</span></p>
+          </div>
+          <div data-level="easy">
+            <p>같은 문제를 8번 풀어보고, 평균보다 잘한 풀이는 더 자주 하도록, 못한 풀이는 덜 하도록 고쳐요. 8번 다 틀리면(또는 다 맞으면) 비교할 게 없어서 아무것도 못 배워요. 아래 "직접 해보기"에서 확인하세요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c6"><div class="card">
+          <div class="num">CONCEPT 06 · week2_fm p.90</div>
+          <h3>OPD / OPSD (On-Policy (Self-)Distillation)</h3>
+          <div class="callout fix">요약본의 "OPD/OPG (On-Policy Distillation/Generation)"에서 슬라이드 용어는 <b>On-Policy (Self-)Distillation, OPSD</b>입니다 (p.90). "OPG"라는 표기는 PDF에 없어 확인이 필요합니다.</div>
+          <div data-level="pro">
+            <p>학생 모델이 현재 정책으로 생성한 궤적의 각 prefix마다 교사(또는 더 강한 자기 버전)가 토큰 수준 감독을 제공합니다. 고정된 교사 데이터로 하는 오프라인 증류의 train–inference 분포 불일치를 줄이면서, GRPO의 최종 정답 기반 희소 보상 대신 모든 토큰에 조밀한(dense) 신호를 줍니다. 단점은 강한 교사 모델에 의존한다는 점입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>내가 푼 풀이를 한 줄 한 줄 선생님이 "여기선 이렇게 쓰는 게 맞아"라고 바로잡아 줘요. 맨 끝 정답만 채점받는 것보다 어디서 틀렸는지 훨씬 잘 알아요. 대신 좋은 선생님이 꼭 있어야 해요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c7"><div class="card">
+          <div class="num">CONCEPT 07 · week4_agent p.85–88</div>
+          <h3>롱 호라이즌 RL의 문제 1: 보상 희소성 (T1)</h3>
+          <div data-level="pro">
+            <p>300스텝짜리 터미널 과제에서 "전부 성공이면 1, 아니면 0" 보상은 초반에 거의 항상 0이라, 거의 다 한 궤적과 아무것도 못 한 궤적이 동일하게 취급됩니다. T1(Terminal Agent Reinforcement Learning for Long-Horizon Tasks)은 verifier로 요구사항 몇 개를 만족했는지를 <b>부분 보상</b>으로 주고(dense reward), SFT/warm start로 긴 과제를 어느 정도 수행할 초기 능력을 먼저 만듭니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>100문제 시험에서 "만점 아니면 0점"이면 아무도 실력이 늘지 않아요. 맞힌 개수만큼 점수를 주면 조금씩 나아져요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c8"><div class="card">
+          <div class="num">CONCEPT 08 · week4_agent p.87–88</div>
+          <h3>롱 호라이즌 RL의 문제 2: 추론-학습 불일치 (TITO, R3)</h3>
+          <div class="callout fix">요약본의 "추론 엔진(vLLM, SGLang) vs 학습 프레임워크(Transformers)"는 일반론으로는 맞지만, 슬라이드의 T1 설정은 롤아웃 <b>SGLang</b>, 학습 <b>Megatron-Core + Transformer Engine</b>입니다 (p.87). "토큰 ID와 MoE 전문가 인덱스를 저장"의 고유명사는 <b>TITO</b>(Token In, Token Out)와 <b>R3</b>이며 출처는 T1 논문입니다 (p.88).</div>
+          <div data-level="pro">
+            <p>롤아웃은 고속 추론 엔진으로, 학습은 별도 학습 프레임워크로 하므로 같은 모델이라도 선택되는 토큰과 MoE 전문가가 달라질 수 있습니다. 토큰을 텍스트로 디코딩했다가 재인코딩하면 <span class="mono">encode(decode(ids)) ≠ ids</span>가 생깁니다(반대로 <span class="mono">decode(encode(text)) = text</span>는 항상 성립). T1의 TITO는 롤아웃의 토큰 ID 자체를 학습에 재사용하고, R3는 롤아웃 때의 MoE 전문가 인덱스를 저장해 학습 때 그대로 씁니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>연습 때 쓴 공책을 복사기로 복사했다가 다시 베끼면 글자가 바뀔 수 있어요. 원본 공책(토큰 ID)을 그대로 쓰면 안 바뀌어요. 2주차에서 배운 MoE의 "전문의 배정"도 연습 때와 시험 때 같은 의사로 맞춰 줘야 해요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 260" role="img" aria-label="롱 호라이즌 RL 루프에서 추론-학습 불일치 지점과 TITO/R3 직결로, sparse vs dense 보상 타임라인">
+              <defs><marker id="ar4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-loop"></g>
+            </svg>
+            <figcaption>위: 텍스트 재인코딩 우회로(빨강 ×) 대신 토큰 ID와 전문가 인덱스를 그대로 넘기는 직결로(파랑). 아래: 300스텝 중 verifier 체크포인트마다 부분 보상을 주면 신호가 조밀해집니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c9"><div class="card">
+          <div class="num">CONCEPT 09 · week4_agent p.89–93</div>
+          <h3>하네스 설계와 MEA (Manage–Execute–Audit)</h3>
+          <div data-level="pro">
+            <p>모델 바깥에서 "어떻게 일을 나누고 검사하고 다시 고치게 할지"를 통제하는 시스템이 하네스입니다. Anthropic은 Planner → Generator → Evaluator 구조와 Sprint Contract(코딩 전 생성자와 평가자가 acceptance criteria에 합의하고 파일로 소통)로 단일 에이전트 20분짜리 결과를 풀 하네스 6시간의 완성도 높은 결과로 바꿨고, 이후 더 강한 모델이 나오자 스프린트 구조를 제거했습니다. LongHorizon-Harness의 MEA는 Executor의 "완료했다"를 믿지 않고 read-only Auditor가 환경을 검사해야만 task state에 completed를 기록합니다. 8주차의 본 주제이기도 합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>혼자 숙제하면 "다 했다"고 착각하기 쉬워요. 계획 짜는 사람, 하는 사람, 검사하는 사람을 나누고, 검사를 통과한 것만 "완료" 도장을 찍어요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c10"><div class="card">
+          <div class="num">CONCEPT 10 · 요약본 기반 (PDF 없음)</div>
+          <h3>블랙박스 모델 튜닝 (Agentic Monte Carlo)</h3>
+          <div class="callout fix">"Agentic Monte Carlo"라는 명칭은 어느 PDF에서도 찾지 못했습니다. 수업 구두 설명으로 보이며 정확한 논문명과 출처 확인이 필요합니다. 아래 설명은 요약본 기준입니다.</div>
+          <div data-level="pro">
+            <p>API로만 접근 가능한 모델(GPT, Claude)은 가중치를 바꿀 수 없습니다. 대신 생성 과정의 중간 상태를 평가하는 가치 모델을 두고, 가치가 높은 중간 상태에서 탐색을 분기해 재시도하면 처음부터 전부 다시 하는 것보다 효율적으로 성공률을 높입니다. 6주차의 트리 탐색과 같은 아이디어를 "학습 없는 튜닝"에 적용한 것입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>미로에서 막히면 입구로 돌아가지 말고, "여기까진 잘 왔다"고 표시된 갈림길로 돌아가서 다른 길을 시도해요. AI 자체를 고칠 수 없을 때 쓰는 방법이에요.</p>
+          </div>
+        </div></section>
+
         <h2 id="play">3. 직접 해보기</h2>
         <section class="playground" id="playground">
-          <h3>🎮 인터랙션 제목</h3>
-          <p class="small muted">무엇을 조작하면 무엇이 바뀌는지 한 줄.</p>
+          <h3>🎮 GRPO 그룹 롤아웃 시뮬레이터</h3>
+          <p class="small muted">같은 문제를 G번 풀게 하고 그룹 안에서 상대 평가합니다. 난이도를 바꿔 가며 "드문 성공이 왜 큰 어드밴티지를 받는지", "전부 성공/전부 실패면 왜 배울 게 없는지"를 확인하세요.</p>
           <div class="controls">
-            <label>슬라이더 이름 <output id="o1">8</output>
-              <input type="range" id="r1" min="1" max="64" value="8"></label>
+            <label>문제 난이도: 성공 확률 p = <output id="oP">0.30</output>
+              <input type="range" id="rP" min="2" max="98" step="1" value="30"></label>
+            <label>그룹 크기 G
+              <select id="sG"><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option></select></label>
+            <div class="row" style="align-self:end">
+              <button class="btn primary" type="button" id="btnRoll">롤아웃 실행</button>
+              <button class="btn" type="button" id="btnRoll10">10번 반복</button>
+              <button class="btn" type="button" id="btnReset">초기화</button>
+            </div>
           </div>
           <div class="stage">
-            <svg id="stage-svg" viewBox="0 0 700 200" width="100%"></svg>
+            <svg id="grpo-svg" class="grpo-cards" viewBox="0 0 700 230" width="100%" role="img" aria-label="그룹 응답 카드와 어드밴티지 막대"></svg>
+            <svg id="gauge-svg" class="gauge" viewBox="0 0 700 46" width="100%" role="img" aria-label="학습 신호 크기 게이지"></svg>
           </div>
-          <div class="readout" id="readout"></div>
+          <div class="readout" id="grpo-readout">[롤아웃 실행]을 눌러 보세요.</div>
+          <div class="warn-box" id="grpo-warn"></div>
+          <div class="stats" id="grpo-stats"></div>
+          <p class="small muted" style="margin-top:10px">보상은 정답 1 / 오답 0 (RLVR). 어드밴티지 Â_i = (r_i − μ)/σ, 학습 신호 크기는 Σ|Â_i|. 난수는 결정적이라 같은 횟수에서 같은 결과가 재현됩니다.</p>
         </section>
 
-        <!-- ================= [7] 모델 비교 ================= -->
         <h2 id="compare">4. 최신 모델과 비교하기</h2>
         <details class="compare" open>
-          <summary>⚖️ 수업 모델 vs Claude · GPT · 공개 모델</summary>
+          <summary>⚖️ 수업 모델(DeepSeek · 공개 레시피) vs Claude · GPT · 공개 모델</summary>
           <div class="body">
+            <p class="small">교육적 메시지: 학습 알고리즘은 <b>공개 모델(DeepSeek, Llama, Tulu, Qwen)에서만 검증</b>됩니다. Claude · GPT는 초기 논문과 제품 기능만 공개돼 있어 "무엇을 썼는지"보다 "무엇을 공개했는지"를 비교하는 것이 정직합니다.</p>
             <table>
-              <thead><tr><th>개념</th><th>수업에서 (DeepSeek 등)</th><th>Claude</th><th>GPT / Gemini / 공개 모델</th><th>출처</th></tr></thead>
+              <thead><tr><th>개념</th><th>수업에서 (DeepSeek 등)</th><th>Claude</th><th>GPT / 공개 모델</th><th>출처</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>개념 A</td>
-                  <td>수업에서 다룬 방식</td>
-                  <td>공개 문서 범위의 사실 <span class="badge src">출처</span> / 또는 <span class="badge private">비공개</span></td>
-                  <td>Llama/Qwen 등 공개 모델은 config로 확인 가능</td>
-                  <td><a href="#">논문/문서 링크</a></td>
-                </tr>
+                <tr><td>선호 튜닝 알고리즘</td><td>RLHF(PPO) → DPO가 업계 표준</td><td>초기 Claude: RLHF + <b>Constitutional AI(RLAIF)</b> 논문 <span class="badge src">출처</span>. 현재 세대의 구체 알고리즘(PPO/DPO/GRPO 여부) <span class="badge private">비공개</span></td><td>OpenAI InstructGPT: RLHF + PPO(2022) <span class="badge src">출처</span>. Llama 3: SFT → rejection sampling → DPO 반복. Tulu 3: SFT → DPO → RLVR</td><td>Bai et al. 2022; Ouyang et al. 2022; Llama 3 Herd 2024; Tulu 3 2024</td></tr>
+                <tr><td>추론 RL</td><td>DeepSeek-R1: cold-start SFT → GRPO(검증 보상) → rejection sampling + SFT → 전 도메인 RL</td><td><b>extended thinking</b> 기능 공개 <span class="badge src">출처</span>. 추론 RL 레시피 <span class="badge private">비공개</span></td><td>DeepSeekMath/R1: GRPO 공개. Qwen3: 4단계(long-CoT cold start → reasoning RL → thinking fusion → general RL) <span class="badge check">확인 필요</span></td><td>DeepSeek-R1 2025; Qwen3 Technical Report 2025</td></tr>
+                <tr><td>보상 모델 / 보상 해킹</td><td>RLHF 보상 모델의 길이 편향 등</td><td>Constitutional AI에서 AI 피드백으로 사람 라벨 대체 <span class="badge src">출처</span>. 보상 해킹 관련 Anthropic 연구 세부 <span class="badge check">확인 필요</span></td><td>OpenAI "Learning to summarize from human feedback" 등</td><td>Anthropic 블로그/논문</td></tr>
+                <tr><td>증류</td><td>OPD(dense, on-policy) vs 오프라인 증류; R1 → Llama/Qwen distill 모델</td><td>증류 여부·방식 <span class="badge private">비공개</span>. 이용약관상 Claude 출력으로 경쟁 모델 학습 금지(공개 약관) <span class="badge src">출처</span></td><td>DeepSeek-R1-Distill-Qwen/Llama 공개 <span class="badge src">출처</span></td><td>DeepSeek-R1 논문, Anthropic 이용약관</td></tr>
+                <tr><td>롱 호라이즌 RL</td><td>T1: dense verifier reward, TITO, R3</td><td>Claude Code 등 장기 에이전트 제품은 공개, 학습 방식 <span class="badge private">비공개</span></td><td>OpenAI Codex 등 제품 공개, 학습 방식 비공개</td><td>T1 arXiv 2026</td></tr>
+                <tr><td>하네스</td><td>Planner → Generator → Evaluator, Sprint Contract (Anthropic 실험)</td><td><b>Anthropic 자체 공개 자료</b>: "Harness design for long-running application development"(2026), "Demystifying evals for AI agents", "Building effective agents"(2024.12) <span class="badge src">출처</span></td><td>LongHorizon-Harness MEA (Claude Code · Codex를 감싸는 하네스) <span class="badge src">출처</span></td><td>week4_agent p.80~93</td></tr>
+                <tr><td>블랙박스 튜닝</td><td>Agentic Monte Carlo(가치 모델로 중간 상태 분기)</td><td>API는 가중치 접근 불가 → 추론 시점 기법만 가능. prompt caching으로 분기 비용 절감 가능(공개 기능) <span class="badge src">출처</span></td><td>GPT API 동일</td><td>수업 명칭·출처 <span class="badge check">확인 필요</span></td></tr>
               </tbody>
             </table>
-            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료면 "확인 필요".</p>
+            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 발표 전까지 "확인 필요" 배지는 공식 문서 링크로 교체하거나 "비공개"로 바꿉니다.</p>
           </div>
         </details>
 
-        <!-- ================= [8] 시험 포인트 ================= -->
         <h2 id="exam">5. 시험 포인트</h2>
         <section class="exam">
           <div class="card">
             <ul>
-              <li>클로즈북 기말에 나올 법한 포인트 1</li>
-              <li>포인트 2</li>
+              <li>학습 단계 순서와 각 단계에 필요한 데이터·모델 (pt, cpt, SFT/IFT, PFT, RFT)</li>
+              <li>RLHF의 구성 요소 4개(policy · reference · reward · value)와 두 가지 약점(복잡성·불안정, reward hacking)</li>
+              <li>DPO가 RLHF와 다른 점: 보상 모델 제거, 오프라인, 2개 모델, β의 역할</li>
+              <li>PPO의 가치 모델 역할(베이스라인 · GAE) vs GRPO의 그룹 정규화 어드밴티지(critic 제거)</li>
+              <li>GRPO가 어려운 문제에 가중치를 더 주는 이유. 전부 성공/전부 실패 시 학습 신호 0</li>
+              <li>OPD가 GRPO의 희소 보상을 보완하는 방식(토큰 수준 dense 감독, on-policy)과 교사 의존성</li>
+              <li>추론-학습 불일치의 두 원인(토큰 재인코딩, MoE 전문가 선택)과 해결(TITO, R3)</li>
+              <li>롱 호라이즌 보상 희소성 해결(verifier 부분 보상), 생성자-평가자 분리 이유, MEA에서 Auditor의 역할</li>
             </ul>
           </div>
           <h3>예상 문제</h3>
-          <details class="quiz"><summary>Q1. 문제</summary><div class="answer">정답과 해설</div></details>
-          <details class="quiz"><summary>Q2. 문제</summary><div class="answer">정답과 해설</div></details>
+          <details class="quiz"><summary>Q1. DPO가 RLHF보다 안정적이라고 평가되는 이유를 필요한 모델 수와 학습 방식 관점에서 설명하라.</summary><div class="answer">RLHF는 보상 모델을 별도 학습하고 정책·레퍼런스·보상·가치 모델을 동시에 띄워 온라인 롤아웃으로 학습하므로 복잡하고, 보상 모델 오류를 정책이 악용(reward hacking)할 수 있다. DPO는 보상 모델을 손실식에 흡수해 선호 쌍 데이터로 정책·레퍼런스 2개 모델만으로 오프라인 학습하므로 단순하고 안정적이다.</div></details>
+          <details class="quiz"><summary>Q2. GRPO에서 8개 응답의 보상이 [1,0,0,0,0,0,0,0]인 경우와 [1,1,1,1,1,1,1,0]인 경우 성공 응답의 어드밴티지는 어떻게 다른가? 전부 0이면?</summary><div class="answer">Â = (r − μ)/σ. 첫 경우 μ = 0.125, σ ≈ 0.33 → 성공 응답 ≈ +2.65(큰 양수). 둘째 경우 μ = 0.875, σ ≈ 0.33 → 성공 응답 ≈ +0.38(작은 양수). 어려운 문제의 드문 성공이 훨씬 강하게 강화된다. 전부 0이면 σ = 0이라 모든 어드밴티지가 0, 학습 신호가 없다. 위 시뮬레이터에서 p를 0.15와 0.9로 바꿔 확인해 보라.</div></details>
+          <details class="quiz"><summary>Q3. OPD(On-Policy Distillation)가 해결하는 문제 두 가지와 한계 하나를 쓰라.</summary><div class="answer">(1) GRPO의 최종 정답 기반 희소 보상 → 교사의 토큰 수준 dense 감독. (2) 오프라인 증류의 train–inference 분포 불일치 → 학생이 실제 방문하는 상태에서 감독. 한계: 강한 교사 모델에 의존한다.</div></details>
+          <details class="quiz"><summary>Q4. 롤아웃 엔진과 학습 프레임워크가 달라서 생기는 불일치 두 가지와 T1의 해결책을 쓰라.</summary><div class="answer">(1) 토큰을 텍스트로 디코딩 후 재인코딩하면 encode(decode(ids)) ≠ ids → TITO: 롤아웃의 토큰 ID를 그대로 학습에 사용. (2) MoE 전문가 선택이 엔진마다 달라짐 → R3: 롤아웃 시 전문가 인덱스를 저장해 학습에 재사용.</div></details>
+          <details class="quiz"><summary>Q5. Anthropic 하네스 실험에서 Generator와 Evaluator를 분리한 이유와, MEA에서 "완료"가 기록되는 조건을 쓰라.</summary><div class="answer">에이전트는 자기 결과를 과대평가하고 긴 컨텍스트에서 목표를 잊거나(context anxiety) 일찍 끝내려 하므로, 만드는 역할과 평가 역할을 분리했다. MEA에서는 Executor가 완료했다고 말해도 인정하지 않고, read-only Auditor가 실제 환경을 검사해 확인해야만 task state에 completed가 기록된다.</div></details>
         </section>
 
-        <!-- ================= [9] 출처 ================= -->
         <h2 id="refs">6. 출처</h2>
         <ul class="small">
-          <li>논문/문서 1</li>
+          <li>Stanford CME295 Lecture 1 슬라이드 (week2_fm p.68~89 원출처) — cme295.stanford.edu</li>
+          <li>Rafailov et al., "Direct Preference Optimization", 2023 · Schulman et al., "Proximal Policy Optimization", 2017</li>
+          <li>DeepSeekMath (GRPO 원 논문, 2024) · DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning (2025)</li>
+          <li>s1: Simple test-time scaling (week4_agent p.41~42)</li>
+          <li>T1: Terminal Agent Reinforcement Learning for Long-Horizon Tasks, arXiv 2026 (week4_agent p.85~88)</li>
+          <li>Harness design for long-running application development, Anthropic preprint 2026 (week4_agent p.89~90)</li>
+          <li>LongHorizon-Harness: Advancing LongHorizon Agents for Real-World Tasks, arXiv 2026 (week4_agent p.91~93)</li>
+          <li>Demystifying evals for AI agents, Anthropic 2026 (week4_agent p.80~83)</li>
+          <li>Bai et al., "Constitutional AI: Harmlessness from AI Feedback", Anthropic 2022 · Ouyang et al., "Training language models to follow instructions with human feedback", 2022 — 비교용</li>
+          <li>Tulu 3 (2024), Nemotron Nano 2, Llama 3 Herd of Models (2024), Qwen3 Technical Report (2025) — 비교용</li>
         </ul>
 
         <div id="week-nav"></div>
@@ -134,18 +272,201 @@
   <script src="../assets/js/weeks.js"></script>
   <script src="../assets/js/site.js"></script>
   <script>
-    // [10] 이 주차의 인터랙션 스크립트. 다른 주차와 충돌하지 않도록 IIFE 안에 둡니다.
-    (function () {
-      var r1 = document.getElementById("r1"), o1 = document.getElementById("o1");
-      var svg = document.getElementById("stage-svg"), readout = document.getElementById("readout");
-      function render() {
-        var v = +r1.value; o1.value = v;
-        svg.innerHTML = '<rect x="10" y="80" width="' + (v * 10) + '" height="40" rx="6" fill="var(--accent)"/>';
-        readout.textContent = "값: " + v;
-      }
-      r1.addEventListener("input", render);
-      render();
+  (function () {
+    var NS = "http://www.w3.org/2000/svg";
+    function el(tag, attrs, text) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    function box(g, x, y, w, h, label, sub, opts) {
+      opts = opts || {};
+      g.appendChild(el("rect", { x: x, y: y, width: w, height: h, rx: 10, fill: opts.fill || "none", "fill-opacity": opts.fillOpacity == null ? 1 : opts.fillOpacity, stroke: opts.stroke || "currentColor", "stroke-width": opts.sw || 1.5, "stroke-dasharray": opts.dash || "none" }));
+      g.appendChild(el("text", { x: x + w / 2, y: y + (sub ? h / 2 - 4 : h / 2 + 5), "text-anchor": "middle", "font-weight": 700, "font-size": opts.fs || 13, fill: opts.textFill || "currentColor" }, label));
+      if (sub) g.appendChild(el("text", { x: x + w / 2, y: y + h / 2 + 14, "text-anchor": "middle", "font-size": 11, fill: opts.textFill || "currentColor", opacity: .8 }, sub));
+    }
+    function arrow(g, x1, y1, x2, y2, marker, opts) {
+      opts = opts || {};
+      g.appendChild(el("line", { x1: x1, y1: y1, x2: x2, y2: y2, stroke: opts.stroke || "currentColor", "stroke-width": opts.sw || 1.5, "stroke-dasharray": opts.dash || "none", "marker-end": "url(#" + marker + ")" }));
+    }
+
+    // ---------- 도형 1: 학습 파이프라인 레일 ----------
+    (function drawRail() {
+      var g = document.getElementById("fig-rail");
+      var steps = [
+        ["pt", "사전학습", "코퍼스", "1", false],
+        ["cpt", "지속 사전학습", "도메인 코퍼스", "1", false],
+        ["SFT / IFT", "지시 따르기", "지시-응답 쌍", "1", false],
+        ["PFT", "RLHF · DPO", "선호 쌍", "4 / 2", true],
+        ["RFT", "PPO · GRPO", "검증기(정답)", "4 / 2", true],
+        ["OPD", "증류", "교사 모델", "2", true]
+      ];
+      // 레일
+      g.appendChild(el("line", { x1: 20, y1: 70, x2: 880, y2: 70, stroke: "currentColor", "stroke-width": 4, "stroke-opacity": .25 }));
+      steps.forEach(function (s, i) {
+        var x = 20 + i * 145, w = 130;
+        g.appendChild(el("circle", { cx: x + w / 2, cy: 70, r: 7, fill: s[4] ? "var(--accent)" : "currentColor" }));
+        box(g, x, 90, w, 58, s[0], s[1], { fill: s[4] ? "var(--accent)" : "none", fillOpacity: s[4] ? .12 : 1, stroke: s[4] ? "var(--accent)" : "currentColor" });
+        g.appendChild(el("text", { x: x + w / 2, y: 172, "text-anchor": "middle", "font-size": 11, fill: "currentColor", opacity: .85 }, "데이터: " + s[2]));
+        g.appendChild(el("text", { x: x + w / 2, y: 192, "text-anchor": "middle", "font-size": 11, "font-family": "IBM Plex Mono, monospace", fill: "currentColor" }, "모델 " + s[3] + "개"));
+        if (i < steps.length - 1) arrow(g, x + w, 119, x + 143, 119, "ar4a");
+      });
+      g.appendChild(el("text", { x: 20, y: 40, "font-size": 12, fill: "currentColor", opacity: .75 }, "LLM 학습 레시피 (week2_fm p.56~57). 단계는 반복 가능 (Tulu 3, Nemotron Nano 2). PFT·RFT의 모델 수는 RLHF/PPO 4개 · DPO/GRPO 2개."));
+      g.appendChild(el("text", { x: 20, y: 222, "font-size": 11, fill: "currentColor", opacity: .7 }, "→ 뒤로 갈수록 '사람 선호'에서 '검증 가능한 정답'으로, 그리고 '더 강한 교사'로 신호의 출처가 바뀐다."));
     })();
+
+    // ---------- 도형 2: RLHF/PPO vs DPO vs GRPO 모델 구성도 ----------
+    (function drawModels() {
+      var g = document.getElementById("fig-models");
+      var cols = [
+        { title: "RLHF (PPO)", x: 15, models: ["policy", "reference", "reward", "value"], note: "온라인 · 롤아웃 반복", extra: "online" },
+        { title: "DPO", x: 315, models: ["policy", "reference"], note: "오프라인 · 고정 선호 데이터", extra: "offline" },
+        { title: "GRPO", x: 615, models: ["policy", "reference"], note: "온라인 · 그룹 G 응답 + 검증기", extra: "group" }
+      ];
+      cols.forEach(function (c, ci) {
+        var w = 270;
+        g.appendChild(el("rect", { x: c.x, y: 10, width: w, height: 230, rx: 12, fill: "none", stroke: ci === 2 ? "var(--accent)" : "currentColor", "stroke-opacity": ci === 2 ? 1 : .35, "stroke-width": ci === 2 ? 2 : 1 }));
+        g.appendChild(el("text", { x: c.x + w / 2, y: 34, "text-anchor": "middle", "font-weight": 700, "font-size": 14, fill: ci === 2 ? "var(--accent)" : "currentColor" }, c.title + (ci === 2 ? "  ← 추론 RL 표준" : "")));
+        c.models.forEach(function (m, i) {
+          var bx = c.x + 15 + (i % 2) * 125, by = 50 + Math.floor(i / 2) * 50;
+          box(g, bx, by, 110, 38, m, null, { fill: m === "policy" ? "var(--accent)" : "none", fillOpacity: m === "policy" ? .9 : 1, textFill: m === "policy" ? "#fff" : "currentColor", fs: 12 });
+        });
+        if (c.extra === "online") {
+          g.appendChild(el("text", { x: c.x + w / 2, y: 170, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, "롤아웃 → 보상 모델 점수 → PPO 업데이트"));
+          g.appendChild(el("text", { x: c.x + w / 2, y: 190, "text-anchor": "middle", "font-size": 11, fill: "var(--danger)" }, "reward hacking 위험 · 4개 모델 메모리"));
+        } else if (c.extra === "offline") {
+          box(g, c.x + 15, 100, 240, 38, "선호 쌍 데이터셋 (y_w ≻ y_l)", null, { dash: "5 3", fs: 12 });
+          g.appendChild(el("text", { x: c.x + w / 2, y: 170, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, "보상 모델을 손실식에 흡수 · 롤아웃 없음"));
+          g.appendChild(el("text", { x: c.x + w / 2, y: 190, "text-anchor": "middle", "font-size": 11, fill: "var(--ok)" }, "단순 · 안정 · 업계 표준"));
+        } else {
+          // critic X
+          g.appendChild(el("rect", { x: c.x + 15, y: 100, width: 110, height: 38, rx: 10, fill: "none", stroke: "var(--danger)", "stroke-dasharray": "4 3" }));
+          g.appendChild(el("text", { x: c.x + 70, y: 124, "text-anchor": "middle", "font-size": 12, fill: "var(--danger)" }, "critic ✕"));
+          box(g, c.x + 140, 100, 115, 38, "verifier", "정답 검증", { fs: 12 });
+          // 그룹 응답
+          for (var k = 0; k < 8; k++) {
+            g.appendChild(el("rect", { x: c.x + 20 + k * 30, y: 155, width: 24, height: 24, rx: 5, fill: k === 1 || k === 5 ? "var(--ok)" : "currentColor", opacity: k === 1 || k === 5 ? .9 : .25 }));
+          }
+          g.appendChild(el("text", { x: c.x + w / 2, y: 200, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, "같은 프롬프트에 G개 응답 → 그룹 안 상대 평가"));
+          g.appendChild(el("text", { x: c.x + w / 2, y: 218, "text-anchor": "middle", "font-size": 11, fill: "var(--accent)" }, "Â = (r − μ) / σ 가 가치 모델을 대신"));
+        }
+        g.appendChild(el("text", { x: c.x + w / 2, y: 232, "text-anchor": "middle", "font-size": 10, fill: "currentColor", opacity: .65 }, c.note));
+      });
+    })();
+
+    // ---------- 도형 3: 롱 호라이즌 RL 루프와 불일치 지점 ----------
+    (function drawLoop() {
+      var g = document.getElementById("fig-loop");
+      box(g, 20, 30, 170, 56, "롤아웃 엔진", "SGLang", {});
+      box(g, 710, 30, 170, 56, "학습 프레임워크", "Megatron-Core + TE", {});
+      // 우회로 (빨강)
+      box(g, 300, 10, 300, 40, "텍스트로 디코딩 → 재인코딩", null, { stroke: "var(--danger)", dash: "5 3", fs: 12, textFill: "var(--danger)" });
+      arrow(g, 190, 42, 298, 30, "ar4b", { stroke: "var(--danger)", dash: "5 3" });
+      arrow(g, 600, 30, 708, 42, "ar4b", { stroke: "var(--danger)", dash: "5 3" });
+      g.appendChild(el("text", { x: 450, y: 66, "text-anchor": "middle", "font-size": 11, fill: "var(--danger)", "font-weight": 700 }, "✕ encode(decode(ids)) ≠ ids · MoE 전문가 선택도 달라짐"));
+      // 직결로 (파랑)
+      box(g, 300, 86, 300, 44, "토큰 ID (TITO) + 전문가 인덱스 (R3)", null, { fill: "var(--accent)", fillOpacity: .12, stroke: "var(--accent)", sw: 2, fs: 12 });
+      arrow(g, 190, 76, 298, 100, "ar4b", { stroke: "var(--accent)", sw: 2 });
+      arrow(g, 600, 108, 708, 76, "ar4b", { stroke: "var(--accent)", sw: 2 });
+      g.appendChild(el("text", { x: 450, y: 148, "text-anchor": "middle", "font-size": 11, fill: "var(--accent)" }, "그대로 저장해서 학습에 재사용 → 롤아웃과 학습이 같은 것을 본다"));
+      // 타임라인
+      g.appendChild(el("text", { x: 20, y: 185, "font-size": 12, "font-weight": 700, fill: "currentColor" }, "300스텝 과제의 보상"));
+      g.appendChild(el("line", { x1: 180, y1: 196, x2: 880, y2: 196, stroke: "currentColor", "stroke-width": 2, "stroke-opacity": .4 }));
+      g.appendChild(el("text", { x: 180, y: 214, "font-size": 10, fill: "currentColor", opacity: .7 }, "step 0"));
+      g.appendChild(el("text", { x: 880, y: 214, "text-anchor": "end", "font-size": 10, fill: "currentColor", opacity: .7 }, "step 300"));
+      // sparse: 끝에만 1
+      g.appendChild(el("circle", { cx: 880, cy: 196, r: 7, fill: "var(--danger)" }));
+      g.appendChild(el("text", { x: 20, y: 203, "font-size": 11, fill: "var(--danger)" }, "sparse: 끝에서만 1/0"));
+      // dense: verifier checkpoints
+      for (var i = 1; i <= 6; i++) {
+        var cx = 180 + i * 100;
+        g.appendChild(el("circle", { cx: cx, cy: 236, r: 6, fill: "var(--ok)" }));
+        g.appendChild(el("text", { x: cx, y: 254, "text-anchor": "middle", "font-size": 10, fill: "currentColor", opacity: .7 }, "+" + i + "/6"));
+      }
+      g.appendChild(el("line", { x1: 180, y1: 236, x2: 880, y2: 236, stroke: "var(--ok)", "stroke-width": 2, "stroke-opacity": .4 }));
+      g.appendChild(el("text", { x: 20, y: 241, "font-size": 11, fill: "var(--ok)" }, "dense: verifier 부분 보상"));
+    })();
+
+    // ---------- 인터랙션: GRPO 그룹 롤아웃 시뮬레이터 ----------
+    var rP = document.getElementById("rP"), oP = document.getElementById("oP"), sG = document.getElementById("sG");
+    var svg = document.getElementById("grpo-svg"), gauge = document.getElementById("gauge-svg");
+    var readout = document.getElementById("grpo-readout"), warn = document.getElementById("grpo-warn"), stats = document.getElementById("grpo-stats");
+    var runs = 0, zeroRuns = 0, sumSignal = 0;
+
+    rP.addEventListener("input", function () { oP.value = (rP.value / 100).toFixed(2); });
+
+    function rollout() {
+      var p = rP.value / 100, G = +sG.value;
+      runs++;
+      var rnd = T14.rand(runs * 7919 + G);
+      var r = [];
+      for (var i = 0; i < G; i++) r.push(rnd() < p ? 1 : 0);
+      var mu = r.reduce(function (a, b) { return a + b; }, 0) / G;
+      var sd = Math.sqrt(r.reduce(function (a, b) { return a + (b - mu) * (b - mu); }, 0) / G);
+      var adv = r.map(function (x) { return sd > 0 ? (x - mu) / sd : 0; });
+      var signal = adv.reduce(function (a, b) { return a + Math.abs(b); }, 0);
+      if (sd === 0) zeroRuns++;
+      sumSignal += signal;
+      draw(r, adv, mu, sd, signal, G, p);
+    }
+
+    function draw(r, adv, mu, sd, signal, G, p) {
+      svg.innerHTML = "";
+      var left = 40, width = 640, step = width / G, cw = Math.min(44, step * .7);
+      var baseY = 150, scale = 28, maxAbs = 3.2;
+      // 축
+      svg.appendChild(el("line", { x1: left, y1: baseY, x2: left + width, y2: baseY, stroke: "currentColor", "stroke-opacity": .35 }));
+      svg.appendChild(el("text", { x: 8, y: baseY + 4, fill: "currentColor", opacity: .7 }, "Â=0"));
+      svg.appendChild(el("text", { x: 8, y: 30, fill: "currentColor", opacity: .7 }, "응답"));
+      svg.appendChild(el("text", { x: 8, y: 100, fill: "currentColor", opacity: .7 }, "+Â"));
+      svg.appendChild(el("text", { x: 8, y: 215, fill: "currentColor", opacity: .7 }, "−Â"));
+      for (var i = 0; i < G; i++) {
+        var cx = left + step * (i + .5);
+        // 카드
+        svg.appendChild(el("rect", { class: "card-r", x: cx - cw / 2, y: 14, width: cw, height: 30, rx: 6, fill: r[i] ? "var(--ok)" : "currentColor", opacity: r[i] ? .9 : .22 }));
+        svg.appendChild(el("text", { x: cx, y: 34, "text-anchor": "middle", fill: r[i] ? "#fff" : "currentColor", "font-weight": 700 }, r[i] ? "1" : "0"));
+        // 어드밴티지 막대
+        var a = Math.max(-maxAbs, Math.min(maxAbs, adv[i]));
+        var h = Math.abs(a) * scale;
+        svg.appendChild(el("rect", { class: "adv", x: cx - cw / 2, y: a >= 0 ? baseY - h : baseY, width: cw, height: Math.max(h, sd > 0 ? 1 : 0), rx: 3, fill: a > 0 ? "var(--accent)" : a < 0 ? "var(--danger)" : "currentColor", opacity: .85 }));
+        if (G <= 8 || i % 2 === 0) svg.appendChild(el("text", { x: cx, y: a >= 0 ? baseY - h - 5 : baseY + h + 13, "text-anchor": "middle", fill: "currentColor", "font-size": G > 8 ? 9 : 11 }, (adv[i] >= 0 ? "+" : "") + adv[i].toFixed(2)));
+      }
+      // 게이지
+      gauge.innerHTML = "";
+      var maxSig = G * 1.0; // 대략적 상한 (G=8, 4:4 분포일 때 Σ|Â| = 8)
+      var frac = Math.min(1, signal / maxSig);
+      gauge.appendChild(el("text", { x: 8, y: 29, fill: "currentColor", "font-size": 12, "font-weight": 700 }, "학습 신호 Σ|Â|"));
+      gauge.appendChild(el("rect", { x: 130, y: 14, width: 470, height: 20, rx: 6, fill: "currentColor", opacity: .08 }));
+      gauge.appendChild(el("rect", { class: "fill", x: 130, y: 14, width: Math.max(frac * 470, 0), height: 20, rx: 6, fill: frac === 0 ? "var(--danger)" : "var(--accent)", opacity: .9 }));
+      gauge.appendChild(el("text", { x: 612, y: 29, fill: "currentColor", "font-family": "IBM Plex Mono, monospace", "font-size": 12 }, signal.toFixed(2)));
+
+      var succ = r.reduce(function (a, b) { return a + b; }, 0);
+      readout.innerHTML = "p = " + p.toFixed(2) + " · G = " + G + " · 성공 " + succ + "/" + G + " · μ = " + mu.toFixed(3) + " · σ = " + sd.toFixed(3) +
+        (sd > 0 ? " · 성공 응답 Â = <b>+" + ((1 - mu) / sd).toFixed(2) + "</b>, 실패 응답 Â = " + ((0 - mu) / sd).toFixed(2) : "");
+      if (sd === 0) {
+        warn.className = "warn-box show";
+        warn.textContent = succ === G ? "전부 성공: 그룹 안에 차이가 없어 σ = 0 → 모든 Â = 0. 이 그룹에서는 배울 게 없습니다 (너무 쉬운 문제)."
+                                      : "전부 실패: 그룹 안에 차이가 없어 σ = 0 → 모든 Â = 0. 이 그룹에서는 배울 게 없습니다 (너무 어려운 문제).";
+      } else {
+        warn.className = "warn-box";
+      }
+      stats.innerHTML = "<span>실행 " + runs + "회</span><span>신호 0인 그룹 " + zeroRuns + "회 (" + (runs ? (zeroRuns / runs * 100).toFixed(0) : 0) + "%)</span><span>평균 신호 " + (runs ? (sumSignal / runs).toFixed(2) : "0") + "</span>";
+    }
+
+    function reset() {
+      runs = 0; zeroRuns = 0; sumSignal = 0;
+      svg.innerHTML = ""; gauge.innerHTML = "";
+      readout.textContent = "[롤아웃 실행]을 눌러 보세요.";
+      warn.className = "warn-box"; stats.innerHTML = "";
+    }
+
+    document.getElementById("btnRoll").addEventListener("click", rollout);
+    document.getElementById("btnRoll10").addEventListener("click", function () { for (var i = 0; i < 10; i++) rollout(); });
+    document.getElementById("btnReset").addEventListener("click", reset);
+    sG.addEventListener("change", reset);
+    oP.value = (rP.value / 100).toFixed(2);
+  })();
   </script>
 </body>
 </html>

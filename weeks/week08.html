@@ -3,125 +3,348 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- 작업 지시서: content/briefs/week08.md · 완성 예시: weeks/week02.html -->
   <title>8주차 · 하네스 엔지니어링과 자가 진화 에이전트 — Team14 랩</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/site.css">
   <style>
-    /* 이 주차 전용 스타일만 여기에. 공통 규칙은 assets/css/site.css */
+    .hda-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin: 8px 0 4px; }
+    .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+    .playground select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+    .toggle { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; font-size: .9rem; }
+    .toggle input { accent-color: var(--accent); }
+    .toggle.on { border-color: var(--accent); background: var(--accent-soft); }
+    .hda-bar rect, .hda-bar line, .hda-bar text { transition: all .4s ease; }
+    .formula { font-family: var(--mono); font-size: .92rem; background: var(--surface-2); padding: 8px 12px; border-radius: 8px; display: inline-block; }
+    .warnbox { border-left: 4px solid var(--danger); background: var(--surface-2); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 8px; font-size: .92rem; }
+    .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 10px; }
   </style>
 </head>
-<!-- [2] data-week 는 assets/js/weeks.js 의 id 와 같아야 prev/next 내비게이션이 붙습니다 -->
 <body data-week="week08">
   <header class="site-header"><div class="wrap"></div></header>
 
   <main class="wrap">
     <section class="week-header fade-in">
-      <div class="meta"><span class="pill accent">WEEK 08 · 하네스</span><span>담당: 조원 B</span><span>·</span><span>마지막 수정: 2026-11-xx</span></div>
+      <div class="meta"><span class="pill accent">WEEK 08 · 하네스</span><span>담당: 담당 C</span><span>·</span><span>마지막 수정: 2026-10-31</span><span>·</span><span>원본 92쪽 대조 완료</span></div>
       <h1>하네스 엔지니어링과 자가 진화 에이전트</h1>
-      <!-- [3] 한 줄 요약: 전공/쉬운 두 벌 -->
-      <div data-level="pro"><p class="lead">이 주차를 한 문장으로. 무엇을, 왜, 어떤 대가로.</p></div>
-      <div data-level="easy"><p>이 주차를 중학생에게 한 문장으로.</p></div>
+      <div data-level="pro"><p class="lead">모델 가중치는 고정한 채, 모델을 둘러싼 <b>하네스</b>(컨텍스트 · 워크플로우 · 메모리 · 서브에이전트 · 평가)를 설계하고 자동으로 진화시키는 방법을 배웁니다. 그리고 그렇게 올라간 점수가 정말 똑똑해진 것(G)인지, 벤치마크 암기(O)인지, 돈을 더 쓴 것(T)인지 <b>분해해서 검증</b>하는 법까지.</p></div>
+      <div data-level="easy"><p>AI의 "뇌"는 그대로 두고, 뇌에 붙은 손·눈·수첩·규칙집을 더 잘 짜서 일을 잘하게 만드는 방법이에요. 그리고 성적이 올랐을 때 "진짜 실력이 늘었나, 답지를 외웠나, 시험을 여러 번 봤나"를 가려내는 법도 배워요.</p></div>
     </section>
 
-      <div class="callout" style="border-left-color:var(--warn)"><b>작업 중인 페이지입니다.</b> 작업 지시서는 저장소의 <code>content/briefs/week08.md</code>, 완성 예시는 <a href="week02.html">2주차</a>를 보세요. 아래는 템플릿 뼈대입니다.</div>
     <div class="layout">
       <nav class="toc" aria-label="이 페이지 목차"></nav>
       <div>
 
-        <!-- ================= [4] 핵심 개념 지도 (SVG 한 장) ================= -->
         <h2 id="map">1. 한눈에 보기</h2>
         <figure class="figure">
-          <svg viewBox="0 0 800 220" role="img" aria-label="이 주차 개념 지도">
-            <!-- 박스/화살표로 개념 관계를 그립니다. 색은 currentColor 와 var(--accent) 만 쓰면 다크모드에서도 보입니다. -->
-            <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor">
-              <rect x="20" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="100" y="116" text-anchor="middle">개념 A</text>
-              <line x1="180" y1="110" x2="240" y2="110" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="240" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="320" y="116" text-anchor="middle">개념 B</text>
+          <svg viewBox="0 0 900 370" role="img" aria-label="하네스 해부도: 고정된 모델을 컨텍스트, 워크플로우, 툴, 메모리, 서브에이전트가 둘러싸고 평가자와 권한 제어는 루프 밖에 있다">
+            <defs><marker id="ar8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+            <g font-family="Noto Sans KR, sans-serif" font-size="13" fill="currentColor">
+              <text x="20" y="24" font-weight="700">하네스 = 고정된 모델을 둘러싼 실행 시스템</text>
+              <!-- 중심 모델 -->
+              <circle cx="430" cy="178" r="54" fill="var(--accent)" opacity=".15"/>
+              <circle cx="430" cy="178" r="54" fill="none" stroke="var(--accent)" stroke-width="2"/>
+              <text x="430" y="174" text-anchor="middle" font-weight="700">Model</text>
+              <text x="430" y="192" text-anchor="middle" font-size="11" opacity=".8">weights frozen</text>
+              <!-- 상단 3 -->
+              <rect x="110" y="52" width="190" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="205" y="73" text-anchor="middle" font-weight="700">Context Engineering</text>
+              <text x="205" y="92" text-anchor="middle" font-size="11" opacity=".75">무엇을 어떻게 보여줄지</text>
+              <rect x="335" y="40" width="190" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="430" y="61" text-anchor="middle" font-weight="700">Workflow / Loop</text>
+              <text x="430" y="80" text-anchor="middle" font-size="11" opacity=".75">plan → execute → observe → improve</text>
+              <rect x="560" y="52" width="190" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="655" y="73" text-anchor="middle" font-weight="700">Tools / Action</text>
+              <text x="655" y="92" text-anchor="middle" font-size="11" opacity=".75">툴 풀링 · 코드 실행 · 검색</text>
+              <!-- 하단 3 -->
+              <rect x="110" y="252" width="190" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="205" y="273" text-anchor="middle" font-weight="700">Memory</text>
+              <text x="205" y="292" text-anchor="middle" font-size="11" opacity=".75">파일시스템 = durable state</text>
+              <rect x="335" y="264" width="190" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="430" y="285" text-anchor="middle" font-weight="700">Sub-agents / Jobs</text>
+              <text x="430" y="304" text-anchor="middle" font-size="11" opacity=".75">병렬 · 검사 가능하게 기록</text>
+              <rect x="560" y="252" width="190" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="655" y="273" text-anchor="middle" font-weight="700">API · Infra · Monitoring</text>
+              <text x="655" y="292" text-anchor="middle" font-size="11" opacity=".75">배포 시스템의 나머지</text>
+              <!-- 연결선 -->
+              <line x1="300" y1="90" x2="388" y2="150" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5"/>
+              <line x1="430" y1="92" x2="430" y2="124" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5"/>
+              <line x1="560" y1="90" x2="472" y2="150" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5"/>
+              <line x1="300" y1="266" x2="388" y2="206" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5"/>
+              <line x1="430" y1="264" x2="430" y2="232" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5"/>
+              <line x1="560" y1="266" x2="472" y2="206" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5"/>
+              <!-- 루프 밖: 평가자/권한 -->
+              <rect x="770" y="140" width="120" height="76" rx="10" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-dasharray="6 4"/>
+              <text x="830" y="165" text-anchor="middle" font-weight="700" fill="var(--danger)">Evaluator</text>
+              <text x="830" y="183" text-anchor="middle" font-weight="700" fill="var(--danger)">Permissions</text>
+              <text x="830" y="203" text-anchor="middle" font-size="11" opacity=".8">루프 밖에 둔다</text>
+              <line x1="760" y1="178" x2="490" y2="178" stroke="var(--danger)" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <!-- 하단 진행 -->
+              <text x="20" y="346" font-size="12" opacity=".85">최적화 대상이 깊어지는 순서:</text>
+              <text x="190" y="346" font-size="12" font-family="IBM Plex Mono, monospace">prompt → structured context → workflow → harness code → optimizer code</text>
             </g>
           </svg>
-          <figcaption>한 줄 캡션</figcaption>
+          <figcaption>Deployment system = Harness + API/Serving + Infra + Monitoring + Security. 평가자와 권한 제어는 진화 루프 <b>바깥</b>에 있어야 보상 해킹을 막을 수 있습니다.</figcaption>
         </figure>
 
-        <!-- ================= [5] 개념 카드 (반복) ================= -->
+        <div class="callout">
+          <b>이번 수업은 Week 5-1 "Introduction" 파트만 다룹니다.</b> 목차의 Reflexion · Voyager · A-MEM · R-Zero · Range-GRPO · Evo-Bench 등은 다음 수업 범위로 보입니다. 요약본에 빠진 STOP 경고 결과, AHE 관측가능성 3기둥, 진화 탐색 계보, 자동 연구 6가지 실패 모드, Anthropic 평가 가이드(p.67~92)를 이 페이지에 모두 넣었습니다.
+        </div>
+
         <h2 id="concepts">2. 핵심 개념</h2>
 
-        <section class="concept" id="c1">
-          <div class="card">
-            <div class="num">CONCEPT 01</div>
-            <h3>개념 이름 (영문 약어)</h3>
-            <div data-level="pro">
-              <p>전공 수준 설명 3~5문장. 정의 → 왜 필요한가 → 어떻게 동작 → 대가(트레이드오프).</p>
-            </div>
-            <div data-level="easy">
-              <p>중학생 비유 2~3문장. 일상 사물로.</p>
-            </div>
-            <!-- 요약본과 원본이 다를 때 -->
-            <div class="callout fix">요약본의 "X"는 원본 자료 기준 "Y"입니다 (슬라이드 p.NN).</div>
-            <figure class="figure">
-              <svg viewBox="0 0 600 160"><!-- 개념 도형 --></svg>
-              <figcaption>캡션</figcaption>
-            </figure>
+        <section class="concept" id="c1"><div class="card">
+          <div class="num">CONCEPT 01 · p.10–14, 19</div>
+          <h3>하네스(Harness)와 재귀적 자기개선(RSI)</h3>
+          <div data-level="pro">
+            <p>하네스는 베이스 모델을 둘러싸고 실행을 오케스트레이션하는 시스템입니다. 모델이 <b>어떻게 생각·계획하고, 어떤 툴을 호출해 행동하고, 컨텍스트를 어떻게 관리하고, 산출물을 어디에 저장하고, 결과를 어떻게 평가할지</b>를 결정합니다. RSI는 I. J. Good(1965)의 "ultraintelligent machine"에서 시작해 Yudkowsky(2008)가 "AI가 자기 지능을 만드는 인지 기계장치를 스스로 개선하는 피드백 루프"로 정의했습니다. 현대적 해석에서 이 루프는 (1) 가중치 직접 수정, (2) 학습 파이프라인 개선, (3) <b>배포 시스템</b> 개선을 포함하고, 배포 시스템 = 하네스 + API/서빙 + 인프라 + 모니터링 + 보안입니다. 초기 프레임워크의 <span class="mono">agent = LLM + memory + tools + planning</span>보다 훨씬 넓어서, 하네스 엔지니어링은 "프롬프트 템플릿"이 아니라 "런타임 소프트웨어 설계"에 가깝습니다.</p>
+            <p class="small muted">이 사이트도 하나의 하네스입니다. 학습자(모델)는 그대로 두고 공부라는 작업의 루프(개념 → 조작 → 비교 → 문제)를 바꿨습니다.</p>
           </div>
-        </section>
+          <div data-level="easy">
+            <p>모델이 "뇌"라면 하네스는 뇌에 붙은 손·눈·수첩·규칙집이에요. 뇌는 그대로 두고 수첩을 어떻게 쓰고 언제 손을 움직일지 규칙을 더 잘 짜면, 같은 뇌로도 훨씬 일을 잘해요. "스스로 더 좋아지는 AI"는 처음엔 뇌를 고치는 게 아니라 이 수첩과 규칙집을 스스로 고치는 것부터 시작해요. 이 사이트도 여러분의 뇌는 그대로 두고 "공부하는 순서"만 바꾼 하네스예요.</p>
+          </div>
+        </div></section>
 
-        <!-- ================= [6] 직접 해보기 (주차당 대표 1개) ================= -->
+        <section class="concept" id="c2"><div class="card">
+          <div class="num">CONCEPT 02 · p.15–18</div>
+          <h3>하네스 디자인 패턴 3가지</h3>
+          <div class="callout fix">요약본의 "<code>groom.me</code>, <code>grill with bug</code>" 같은 명령 이름은 슬라이드 텍스트에 없습니다. 슬라이드의 패턴은 "File System as Persistent Memory"와 코딩 에이전트(Claude Code · Codex · OpenCode · Cursor) 사례입니다. 교수님 구두 설명이나 Claude Code 스킬 데모(예: <code>/grill-me</code>)였을 가능성이 있으니 발표 전 확인이 필요합니다 (p.16~18).</div>
+          <div data-level="pro">
+            <p>① <b>워크플로우 자동화</b>: plan → execute → observe/test → improve → execute 루프를 모델이 돌 수 있게 정의합니다. 모델이 자기 궤적과 실패를 분석해 "agent runtime" 안에서 반복합니다(Karpathy의 <code>autoresearch</code>가 깔끔한 예). ② <b>파일시스템을 영속 메모리로</b>: 전체 로그를 컨텍스트에 싣지 않고 파일에 durable state를 둡니다. 실험 로그·코드 diff·에러 트레이스는 컨텍스트 길이를 훨씬 넘기고, 파일 읽기/쓰기는 LLM의 기초 능력이라 모델이 좋아질수록 같이 좋아집니다. ③ <b>서브에이전트와 백엔드 잡</b>: 여러 가설을 병렬로 탐색하고 부모 에이전트는 프로세스 매니저(launch / inspect logs / cancel / merge) 역할을 합니다. 핵심은 <b>병렬성을 명시적이고 검사 가능하게</b> 만드는 것. 서브에이전트 출력이 채팅 컨텍스트에만 있으면 사라지므로 파일·로그·상태 레코드로 남겨야 중단 후 복구와 이력 추적이 됩니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>① 숙제를 "풀고 → 채점하고 → 틀린 거 고치고 → 다시 풀기"를 자동으로 반복하는 규칙. ② 머릿속에 다 외우려 하지 말고 공책(파일)에 적어두기. ③ 친구 셋에게 다른 방법을 동시에 시켜보되, 각자 결과를 종이에 적어 내게 해야 나중에 누가 왜 틀렸는지 알 수 있어요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c3"><div class="card">
+          <div class="num">CONCEPT 03 · p.12, 20, 30</div>
+          <h3>하네스 최적화의 진행 방향과 5가지 축</h3>
+          <div data-level="pro">
+            <p>최적화 대상은 <span class="mono">instruction prompts → structured context → workflow → harness code → optimizer code</span> 순으로 깊어집니다. 축은 다섯 가지입니다. ① Context Engineering(모델이 받는 정보의 내용·구조·관리), ② Workflow Design(계획·실행·협조 방식), ③ Self-Improving Harness(에이전트가 자기 실행 시스템을 반복 개선), ④ Evolutionary Search(후보 생성·평가·선택), ⑤ Joint Optimization with Model Weights(파라미터와 하네스 동시 최적화). 하네스는 코드이므로, LLM이 코드를 최적화할 수 있으면 손으로 쓴 프롬프트보다 훨씬 큰 설계 공간에 접근합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>처음엔 "질문을 잘 쓰는 법"만 고치다가, 다음엔 "참고 자료 정리법", 그다음엔 "일하는 순서", 그다음엔 "일하는 순서를 짜는 프로그램", 결국엔 "그 프로그램을 고치는 프로그램"까지 고치게 돼요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c4"><div class="card">
+          <div class="num">CONCEPT 04 · p.21–23</div>
+          <h3>ACE (Agentic Context Engineering): 플레이북과 델타 업데이트</h3>
+          <div class="callout fix">요약본의 "Qwen의 결과물을 상위 모델(GPT)이 평가 … Git 방식"에서, Qwen/GPT 역할 분담은 슬라이드 텍스트에 없습니다(그림일 수 있어 확인 필요). ACE의 구조는 <b>Generator → Reflector → Curator</b>이고, "Git 방식"은 델타 업데이트에 대한 비유입니다 (p.21~22).</div>
+          <div data-level="pro">
+            <p>컨텍스트를 "점점 길어지는 프롬프트"가 아니라 <b>진화하는 플레이북</b>(식별자가 달린 bullet 모음)으로 다룹니다. <b>Generator</b>가 bullet을 참조해 과제 궤적을 만들고, <b>Reflector</b>가 성공·실패 궤적에서 통찰을 증류하고, <b>Curator</b>가 항목 단위로 플레이북을 갱신합니다. 이전 메모리 시스템의 두 한계, 즉 반복 재작성으로 과거 정보가 유실되는 <b>Context Collapse</b>와 LLM이 지나치게 간결한 지시를 선호해 세부를 빠뜨리는 <b>Brevity Bias</b>를, 전체 재작성 대신 변경분만 생성하는 <b>Delta Update</b>로 해결합니다. 단, 갱신 규칙과 워크플로우는 여전히 사람이 설계합니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>오답노트를 매번 처음부터 다시 쓰면 예전에 적어둔 중요한 팁이 사라져요(붕괴). 그래서 ACE는 "오늘 새로 배운 것 한 줄만 추가"하는 방식으로 노트를 키워요. Git에서 파일 전체를 다시 올리지 않고 바뀐 줄만 올리는 것과 같아요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c5"><div class="card">
+          <div class="num">CONCEPT 05 · p.23–25, 28</div>
+          <h3>MCE (Meta Context Engineering)와 Meta-Harness</h3>
+          <div class="callout fix">요약본의 "MCE: 컨텍스트 내용(C) 최적화와 검색 방식(BM25·임베딩·하이브리드) 최적화를 교차 반복"은 슬라이드 텍스트와 다릅니다. MCE(Ye et al. 2026)의 핵심은 <b>메커니즘(스킬)과 산출물(컨텍스트)의 분리</b>이며, Meta-Agent가 스킬을 진화시키고 Base-Agent가 그 스킬로 컨텍스트를 구성합니다. BM25/임베딩 언급은 텍스트에 없습니다 (p.23~24).</div>
+          <div data-level="pro">
+            <p>MCE는 "컨텍스트를 어떻게 관리할지"(메커니즘)와 "무엇을 담을지"(내용)를 분리합니다. <b>Meta-Agent</b>가 Agentic Crossover → Skill Generation으로 컨텍스트 엔지니어링 방법 자체(학습 절차, 에러 분석 코드, 템플릿, 검증, 검색·필터링 같은 동적 연산자)를 자유 형식 <b>스킬</b>로 진화시키고, <b>Base-Agent</b>는 그 스킬을 실행해 과제별 컨텍스트를 만듭니다. ACE처럼 휴리스틱을 강제하지 않고 스킬과 컨텍스트를 공진화시킵니다. <b>Meta-Harness</b>(Lee et al. 2026)는 한 단계 더 내려가 "무엇을 저장·검색·제시할지 결정하는 코드" 자체를 최적화하는 <b>하네스를 최적화하는 하네스</b>입니다. 제안자는 코딩 에이전트이고 출력은 비용 대 성능의 <b>파레토 프론티어</b> 위 하네스 후보 집합입니다. ADAS와의 차이는 전체 실행 이력에 선택적 접근, 에이전틱 진단, 최소한의 외부 루프 세 가지입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>ACE가 "오답노트 잘 쓰는 법"을 사람이 정해줬다면, MCE는 "오답노트 쓰는 법 자체"를 AI가 실험하며 바꾸게 해요. Meta-Harness는 거기서 더 나아가 "공부 도구를 만드는 공장"을 AI가 짓는 것이고, 비용 대비 성적이 가장 좋은 도구들만 남겨요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 300" role="img" aria-label="최적화 깊이 사다리: ACE, MCE, Meta-Harness, Hyperagents 네 단계와 STOP 경고">
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-ladder"></g>
+            </svg>
+            <figcaption>계단을 오를수록 "무엇을 최적화하나"가 깊어집니다. 단, 베이스 모델이 약하면 계단을 올라도 떨어집니다(STOP의 경고).</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c6"><div class="card">
+          <div class="num">CONCEPT 06 · p.26–29</div>
+          <h3>워크플로우 디자인: AI Scientist · Autodata agent · ADAS · AFlow</h3>
+          <div class="callout fix">요약본의 "AutoDataAgent: 제미나이(출제)·GPT(검증)·Qwen(학습)"에서 모델명은 슬라이드 텍스트에 없습니다. 실제 구성은 <b>Challenger / Weak Solver / Strong Solver / Verifier(Judge)</b>입니다. 또 "ADAS, AFlow — MCTS 기반"은 부정확합니다. <b>MCTS는 AFlow</b>의 방법이고, <b>ADAS는 meta-agent search</b>입니다 (p.27~29).</div>
+          <div data-level="pro">
+            <p>수작업 워크플로우로는 <b>AI Scientist</b>(아이디어 → 코드 → 실험 → 분석 → 원고 → 피어리뷰)와 모든 주장을 근거에 추적하는 <b>ScientistOne</b>(Chain-of-Evidence)이 있습니다. <b>Autodata agent</b>는 Challenger가 문제를 제안하고, Weak Solver가 "충분히 어려운지", Strong Solver가 "여전히 풀리는지"를 검사해 딱 맞는 난이도의 데이터를 합성합니다. 설계 공간이 거대하므로 워크플로우 설계를 <b>탐색 문제</b>로 봅니다. <b>ADAS</b>는 메타 에이전트가 새 워크플로우를 제안하는 meta-agent search이고, <b>AFlow</b>는 워크플로우를 그래프(노드 = LLM 호출, 엣지 = 코드 논리)로 표현해 <b>MCTS</b>로 최적화합니다. 점수와 균등 탐색의 soft mixture로 노드를 고르고, LLM이 수정안을 내고, 실행·평가해 개선되면 트리에 추가하며, top-k 평균이 정체되거나 예산이 소진되면 멈춥니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>큰 문제를 작은 문제로 쪼개 각각 풀고 합치는 "일하는 순서도"를 만드는 건데, 사람이 그리는 대신 AI가 여러 순서도를 그려보고(ADAS), 바둑 AI처럼 나무 모양으로 가지를 뻗어가며 제일 좋은 순서도를 찾아요(AFlow). Autodata는 "너무 쉽지도 어렵지도 않은 문제집"을 자동으로 만드는 출제 위원회예요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c7"><div class="card">
+          <div class="num">CONCEPT 07 · p.31–38</div>
+          <h3>자기개선 하네스: STOP → Lin et al. → Self-Harness → AHE</h3>
+          <div data-level="pro">
+            <p><b>STOP</b>(Self-Taught Optimizer, 2023)은 Improver가 자기 코드를 개선하는 초기 사례인데, <b>경고 결과</b>가 중요합니다. GPT-4에서는 반복마다 성능이 올랐지만 GPT-3.5·Mixtral 같은 약한 모델에서는 오히려 떨어졌습니다. 재귀 구조만으로는 부족하고 베이스 모델이 유능해야 합니다. <b>Lin et al. (2026)</b>은 하네스 편집을 만드는 능력(harness-updating)은 모델 급에 따라 평평하지만, 갱신된 하네스를 활용하는 능력(harness-benefit)은 비단조적이어서 <b>중간 티어 모델이 가장 이득</b>을 본다고 보고했습니다. <b>Self-Harness</b>는 같은 모델이 Weakness mining(실패 패턴 클러스터링) → Harness proposal(bounded edit) → Proposal validation(검증·머지) 루프로 자기 하네스를 고칩니다. 교수님의 우려: 프로그램이 OS를 편집할 수 있으면 추상화 경계가 깨지므로 편집 가능 표면을 설계하고 권한·보안 계층은 루프 <b>밖</b>에 두어야 합니다. <b>AHE</b>(Agentic Harness Engineering)는 병목을 <b>관측가능성</b>으로 보고 3기둥을 둡니다. ① Component(모든 편집 가능 컴포넌트를 파일시스템에 표현), ② Experience(대량 궤적을 증거·실패 패턴으로 요약), ③ Decision(모든 편집에 다음 라운드 예측을 짝지어 검증). Terminal-Bench-2에서 인간 설계 하네스를 넘었고, 진화를 멈춘 하네스가 SWE-bench Verified로 전이됐습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>"공부법을 스스로 고치는 학생"인데, 똑똑한 학생은 고칠수록 성적이 오르고 기초가 약한 학생은 오히려 망쳐요(STOP). Self-Harness는 "내가 자주 틀리는 유형"을 모아 공부법을 조금씩 고치고 효과 있는 것만 채택해요. AHE는 "뭘 바꿨는지, 왜 틀렸는지, 바꾼 게 정말 효과 있었는지"를 전부 기록해 두는 게 핵심이에요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c8"><div class="card">
+          <div class="num">CONCEPT 08 · p.39–46</div>
+          <h3>진화 탐색 계열: GEPA · AlphaEvolve · ShinkaEvolve · DGM · Hyperagents</h3>
+          <div data-level="pro">
+            <p>진화 탐색은 해 집단을 변이시키고 적합도 높은 것만 남깁니다. 탐색 공간이 넓고 그래디언트로 최적화하기 어렵지만 평가는 쉬울 때 적합해서 하네스 탐색에 딱 맞습니다. 프롬프트 영역에는 변이 프롬프트까지 진화시키는 <b>Promptbreeder</b>, 시행착오 궤적에 대한 자연어 반성으로 갱신안을 내는 <b>GEPA</b>가 있습니다. <b>AlphaEvolve</b>는 고정 LLM에게 diff를 만들게 하고 MAP-Elites + Island 진화로 다양성을 유지하며 <code>EVOLVE-BLOCK</code>으로 진화 영역을 명시합니다(파라미터는 갱신 안 함). <b>ThetaEvolve</b>는 여기에 GRPO로 파라미터 갱신을, <b>DemoEvolve</b>는 인간 전문가 시연을 아카이브에 더합니다. <b>ShinkaEvolve</b>는 Adaptive Parent Sampling, Novelty Rejection Sampling, UCB 밴딧으로 LLM을 고르는 식으로 샘플 효율을 높입니다. <b>DGM</b>(Darwin Gödel Machine)은 코딩 에이전트가 자기 코드베이스를 수정해 더 나은 코딩 에이전트가 되고, <b>Hyperagents</b>(DGM-H)는 Task Agent와 Meta Agent를 분리해 Meta Agent가 <b>자기 개선 절차까지</b> 수정합니다(Metacognitive Self-Modification). 구분: Meta-Harness = 에이전트 개선, Hyperagents = 에이전트 + 개선 방법까지.</p>
+          </div>
+          <div data-level="easy">
+            <p>생물 진화처럼 "여러 버전을 만들고 → 시험 보고 → 잘한 것만 남기고 → 또 변형"을 반복해요. AlphaEvolve는 "프로그램"을 진화시키고, DGM은 "프로그램을 만드는 로봇"을 진화시키고, Hyperagents는 "로봇을 고치는 방법"까지 진화시켜요. ShinkaEvolve는 같은 시도를 두 번 안 하게 해서 시험 횟수를 아껴요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c9"><div class="card">
+          <div class="num">CONCEPT 09 · p.47–50</div>
+          <h3>가중치 공동 최적화: SIA · Continual Harness</h3>
+          <div data-level="pro">
+            <p>하네스 진화는 비파라메트릭 시스템만 바꾸므로, 완전한 자기개선을 위해선 가중치 갱신도 함께 허용할 수 있습니다. <b>SIA</b>는 Meta-Agent(초기 하네스 제안) + Task-Specific Agent(과제 실행) + <b>Feedback-Agent</b>(최근 궤적을 보고 하네스를 갱신할지 가중치를 갱신할지 선택)로 구성됩니다. <b>Continual Harness</b>는 환경 리셋 없이 실행 중에 둘 다 개선합니다. PRM 기반 평가로 실패 지점을 찾고 → 교사 모델(Gemini 3.1 Pro)이 저점수 스텝의 개선 행동을 생성하고 → 교정 궤적으로 학생 가중치를 SFT하고 → Refiner가 프롬프트·스킬·서브에이전트·메모리를 갱신합니다. 루프 한 바퀴는 현재 모델로 256스텝 실행 → PRM 평가 → 저점수 윈도우 교정 → Soft SFT입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>지금까지는 "공부법(하네스)"만 고쳤는데, 이제는 "머리(가중치)"도 같이 고쳐요. SIA는 매번 "이번엔 공부법을 바꿀까, 머리를 훈련할까"를 코치가 고르고, Continual Harness는 선생님이 틀린 단계만 고쳐준 답안으로 다시 공부하면서 동시에 공부법도 손봐요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c10"><div class="card">
+          <div class="num">CONCEPT 10 · p.51–53</div>
+          <h3>미래 과제: 자동 연구의 6가지 실패 모드와 RSI 병목 7가지</h3>
+          <div data-level="pro">
+            <p>논문 생산 ≠ 과학적 발견. Trehan &amp; Chopra(2026)의 6가지 실패: ① 학습 데이터 기본값 편향(옛 라이브러리), ② 실행 압박 하 구현 표류, ③ 메모리·컨텍스트 저하, ④ <b>과도한 낙관</b>(Bubeck et al. 2025의 <b>p-hacking</b>: 100번 중 1번 성공만 보고, <b>eureka-ing</b>: 버그로 100%가 나왔는데 돌파구라 착각, <b>numerical duct tape</b>: 수치 불안정을 근거 없는 근사로 덮기), ⑤ 도메인 암묵지 부족, ⑥ 약한 과학적 취향. RSI 병목 7가지: ① 약하고 모호한 평가자, ② 컨텍스트·메모리 생명주기, ③ 부정적 결과의 보존(문헌이 성공 편향이라 LLM이 가설 포기에 약함), ④ 다양성 붕괴, ⑤ <b>보상 해킹</b>(테스트 과적합, judge 꼼수, 아티팩트 착취 → 평가자와 권한 제어는 루프 밖에, held-out 테스트·트레이스 감사·인간 리뷰), ⑥ 장기 성공(유지보수성·하위 호환은 샌드박스가 못 잡음), ⑦ 인간의 역할(제거가 아니라 스택 위로 이동).</p>
+          </div>
+          <div data-level="easy">
+            <p>AI가 스스로 공부하다 생기는 흔한 실수들: 시험 100번 봐서 제일 잘 본 1번만 자랑하기(p-hacking), 채점기 버그로 100점 나온 걸 진짜 실력이라 믿기(eureka-ing), 점수만 올리려고 채점기의 허점을 파고들기(보상 해킹). 그래서 채점자는 학생 손이 닿지 않는 곳에 둬야 하고, 어른이 중요한 순간엔 꼭 확인해야 해요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c11"><div class="card">
+          <div class="num">CONCEPT 11 · p.54–66</div>
+          <h3>HDA (Harness-Delta Attribution): Δ = E − B = O + T + G</h3>
+          <div class="callout fix">요약본의 "약 90%가 오버피팅"은 <b>ALFWorld에서 98%</b>가 정확합니다. 벤치마크마다 다르며 CREATE는 T 지배, SWE-bench Verified는 G가 뚜렷합니다. "ARC-AGI-3", "60%→90%" 수치와 O 측정 예시 "객관식 정답은 3번"은 슬라이드 텍스트에 없습니다(실제 사례는 LiveMath의 "a stronger result can be proven" 선택지가 35문항 중 21문항에서 항상 정답). 출처 확인 전까지 발표에서는 쓰지 않는 것이 안전합니다 (p.58, 61, 63~64).</div>
+          <div data-level="pro">
+            <p>하네스 진화는 고정 모델 주변의 비파라메트릭 시스템을 과제 피드백으로 반복 갱신하는 텍스트 공간 최적화입니다. 총점 상승은 메커니즘을 숨기므로 이득 Δ를 셋으로 분해합니다. <b>O(Overfitting)</b>: 최적화 설정 특유의 패턴에 의존해 분포 이동 시 사라지는 이득(데이터셋 아티팩트 착취, proposer의 지식 증류, executor를 안 부르는 결정적 코드). <b>T(Test-Time Scaling)</b>: 재시도·검증·병렬 샘플링으로 추론 계산을 더 써서 얻는 이득. <b>G(Generalizable Improvement)</b>: 나머지, 재사용 가능한 스킬과 더 나은 과제 분해. 측정 장치는 네 개입니다. <b>B</b> 베이스 하네스, <b>E</b> 진화 하네스, <b>B_cc</b> B를 E와 같은 호출 횟수로 실행한 것, <b>E_neutral</b> E에서 의심되는 오버피팅 특성을 제거한 사본. 따라서 <span class="formula">T ≈ B_cc − B, O ≈ E − E_neutral, G = Δ − O − T</span> 이고 O는 암묵적 오버피팅을 다 못 잡으므로 <b>하한</b>입니다. 결과: ALFWorld는 5개 모델 모두 학습 성공률 100%에 도달했지만 이득의 98%가 O. LiveMath는 데이터셋 지름길. CREATE는 call-matched 베이스라인이 Claude Haiku 4.5 이득의 49%를 회복했고 Qwen3.6-35B-A3B에서는 진화 하네스를 능가. SWE-bench Verified는 가장 충실하지만 주로 약한 executor에서. 16개 설정 중 4개는 held-out에서 베이스라인보다 <b>나빴습니다</b>.</p>
+          </div>
+          <div data-level="easy">
+            <p>새 공부법으로 성적이 60→90점이 됐다고 쳐요. 그 30점이 어디서 왔는지 셋으로 쪼개요. "답지에 특정 패턴이 많다는 걸 외운 것"(O, 다른 시험에선 소용없음), "시험을 다섯 번 보고 제일 잘 본 걸 낸 것"(T, 시간을 더 쓴 것뿐), "진짜 개념을 이해한 것"(G). 꼼수 규칙을 지우고 시험 횟수를 똑같이 맞춰 보면 진짜 실력(G)만 남아요. 연구 결과, 어떤 과목에선 30점 중 29점이 "답지 외우기"였어요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 300" role="img" aria-label="HDA 측정 장치 네 개의 막대와 벤치마크별 분해">
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-hda"></g>
+            </svg>
+            <figcaption>왼쪽: B · B_cc · E_neutral · E 네 막대의 간격이 T · O · G입니다. 오른쪽: 벤치마크별 분해(슬라이드 기반 근사 예시 수치). O는 하한입니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c12"><div class="card">
+          <div class="num">CONCEPT 12 · p.67–92</div>
+          <h3>에이전트 평가(evals) 기초: Anthropic "Demystifying evals for AI agents"</h3>
+          <div class="callout fix">요약본의 "TAU-bench 계열 라벨 오류 약 30%"는 슬라이드 텍스트에 없습니다. 슬라이드에 있는 것은 <b>Opus 4.5의 τ²-bench 항공권 사례</b>(유효한 해법을 벤치마크가 실패 처리), "pass@100 = 0%면 과제가 깨진 신호", "transcript를 읽어라"입니다 (p.69, 86, 88).</div>
+          <div data-level="pro">
+            <p>용어: <b>task</b>(입력 + 성공 기준), <b>trial</b>(한 번의 시도, 출력이 변동하므로 여러 번), <b>grader</b>(채점 로직, task당 여럿), <b>transcript</b>(출력·툴 호출·추론·중간 결과 전체 기록), <b>outcome</b>(trial 종료 시 환경의 최종 상태. "예약했습니다"라는 말이 아니라 DB에 예약이 있는지), <b>evaluation harness</b>(eval을 돌리는 인프라) vs <b>agent harness</b>(모델을 에이전트로 만드는 시스템. Claude Code가 그 예이고 Agent SDK로 같은 원시 요소를 씀), suite vs benchmark. 정적 eval의 한계: Opus 4.5가 τ²-bench 항공권 문제에서 "Basic Economy는 변경 불가, Economy 업그레이드는 가능" 정책의 허점을 찾아 업그레이드 후 날짜를 변경했는데, 벤치마크는 거절을 기대해 실패 처리했습니다. 실제로는 더 나은 유효 해법이었죠. Grader는 code-based / model-based / human 세 종류. <b>Capability eval</b>(낮은 pass rate에서 시작, 오를 언덕) vs <b>Regression eval</b>(~100% 유지, 퇴행 방지). 0→1 로드맵 8단계: 실제 실패에서 20~50개 과제로 시작 → 수동 테스트하던 것부터 → 전문가 둘이 같은 판정을 내릴 명확한 과제(프론티어 모델에서 pass@100 = 0%면 대개 과제가 망가진 신호) → 균형 잡힌 집합 → 안정적 환경 → grader 신중 설계 → <b>transcript를 읽어라</b> → 포화 모니터링 → 열린 기여. 자동 감사 도구 <b>Petri</b>도 공개됐습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>AI 비서가 잘하는지 재는 "시험지 만들기"예요. 시험지는 문제(task), 여러 번 풀기(trial), 채점 기준(grader), 풀이 과정 기록(transcript), 실제 결과(outcome. "예약했어요"라고 말한 게 아니라 진짜 예약됐는지)로 이루어져요. 재밌는 사례: Claude가 항공권 규정의 빈틈을 찾아 더 좋은 답을 냈는데 시험지는 "틀림"이라 했어요. 시험지도 틀릴 수 있으니 풀이 기록을 꼭 읽어봐야 해요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 170" role="img" aria-label="에이전트 평가 용어 지도: task, trial, transcript, outcome, grader, score">
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-eval"></g>
+            </svg>
+            <figcaption>agent harness(모델을 에이전트로 만드는 것)와 evaluation harness(시험을 돌리는 것)는 다른 상자입니다.</figcaption>
+          </figure>
+        </div></section>
+
         <h2 id="play">3. 직접 해보기</h2>
         <section class="playground" id="playground">
-          <h3>🎮 인터랙션 제목</h3>
-          <p class="small muted">무엇을 조작하면 무엇이 바뀌는지 한 줄.</p>
+          <h3>🎮 HDA Lab — 성능 분해 시뮬레이터 Δ = E − B = O + T + G</h3>
+          <p class="small muted">하네스 진화로 점수가 B에서 E로 올랐습니다. 토글을 하나씩 켜면서 그 이득이 오버피팅(O, 답지 외우기) · 테스트타임 스케일링(T, 시험 여러 번 보기) · 진짜 개선(G, 실력)으로 쪼개지는 걸 보세요. 프리셋 숫자는 슬라이드 기반 <b>예시 수치</b>입니다.</p>
+          <div class="preset-row">
+            <button class="btn small" type="button" data-preset="alfworld">ALFWorld (O 지배)</button>
+            <button class="btn small" type="button" data-preset="livemath">LiveMath (지름길)</button>
+            <button class="btn small" type="button" data-preset="create">CREATE (T 지배)</button>
+            <button class="btn small" type="button" data-preset="swe">SWE-bench Verified (G 뚜렷)</button>
+          </div>
           <div class="controls">
-            <label>슬라이더 이름 <output id="o1">8</output>
-              <input type="range" id="r1" min="1" max="64" value="8"></label>
+            <label>베이스 점수 B <output id="oB">55</output>
+              <input type="range" id="rB" min="0" max="100" step="1" value="55"></label>
+            <label>진화 하네스 점수 E <output id="oE">95</output>
+              <input type="range" id="rE" min="0" max="100" step="1" value="95"></label>
+            <label>E의 모델 호출 횟수 (B는 1회) <output id="oC">8</output>
+              <input type="range" id="rC" min="1" max="20" step="1" value="8"></label>
+            <label>하드코딩 규칙 의존도 (Δ 중 O 비율) <output id="oO">70%</output>
+              <input type="range" id="rO" min="0" max="100" step="5" value="70"></label>
+            <label>추론 계산 의존도 (Δ 중 T 비율) <output id="oT">20%</output>
+              <input type="range" id="rT" min="0" max="100" step="5" value="20"></label>
+          </div>
+          <div class="row" style="margin-bottom:10px">
+            <label class="toggle" id="tgNeutral"><input type="checkbox" id="cbNeutral"> 하드코딩 규칙 제거 (E → E_neutral)</label>
+            <label class="toggle" id="tgCC"><input type="checkbox" id="cbCC"> 베이스 호출 횟수 맞추기 (B → B_cc)</label>
+            <label class="toggle" id="tgHO"><input type="checkbox" id="cbHO"> held-out 벤치마크로 전환</label>
+          </div>
+          <div class="hda-legend">
+            <span><i class="sw" style="background:#8a94a6"></i>B 베이스</span>
+            <span><i class="sw" style="background:#1f9d6a"></i>G 진짜 개선 (실력)</span>
+            <span><i class="sw" style="background:#d9a300"></i>T 테스트타임 (시험 여러 번)</span>
+            <span><i class="sw" style="background:#d6455d"></i>O 오버피팅 (답지 외우기)</span>
+            <span><i class="sw" style="background:#2d5bff"></i>Δ 아직 분해 안 됨</span>
           </div>
           <div class="stage">
-            <svg id="stage-svg" viewBox="0 0 700 200" width="100%"></svg>
+            <svg id="hda-svg" class="hda-bar" viewBox="0 0 760 190" width="100%" role="img" aria-label="성능 분해 누적 막대"></svg>
           </div>
-          <div class="readout" id="readout"></div>
+          <div class="readout" id="hda-readout"></div>
+          <div id="hda-warn"></div>
+          <p class="small muted" style="margin-top:10px">측정 정의: T = B_cc − B (같은 호출 예산을 준 베이스라인의 향상), O = E − E_neutral (오버피팅 특성을 제거했을 때 사라지는 몫, 하한), G = Δ − O − T. held-out에서는 O가 사라지고 G가 음수면 베이스보다 못합니다(논문의 16개 설정 중 4개). 호출 횟수를 1로 두면 T는 0이 됩니다.</p>
         </section>
 
-        <!-- ================= [7] 모델 비교 ================= -->
         <h2 id="compare">4. 최신 모델과 비교하기</h2>
         <details class="compare" open>
-          <summary>⚖️ 수업 모델 vs Claude · GPT · 공개 모델</summary>
+          <summary>⚖️ 수업의 하네스 사례 vs Claude Code · Codex · 공개 도구</summary>
           <div class="body">
+            <p class="small">이 주차는 비교 거리가 가장 많습니다. 수업이 말하는 "하네스"의 실제 제품이 <b>Claude Code</b>이기 때문입니다. 다만 Claude 열은 Anthropic 공식 문서·블로그·수업 슬라이드에 인용된 범위만 쓰고, 내부 구현(예: Claude가 ACE 같은 플레이북 진화를 쓰는지)은 비공개로 둡니다. 발표 전 Claude Code 기능 명칭은 공식 문서에서 한 번 더 확인하세요.</p>
             <table>
-              <thead><tr><th>개념</th><th>수업에서 (DeepSeek 등)</th><th>Claude</th><th>GPT / Gemini / 공개 모델</th><th>출처</th></tr></thead>
+              <thead><tr><th>개념</th><th>수업에서</th><th>Claude</th><th>GPT / Gemini / 공개 도구</th><th>출처</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>개념 A</td>
-                  <td>수업에서 다룬 방식</td>
-                  <td>공개 문서 범위의 사실 <span class="badge src">출처</span> / 또는 <span class="badge private">비공개</span></td>
-                  <td>Llama/Qwen 등 공개 모델은 config로 확인 가능</td>
-                  <td><a href="#">논문/문서 링크</a></td>
-                </tr>
+                <tr><td>하네스 = 모델 둘레의 실행 시스템</td><td>코딩 에이전트 하네스(Claude Code · Codex · OpenCode · Cursor류) 루프 수렴(p.18), Terminus-2 · OpenCode(p.37)</td><td>Claude Code가 "유연한 에이전트 하네스"이고 Claude Agent SDK가 같은 원시 요소를 제공 <span class="badge src">출처</span>(p.70, Anthropic 블로그). 구성요소(툴 루프 · 권한 모드 · CLAUDE.md · 서브에이전트 · 스킬 · 훅 · MCP)는 공식 문서 기준 <span class="badge check">확인 필요</span></td><td>OpenAI Codex CLI, OpenCode(오픈소스), Cursor. 구조 공개 수준 상이 <span class="badge check">확인 필요</span></td><td>슬라이드 p.18, 70 · Anthropic "Demystifying evals for AI agents" · Claude Code 문서</td></tr>
+                <tr><td>패턴 2: 파일시스템 영속 메모리</td><td>durable state in files, 로그·diff·trace를 파일로(p.16)</td><td>CLAUDE.md(프로젝트 메모리 파일)와 세션 간 파일 기반 상태 <span class="badge check">확인 필요</span>. Anthropic 블로그 "Effective context engineering for AI agents"(2025) <span class="badge src">출처</span></td><td>Codex의 AGENTS.md류 프로젝트 지시 파일 <span class="badge check">확인 필요</span></td><td>Claude Code 문서(Memory) · Anthropic 블로그</td></tr>
+                <tr><td>패턴 3: 서브에이전트 · 검사 가능한 병렬성</td><td>부모 = 프로세스 매니저(launch / inspect / cancel / merge)(p.17)</td><td>Claude Code 서브에이전트(별도 컨텍스트, 결과만 반환) <span class="badge check">확인 필요</span>. "Building effective agents"(2024)의 orchestrator-workers 패턴 <span class="badge src">출처</span></td><td>OpenAI Agents SDK handoffs 공개 <span class="badge src">출처</span>. Codex 서브에이전트 여부 <span class="badge check">확인 필요</span></td><td>Claude Code 문서(Sub-agents) · Anthropic 블로그</td></tr>
+                <tr><td>컨텍스트 엔지니어링 (ACE 델타 업데이트, 컨텍스트 붕괴)</td><td>ACE / MCE / Meta-Harness(p.21~25)</td><td>Anthropic 블로그: 컨텍스트를 유한 자원으로, compaction · 구조화 노트 · 서브에이전트 권고 <span class="badge src">출처</span>. ACE/MCE 같은 자동 플레이북 진화를 제품이 내장했는지 <span class="badge private">비공개</span></td><td><span class="badge check">확인 필요</span></td><td>Anthropic 블로그 · Claude Code 문서</td></tr>
+                <tr><td>스킬 진화 (MCE의 free-form skills)</td><td>스킬 = 학습 절차 · 에러분석 코드 · 템플릿 · 검증 · 동적 연산자(p.24)</td><td>Claude Agent Skills(SKILL.md 폴더 형식, 공개 사양) <span class="badge src">출처</span>. 사람이 작성하며 자동 진화 기능은 공개 자료 범위 밖 <span class="badge private">비공개</span></td><td>—</td><td>Anthropic Agent Skills 문서</td></tr>
+                <tr><td>자기개선 하네스의 보안 경계 (권한 제어는 루프 밖)</td><td>Self-Harness 우려: 편집 표면 설계, 권한·보안 계층 외부화(p.36, 53)</td><td>Claude Code 권한 모드 · 허용 목록 · 훅 <span class="badge check">확인 필요</span>. Petri(오픈소스 감사 도구, Auditor Agent) <span class="badge src">출처</span>(p.87)</td><td>—</td><td>슬라이드 p.36, 53, 87 · Claude Code 문서(Permissions)</td></tr>
+                <tr><td>하네스 진화 효과 측정 (HDA, O/T/G)</td><td>B = Claude Haiku 4.5, executor 5종, Qwen3.6-35B-A3B(p.58, 63~64). harness-benefit 비단조(Qwen2-32B ~ Opus 4.6)(p.34)</td><td>Claude Haiku 4.5는 executor로 쓰임 <span class="badge src">출처</span>. CREATE에서 call-matched 베이스라인이 Haiku 4.5 이득의 49% 회복. Claude 내부에서 하네스 진화를 쓰는지 <span class="badge private">비공개</span></td><td>Qwen3.6-35B-A3B: CREATE에서 B_cc가 E를 능가 <span class="badge src">출처</span>. MiniMax M2.5 · GLM-5(Self-Harness 실험)</td><td>슬라이드 p.34, 58, 63~64</td></tr>
+                <tr><td>정적 벤치마크의 한계</td><td>Opus 4.5 τ²-bench 항공권 허점(p.69)</td><td>Anthropic이 공개 블로그에서 직접 공개한 사례 <span class="badge src">출처</span>. 비개발자도 Claude Code로 eval task를 PR로 기여(p.88)</td><td>τ-Bench(Sierra), SWE-bench Verified(OpenAI 큐레이션), Terminal-Bench, BrowseComp(OpenAI), WebArena, OSWorld <span class="badge src">출처</span></td><td>Anthropic 블로그 · 각 벤치마크 논문</td></tr>
+                <tr><td>가중치 공동 최적화의 교사 모델</td><td>Continual Harness: Teacher Correction = Gemini 3.1 Pro(p.49)</td><td>Claude가 교사로 쓰인 사례는 이 수업 범위에 없음</td><td>Gemini 3.1 Pro(교사) <span class="badge src">출처</span>. 학생 모델 미기재 <span class="badge check">확인 필요</span></td><td>슬라이드 p.49</td></tr>
+                <tr><td>자동 연구 하네스</td><td>AI Scientist(Lu et al. 2026), ScientistOne, Karpathy autoresearch(p.15, 26)</td><td>Anthropic의 연구 에이전트 내부 하네스 세부 <span class="badge private">비공개</span></td><td>Sakana AI Scientist(공개 코드), karpathy/autoresearch(공개) <span class="badge src">출처</span></td><td>슬라이드 p.15, 26</td></tr>
               </tbody>
             </table>
-            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료면 "확인 필요".</p>
+            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 발표 전까지 "확인 필요" 배지는 공식 문서 링크로 교체하거나 "비공개"로 바꿉니다.</p>
           </div>
         </details>
 
-        <!-- ================= [8] 시험 포인트 ================= -->
         <h2 id="exam">5. 시험 포인트</h2>
         <section class="exam">
           <div class="card">
             <ul>
-              <li>클로즈북 기말에 나올 법한 포인트 1</li>
-              <li>포인트 2</li>
+              <li>하네스의 정의(모델 가중치 고정 + 생각/계획 · 툴 호출 · 컨텍스트 관리 · 산출물 저장 · 평가를 결정하는 외부 시스템)와 배포 시스템 구성요소</li>
+              <li>디자인 패턴 3가지: 워크플로우 자동화(루프), 파일시스템 영속 메모리, 서브에이전트/백엔드 잡(명시적 · 검사 가능한 병렬성)</li>
+              <li>최적화 대상의 진행: prompt → structured context → workflow → harness code → optimizer code. 5가지 축</li>
+              <li>ACE(Generator/Reflector/Curator, Context Collapse, Brevity Bias, Delta Update) vs MCE(메커니즘 · 내용 분리, 스킬 진화) vs Meta-Harness(하네스를 최적화하는 하네스, 파레토 프론티어)</li>
+              <li>ADAS(meta-agent search) vs AFlow(그래프 + MCTS). Autodata agent의 Challenger / Weak / Strong / Judge</li>
+              <li>STOP 교훈(약한 모델은 재귀 개선에 실패), Lin et al.의 harness-updating/benefit, AHE 관측가능성 3기둥, 보상 해킹과 "평가자는 루프 밖"</li>
+              <li><b>HDA: Δ = E − B = O + T + G</b>. B_cc로 T, E_neutral로 O(하한), 나머지 G. ALFWorld 98% O, CREATE T 지배, SWE-bench Verified G</li>
+              <li>eval 용어(task/trial/grader/transcript/outcome/harness), grader 3종, capability vs regression, Opus 4.5 τ²-bench 사례, pass@100 = 0% → 과제 결함 신호, "transcript를 읽어라"</li>
             </ul>
           </div>
           <h3>예상 문제</h3>
-          <details class="quiz"><summary>Q1. 문제</summary><div class="answer">정답과 해설</div></details>
-          <details class="quiz"><summary>Q2. 문제</summary><div class="answer">정답과 해설</div></details>
+          <details class="quiz"><summary>Q1. Δ = E − B를 세 메커니즘으로 분해할 때 B_cc와 E_neutral이 각각 무엇을 통제하는지 설명하고, 오버피팅 추정치가 왜 "하한"인지 쓰라.</summary><div class="answer">B_cc는 베이스 하네스를 진화 하네스와 같은 모델 호출 횟수(추론 예산)로 실행한 것으로, B_cc − B가 테스트타임 스케일링(T)을 측정한다. E_neutral은 진화 하네스에서 하드코딩 규칙 등 의심되는 오버피팅 특성을 제거·중화한 사본으로, E − E_neutral이 오버피팅(O)을 측정한다. G = Δ − O − T. 오버피팅 중 일부는 암묵적이거나 다른 메커니즘과 얽혀 있어 탐지·제거되지 않을 수 있으므로 측정된 O는 필연적으로 하한이다.</div></details>
+          <details class="quiz"><summary>Q2. ACE가 Context Collapse와 Brevity Bias를 어떻게 해결하는지 세 구성요소와 함께 설명하고, MCE가 ACE와 달라지는 핵심을 한 문장으로 쓰라.</summary><div class="answer">Generator가 플레이북 bullet을 참조해 궤적을 생성하고, Reflector가 성공/실패 궤적에서 통찰을 증류하며, Curator가 증분적·항목화된 델타 업데이트로 플레이북을 갱신한다. 전체 재작성/요약을 하지 않으므로 반복 재작성에 의한 정보 유실(Context Collapse)과 과도한 간결화(Brevity Bias)를 피한다. MCE는 "어떻게 관리할지(메커니즘 = 스킬)"와 "무엇을 담을지(내용)"를 분리해, 휴리스틱을 강제하는 대신 Meta-Agent가 스킬을 진화시키고 Base-Agent가 그 스킬로 컨텍스트를 구성하도록 공진화시킨다.</div></details>
+          <details class="quiz"><summary>Q3. (객관식) AFlow의 워크플로우 최적화 방식으로 옳은 것은? ① 메타 에이전트가 새 설계를 제안하는 meta-agent search ② 워크플로우를 그래프로 표현하고 MCTS로 탐색 ③ 코딩 에이전트가 자기 코드베이스를 수정해 아카이브에 저장 ④ 후보 프로그램 풀에 MAP-Elites와 island 진화 적용</summary><div class="answer">②. ①은 ADAS, ③은 DGM, ④는 AlphaEvolve.</div></details>
+          <details class="quiz"><summary>Q4. STOP의 "경고 결과"와 Lin et al.의 harness-benefit 비단조성을 근거로 "하네스 개선과 모델 지능의 관계"에 대한 결론을 설명하라.</summary><div class="answer">STOP은 GPT-4에서는 반복마다 성능이 개선됐지만 GPT-3.5·Mixtral 같은 약한 모델에서는 저하됐다. 재귀 구조만으로는 부족하고 베이스 모델이 메커니즘을 개선할 만큼 유능해야 한다. Lin et al.은 하네스 편집 생산 능력(updating)은 모델 급에 따라 평평하지만, 갱신된 하네스를 활용하는 능력(benefit)은 비단조적으로 중간 티어가 가장 이득을 본다고 보고했다. 결론: 하네스 엔지니어링은 더 나은 "배포"를 가능하게 하지만 핵심은 여전히 지능이며, 장기적으로 많은 하네스 개선이 모델 행동으로 내재화되더라도 외부 컨텍스트·툴과의 인터페이스(목표·제약·평가 명세)는 남는다.</div></details>
+          <details class="quiz"><summary>Q5. (a) transcript와 outcome의 차이, (b) capability eval과 regression eval의 차이, (c) 프론티어 모델에서 pass@100 = 0%의 의미를 설명하고, Opus 4.5 τ²-bench 사례가 왜 "transcript를 읽어라"와 연결되는지 쓰라.</summary><div class="answer">(a) transcript는 trial 전체 기록(출력·툴 호출·추론·중간 결과), outcome은 trial 종료 시 환경의 최종 상태(예: "예약했다"는 말이 아니라 DB에 예약 레코드 존재 여부). (b) capability eval은 낮은 pass rate로 시작해 오를 언덕을 주고, regression eval은 ~100%를 유지해 퇴행을 잡는다. (c) 많은 trial에 걸쳐 0% 통과는 대개 에이전트가 무능한 게 아니라 과제 명세나 grader가 망가졌다는 신호다. Opus 4.5는 정책상 유효한 해법(Economy 업그레이드 후 날짜 변경)을 찾았지만 벤치마크는 거절을 기대해 실패 처리했다. grader가 유효한 해법을 거부했는지 진짜 실수였는지는 transcript를 읽어야만 알 수 있고, 실패는 "공정해 보여야" 한다.</div></details>
         </section>
 
-        <!-- ================= [9] 출처 ================= -->
         <h2 id="refs">6. 출처</h2>
         <ul class="small">
-          <li>논문/문서 1</li>
+          <li>Turing, "Intelligent Machinery" (1948), in B. Jack Copeland (2004) · Russell &amp; Norvig, AI: A Modern Approach (2020) · Language Agent Tutorial (language-agent-tutorial.github.io)</li>
+          <li>"Harness Engineering for Self-Improvement" (슬라이드 p.10~53의 출처, 저자 미기재 · 확인 필요). 인용: Good (1965), Yudkowsky (2008), Karpathy autoresearch, ACE (2025), MCE — Ye et al. 2026, Meta-Harness — Lee et al. 2026, AI Scientist — Lu et al. 2026, ScientistOne — Meng et al. 2026, Autodata agent — Kulikov et al. 2026, ADAS — Hu et al. 2025, AFlow — Zhang et al. 2025, STOP — Zelikman et al. 2023, Lin et al. 2026, Self-Harness — Zhang et al. 2026, AHE — Lin et al. 2026, Promptbreeder — Fernando et al. 2023, GEPA — Agrawal et al. 2025, AlphaEvolve — Novikov et al. 2025, ThetaEvolve — Wang et al. 2025, DemoEvolve — Che et al. 2026, ShinkaEvolve — Lange et al. 2025, Darwin Gödel Machine — Zhang et al. 2025, Hyperagents — Zhang et al. 2026, SIA — Hebbar et al. 2026, Continual Harness (arXiv 2026), Trehan &amp; Chopra (2026), Bubeck et al. (2025)</li>
+          <li>"What Evolves When We Talk About Harness Evolution?" (Harness-Delta Attribution, HDA) — 슬라이드 p.54~66</li>
+          <li>Anthropic, "Demystifying evals for AI agents" (블로그) — 슬라이드 p.67~92. 언급: τ-Bench(2024) · τ²-Bench(2025) · τ³-Bench(2026) · SWE-bench Verified · Terminal-Bench · BrowseComp · WebArena · OSWorld · Petri · Harbor · LangSmith · Arize Phoenix</li>
+          <li>비교표: Anthropic 블로그 "Building effective agents"(2024), "Effective context engineering for AI agents"(2025) · Claude Code 문서 · Anthropic Agent Skills 문서 · OpenAI Agents SDK 문서</li>
         </ul>
 
         <div id="week-nav"></div>
@@ -134,18 +357,208 @@
   <script src="../assets/js/weeks.js"></script>
   <script src="../assets/js/site.js"></script>
   <script>
-    // [10] 이 주차의 인터랙션 스크립트. 다른 주차와 충돌하지 않도록 IIFE 안에 둡니다.
-    (function () {
-      var r1 = document.getElementById("r1"), o1 = document.getElementById("o1");
-      var svg = document.getElementById("stage-svg"), readout = document.getElementById("readout");
-      function render() {
-        var v = +r1.value; o1.value = v;
-        svg.innerHTML = '<rect x="10" y="80" width="' + (v * 10) + '" height="40" rx="6" fill="var(--accent)"/>';
-        readout.textContent = "값: " + v;
-      }
-      r1.addEventListener("input", render);
-      render();
+  (function () {
+    var NS = "http://www.w3.org/2000/svg";
+    function el(tag, attrs, text) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    var C = { B: "#8a94a6", G: "#1f9d6a", T: "#d9a300", O: "#d6455d", D: "#2d5bff" };
+
+    // ---------- 정적 도형: 최적화 깊이 사다리 ----------
+    (function drawLadder() {
+      var g = document.getElementById("fig-ladder");
+      var steps = [
+        { name: "ACE", what: "플레이북 내용", sub: "Generator → Reflector → Curator", y: 220 },
+        { name: "MCE", what: "컨텍스트 구성 스킬", sub: "Meta-Agent가 스킬 진화, Base-Agent가 실행", y: 160 },
+        { name: "Meta-Harness", what: "하네스 코드", sub: "코딩 에이전트 proposer · 파레토 프론티어", y: 100 },
+        { name: "Hyperagents", what: "개선 절차 자체", sub: "Meta Agent가 자기 개선 방법까지 수정", y: 40 }
+      ];
+      steps.forEach(function (s, i) {
+        var x = 30 + i * 170;
+        g.appendChild(el("rect", { x: x, y: s.y, width: 330, height: 56, rx: 10, fill: "var(--accent)", "fill-opacity": .08 + i * .06, stroke: "var(--accent)", "stroke-width": 1.5 }));
+        g.appendChild(el("text", { x: x + 12, y: s.y + 22, "font-weight": 700, "font-size": 13, fill: "currentColor" }, s.name + " · " + s.what));
+        g.appendChild(el("text", { x: x + 12, y: s.y + 42, "font-size": 11, fill: "currentColor", opacity: .8 }, s.sub));
+        if (i < steps.length - 1) g.appendChild(el("path", { d: "M" + (x + 345) + " " + (s.y + 10) + " L" + (x + 345) + " " + (s.y - 4), stroke: "var(--accent)", "stroke-width": 2, fill: "none" }));
+      });
+      g.appendChild(el("text", { x: 30, y: 292, "font-size": 11, fill: "currentColor", opacity: .75 }, "무엇을 최적화하나: 내용 → 방법 → 방법을 만드는 코드 → 코드를 고치는 절차"));
+      // STOP 경고 배지
+      g.appendChild(el("rect", { x: 700, y: 200, width: 185, height: 76, rx: 10, fill: "var(--danger)", "fill-opacity": .12, stroke: "var(--danger)", "stroke-width": 1.5, "stroke-dasharray": "5 3" }));
+      g.appendChild(el("text", { x: 792, y: 226, "text-anchor": "middle", "font-weight": 700, fill: "var(--danger)" }, "⚠ STOP의 경고"));
+      g.appendChild(el("text", { x: 792, y: 246, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, "베이스 모델이 약하면"));
+      g.appendChild(el("text", { x: 792, y: 262, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, "계단을 올라도 떨어진다"));
     })();
+
+    // ---------- 정적 도형: HDA 측정 장치 + 벤치마크별 분해 ----------
+    (function drawHda() {
+      var g = document.getElementById("fig-hda");
+      var base = 250, scale = 2.0; // y = base - v*scale
+      var bars = [
+        { name: "B", v: 40, c: C.B, note: "베이스" },
+        { name: "B_cc", v: 52, c: C.T, note: "호출 횟수 맞춤" },
+        { name: "E_neutral", v: 60, c: C.G, note: "규칙 제거" },
+        { name: "E", v: 85, c: C.O, note: "진화 하네스" }
+      ];
+      g.appendChild(el("text", { x: 20, y: 24, "font-weight": 700, "font-size": 13, fill: "currentColor" }, "측정 장치 4개 (예시 수치)"));
+      bars.forEach(function (b, i) {
+        var x = 40 + i * 90;
+        g.appendChild(el("rect", { x: x, y: base - b.v * scale, width: 50, height: b.v * scale, rx: 6, fill: b.c, opacity: .85 }));
+        g.appendChild(el("text", { x: x + 25, y: base - b.v * scale - 6, "text-anchor": "middle", "font-family": "IBM Plex Mono, monospace", "font-size": 11, fill: "currentColor" }, b.v));
+        g.appendChild(el("text", { x: x + 25, y: base + 16, "text-anchor": "middle", "font-weight": 700, "font-size": 11, fill: "currentColor" }, b.name));
+        g.appendChild(el("text", { x: x + 25, y: base + 30, "text-anchor": "middle", "font-size": 10, fill: "currentColor", opacity: .7 }, b.note));
+      });
+      // 괄호 표기
+      function brace(x, y1, y2, label, color) {
+        g.appendChild(el("line", { x1: x, y1: y1, x2: x, y2: y2, stroke: color, "stroke-width": 2 }));
+        g.appendChild(el("line", { x1: x - 4, y1: y1, x2: x + 4, y2: y1, stroke: color, "stroke-width": 2 }));
+        g.appendChild(el("line", { x1: x - 4, y1: y2, x2: x + 4, y2: y2, stroke: color, "stroke-width": 2 }));
+        g.appendChild(el("text", { x: x + 8, y: (y1 + y2) / 2 + 4, "font-size": 11, "font-family": "IBM Plex Mono, monospace", fill: color }, label));
+      }
+      brace(410, base - 52 * scale, base - 40 * scale, "T = B_cc − B", C.T);
+      brace(410, base - 85 * scale, base - 60 * scale, "O = E − E_neutral", C.O);
+      brace(410, base - 60 * scale, base - 52 * scale, "G = 나머지", C.G);
+      // 벤치마크별 미니 누적 막대
+      g.appendChild(el("text", { x: 560, y: 24, "font-weight": 700, "font-size": 13, fill: "currentColor" }, "벤치마크별 Δ 분해 (근사)"));
+      var bm = [
+        { name: "ALFWorld", o: .98, t: .01, gg: .01 },
+        { name: "LiveMath", o: .8, t: .1, gg: .1 },
+        { name: "CREATE", o: .15, t: .55, gg: .3 },
+        { name: "SWE-bench V", o: .15, t: .2, gg: .65 }
+      ];
+      bm.forEach(function (b, i) {
+        var y = 48 + i * 50, x0 = 560, w = 300;
+        g.appendChild(el("text", { x: x0, y: y + 13, "font-size": 11, fill: "currentColor" }, b.name));
+        var x = x0 + 95;
+        [["gg", C.G], ["t", C.T], ["o", C.O]].forEach(function (p) {
+          var ww = (w - 95) * b[p[0]];
+          g.appendChild(el("rect", { x: x, y: y, width: ww, height: 20, fill: p[1], opacity: .9 }));
+          if (ww > 28) g.appendChild(el("text", { x: x + ww / 2, y: y + 14, "text-anchor": "middle", "font-size": 10, fill: "#fff", "font-weight": 700 }, Math.round(b[p[0]] * 100) + "%"));
+          x += ww;
+        });
+      });
+      g.appendChild(el("text", { x: 560, y: 262, "font-size": 10, fill: "currentColor", opacity: .7 }, "초록 G · 노랑 T · 빨강 O. ALFWorld 98%, CREATE 49% 회복만 슬라이드 수치, 나머지는 서술 기반 근사."));
+    })();
+
+    // ---------- 정적 도형: 평가 용어 지도 ----------
+    (function drawEval() {
+      var g = document.getElementById("fig-eval");
+      var nodes = [["task", "입력 + 성공 기준"], ["trial × N", "여러 번 시도"], ["transcript", "툴 호출 · 추론 기록"], ["outcome", "환경의 최종 상태"], ["grader", "code · model · human"], ["score", "weighted · binary · hybrid"]];
+      nodes.forEach(function (n, i) {
+        var x = 15 + i * 148;
+        g.appendChild(el("rect", { x: x, y: 50, width: 130, height: 54, rx: 9, fill: i === 3 ? "var(--accent)" : "none", "fill-opacity": i === 3 ? .15 : 1, stroke: i === 3 ? "var(--accent)" : "currentColor", "stroke-width": 1.5 }));
+        g.appendChild(el("text", { x: x + 65, y: 72, "text-anchor": "middle", "font-weight": 700, fill: "currentColor" }, n[0]));
+        g.appendChild(el("text", { x: x + 65, y: 92, "text-anchor": "middle", "font-size": 10, fill: "currentColor", opacity: .8 }, n[1]));
+        if (i < nodes.length - 1) g.appendChild(el("line", { x1: x + 130, y1: 77, x2: x + 146, y2: 77, stroke: "currentColor", "stroke-width": 1.5 }));
+      });
+      g.appendChild(el("rect", { x: 15, y: 14, width: 425, height: 24, rx: 6, fill: "none", stroke: "currentColor", "stroke-dasharray": "4 3", opacity: .6 }));
+      g.appendChild(el("text", { x: 227, y: 30, "text-anchor": "middle", "font-size": 11, fill: "currentColor", opacity: .8 }, "agent harness: 모델을 에이전트로 만드는 시스템 (Claude Code 등)"));
+      g.appendChild(el("rect", { x: 460, y: 14, width: 425, height: 24, rx: 6, fill: "none", stroke: "currentColor", "stroke-dasharray": "4 3", opacity: .6 }));
+      g.appendChild(el("text", { x: 672, y: 30, "text-anchor": "middle", "font-size": 11, fill: "currentColor", opacity: .8 }, "evaluation harness: eval을 end-to-end로 돌리는 인프라"));
+      g.appendChild(el("text", { x: 15, y: 140, "font-size": 11, fill: "currentColor", opacity: .85 }, "💬 Opus 4.5 · τ²-bench: 정책 허점을 찾아 더 나은 유효 해법 → 벤치마크는 '실패' 처리. 그래서 transcript를 읽어야 한다."));
+      g.appendChild(el("text", { x: 15, y: 160, "font-size": 11, fill: "currentColor", opacity: .7 }, "capability eval = 낮은 pass rate에서 오를 언덕 · regression eval = ~100% 유지해 퇴행 방지 · pass@100 = 0% → 과제 결함 신호"));
+    })();
+
+    // ---------- 인터랙션: HDA Lab ----------
+    var rB = document.getElementById("rB"), rE = document.getElementById("rE"), rC = document.getElementById("rC"), rO = document.getElementById("rO"), rT = document.getElementById("rT");
+    var oB = document.getElementById("oB"), oE = document.getElementById("oE"), oC = document.getElementById("oC"), oO = document.getElementById("oO"), oT = document.getElementById("oT");
+    var cbN = document.getElementById("cbNeutral"), cbC = document.getElementById("cbCC"), cbH = document.getElementById("cbHO");
+    var svg = document.getElementById("hda-svg"), readout = document.getElementById("hda-readout"), warn = document.getElementById("hda-warn");
+    var presets = {
+      alfworld: { B: 55, E: 100, C: 10, O: 98, T: 1 },
+      livemath: { B: 40, E: 78, C: 6, O: 75, T: 10 },
+      create: { B: 50, E: 70, C: 12, O: 10, T: 55 },
+      swe: { B: 25, E: 45, C: 8, O: 10, T: 25 }
+    };
+
+    function render() {
+      var B = +rB.value, E = +rE.value, calls = +rC.value, oF = +rO.value / 100, tF = +rT.value / 100;
+      if (oF + tF > 1) { tF = 1 - oF; rT.value = Math.round(tF * 100); }
+      oB.value = B; oE.value = E; oC.value = calls; oO.value = Math.round(oF * 100) + "%"; oT.value = Math.round(tF * 100) + "%";
+      var D = E - B;
+      var callFactor = calls <= 1 ? 0 : Math.log(calls) / Math.log(20);
+      var T = Math.max(0, D) * tF * callFactor;
+      var O = Math.max(0, D) * oF;
+      var G = D - O - T;
+      var neutral = cbN.checked, cc = cbC.checked, ho = cbH.checked;
+      var Eshown = ho ? E - O : E; // held-out: O 사라짐
+
+      // ----- 누적 막대 -----
+      svg.innerHTML = "";
+      var x0 = 60, W = 640, y = 50, h = 40, s = W / 100;
+      svg.appendChild(el("rect", { x: x0, y: y, width: W, height: h, rx: 8, fill: "currentColor", opacity: .07 }));
+      svg.appendChild(el("rect", { x: x0, y: y, width: Math.max(0, B) * s, height: h, rx: 8, fill: C.B, opacity: .9 }));
+      var segs = [];
+      if (D > 0) {
+        if (!neutral && !cc) segs.push({ v: ho ? D - O : D, c: C.D, label: ho ? "Δ(held-out)" : "Δ 미분해" });
+        else {
+          if (cc) segs.push({ v: T, c: C.T, label: "T" });
+          var rest = D - (cc ? T : 0) - (neutral ? O : 0);
+          var restLabel = (cc && neutral) ? "G" : (cc ? "O+G" : "T+G");
+          var restColor = (cc && neutral) ? C.G : C.D;
+          if (!ho || (cc && neutral)) segs.push({ v: rest, c: restColor, label: restLabel });
+          else segs.push({ v: rest - (neutral ? 0 : O), c: restColor, label: restLabel.replace("O+", "") });
+          if (neutral && !ho) segs.push({ v: O, c: C.O, label: "O" });
+        }
+      }
+      var cx = x0 + B * s;
+      segs.forEach(function (sg) {
+        if (sg.v > 0) {
+          svg.appendChild(el("rect", { x: cx, y: y, width: sg.v * s, height: h, fill: sg.c, opacity: .92 }));
+          if (sg.v * s > 22) svg.appendChild(el("text", { x: cx + sg.v * s / 2, y: y + 25, "text-anchor": "middle", "font-size": 12, "font-weight": 700, fill: "#fff", "font-family": "IBM Plex Mono, monospace" }, sg.label));
+          cx += sg.v * s;
+        } else if (sg.v < 0) {
+          // 음수 G: 베이스 아래로
+          svg.appendChild(el("rect", { x: cx + sg.v * s, y: y, width: -sg.v * s, height: h, fill: "none", stroke: C.O, "stroke-width": 2, "stroke-dasharray": "4 3" }));
+          svg.appendChild(el("text", { x: cx + sg.v * s / 2, y: y + 25, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: C.O, "font-family": "IBM Plex Mono, monospace" }, "G<0"));
+          cx += sg.v * s;
+        }
+      });
+      // 눈금
+      [0, 25, 50, 75, 100].forEach(function (t) {
+        svg.appendChild(el("line", { x1: x0 + t * s, y1: y + h + 4, x2: x0 + t * s, y2: y + h + 10, stroke: "currentColor", opacity: .5 }));
+        svg.appendChild(el("text", { x: x0 + t * s, y: y + h + 24, "text-anchor": "middle", "font-size": 11, fill: "currentColor", opacity: .7, "font-family": "IBM Plex Mono, monospace" }, t));
+      });
+      // 마커: B, B_cc, E_neutral, E
+      function marker(v, label, color, yy) {
+        var px = x0 + v * s;
+        svg.appendChild(el("line", { x1: px, y1: y - 10, x2: px, y2: y + h + 2, stroke: color, "stroke-width": 2 }));
+        svg.appendChild(el("text", { x: px, y: yy, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: color, "font-family": "IBM Plex Mono, monospace" }, label + " " + Math.round(v)));
+      }
+      marker(B, "B", C.B, 24);
+      if (cc) marker(B + T, "B_cc", C.T, 40);
+      if (neutral && !ho) marker(E - O, "E_neutral", C.G, 24);
+      marker(Eshown, ho ? "E(held-out)" : "E", ho ? C.D : C.O, cc && Math.abs(Eshown - (B + T)) < 12 ? 40 : 24);
+      svg.appendChild(el("text", { x: x0, y: 140, "font-size": 12, fill: "currentColor" }, ho ? "held-out 벤치마크: 학습 분할에서 외운 규칙(O)이 통하지 않아 막대가 내려갑니다." : "학습 벤치마크에서 측정한 점수입니다. 토글을 켜서 분해해 보세요."));
+      svg.appendChild(el("text", { x: x0, y: 162, "font-size": 11, fill: "currentColor", opacity: .7 }, "호출 횟수 " + calls + "회 → T 가중치 " + Math.round(callFactor * 100) + "% (1회면 0, 20회면 100%)"));
+
+      // ----- readout -----
+      var fmt = function (v) { return (v >= 0 ? "+" : "") + v.toFixed(1); };
+      var pct = function (v) { return D > 0 ? Math.round(v / D * 100) + "%" : "—"; };
+      readout.innerHTML =
+        "Δ = E − B = " + E + " − " + B + " = <b>" + fmt(D) + "</b><br>" +
+        "O = E − E_neutral = " + (neutral ? "<b>" + fmt(O) + "</b> (" + pct(O) + ")" : "<span class='muted'>규칙 제거 토글을 켜면 측정</span>") + "<br>" +
+        "T = B_cc − B = " + (cc ? "<b>" + fmt(T) + "</b> (" + pct(T) + ")" : "<span class='muted'>호출 횟수 맞추기 토글을 켜면 측정</span>") + "<br>" +
+        "G = Δ − O − T = " + ((neutral && cc) ? "<b>" + fmt(G) + "</b> → 진짜 개선은 Δ의 <b>" + pct(G) + "</b>" : "<span class='muted'>두 토글을 모두 켜야 남는 몫이 보입니다</span>");
+      warn.innerHTML = "";
+      if (neutral && cc && G <= 0) warn.innerHTML = '<div class="warnbox">⚠ 진화 하네스의 일반화 개선이 0 이하입니다. held-out에서는 베이스보다 못할 수 있습니다 (논문의 16개 설정 중 4개가 이 경우).</div>';
+      else if (ho && Eshown < B) warn.innerHTML = '<div class="warnbox">⚠ held-out 점수가 베이스보다 낮습니다. 학습 분할의 이득이 오버피팅이었습니다.</div>';
+      else if (neutral && !cc && O / Math.max(1, D) > .8) warn.innerHTML = '<div class="warnbox">⚠ 이득의 ' + pct(O) + '가 오버피팅입니다. ALFWorld(98%)와 같은 상황입니다.</div>';
+      [["tgNeutral", cbN], ["tgCC", cbC], ["tgHO", cbH]].forEach(function (p) { document.getElementById(p[0]).classList.toggle("on", p[1].checked); });
+    }
+
+    [rB, rE, rC, rO, rT].forEach(function (r) { r.addEventListener("input", render); });
+    [cbN, cbC, cbH].forEach(function (c) { c.addEventListener("change", render); });
+    document.querySelectorAll("[data-preset]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var p = presets[b.getAttribute("data-preset")];
+        rB.value = p.B; rE.value = p.E; rC.value = p.C; rO.value = p.O; rT.value = p.T;
+        render();
+      });
+    });
+    render();
+  })();
   </script>
 </body>
 </html>

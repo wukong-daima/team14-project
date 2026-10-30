@@ -4,9 +4,23 @@
 주차별 강의 내용을 도형과 인터랙션으로 공부하고, 수업에서 다룬 모델(DeepSeek 등)과
 Claude · GPT · 공개 모델의 동작을 **공개 자료 범위에서** 비교하는 정적 사이트입니다.
 
-- 사이트: https://wukong-daima.github.io/team14-project/ (GitHub Pages, `main` 브랜치 루트)
+- **사이트: https://wukong-daima.github.io/team14-project/** (GitHub Pages, `main` 브랜치 루트에서 자동 배포)
 - 발표 모드: `slides/index.html` (reveal.js)
 - 계획: [PLAN.md](PLAN.md) · 작업 규칙: [CONTRIBUTING.md](CONTRIBUTING.md) · 주차별 콘텐츠 브리프: [content/briefs/](content/briefs/)
+
+## 주차 작업 시작하기
+
+```bash
+git clone https://github.com/wukong-daima/team14-project.git && cd team14-project
+scripts/new-week.sh 03          # 내 주차 번호. feat/week03 브랜치 + weeks/week03.html 준비
+scripts/pr-week.sh 03           # 다 하면 커밋·푸시·PR 한 번에
+```
+
+| 담당 | 주차 | 명령 |
+|---|---|---|
+| 손 | 1, 2 (완성) · 공통 | `scripts/new-week.sh 01` / `02` |
+| 조원 A | 3, 4 | `scripts/new-week.sh 03` / `04` |
+| 조원 B | 6, 8 | `scripts/new-week.sh 06` / `08` |
 
 ## 로컬에서 보기
 
@@ -20,6 +34,7 @@ python3 -m http.server 8080
 ## 구조
 
 ```
+scripts/new-week.sh     주차 브랜치 만들기/이어하기 · scripts/pr-week.sh  커밋+푸시+PR
 index.html              랜딩: 컨셉 · 주차 카드 · 팀/일정
 weeks/weekNN.html       주차 페이지 (한 주차 = 한 파일, 인터랙션 스크립트 포함)
 weeks/_template.html    새 주차를 만들 때 복사하는 템플릿

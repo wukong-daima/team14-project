@@ -10,10 +10,10 @@
 |---|---|---|---|
 | week01.md | 1주차 열린 문제와 에이전트 | week1_overview.pdf (32p) | 페이지 완성 (`weeks/week01.html`) |
 | week02.md | 2주차 파운데이션 모델 아키텍처 | week2_fm.pdf (128p) | 페이지 완성 (`weeks/week02.html`). p.68~90 선호 튜닝은 4주차와 겹침 |
-| week03.md | 3주차 KV 캐시 압축 (DeepSeek-V4.1-Flash) | week3_fm.pdf (27p, Week 3-1만) | 3-2 자료(Mamba·GDN·Hybrid)는 미확보 |
-| week04.md | 4주차 학습 방법론 | **week2_fm.pdf p.56~57, 68~90** + week4_agent.pdf p.84~93 | 요약본이 말하는 4주차 수업의 원본 슬라이드는 2주차 PDF 후반부. 2주차 페이지의 개념 9·10을 심화하는 방향으로 작성 |
-| week06.md | 6주차 에이전트 | **week4_agent.pdf (93p, "Week 4-1 AI Agent")** | 파일명은 week4지만 내용은 6주차 요약과 1:1 대응 |
-| week08.md | 8주차 하네스 엔지니어링 | week5_self_evolving_agent.pdf (92p, Week 5-1 Introduction) | Reflexion·Voyager·R-Zero는 다음 수업 범위 |
+| week03.md | 3주차 KV 캐시 압축 (DeepSeek-V4.1-Flash) | week3_fm.pdf (27p, Week 3-1만) | 페이지 초안 완성. 3-2 자료(Mamba·GDN·Hybrid)는 미확보 |
+| week04.md | 4주차 학습 방법론 | **week2_fm.pdf p.56~57, 68~90** + week4_agent.pdf p.84~93 | 페이지 초안 완성. 원본 슬라이드는 2주차 PDF 후반부, 2주차 개념 9·10의 심화 |
+| week06.md | 6주차 에이전트 | **week4_agent.pdf (93p, "Week 4-1 AI Agent")** | 페이지 초안 완성. 파일명은 week4지만 내용은 6주차 요약과 1:1 대응 |
+| week08.md | 8주차 하네스 엔지니어링 | week5_self_evolving_agent.pdf (92p, Week 5-1 Introduction) | 페이지 초안 완성. Reflexion·Voyager·R-Zero는 다음 수업 범위 |
 
 ## 작업 흐름
 

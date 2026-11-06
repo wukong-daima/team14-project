@@ -56,7 +56,8 @@
       if (!s || !a) return;
       var text = norm(s.textContent).replace(/^Q\d+\.\s*/, "");
       if (!text || text === "문제") return;                       // 템플릿 자리표시
-      var q = { id: week.id + "-" + hash(text), week: week.id, src: "page", type: "self",
+      // data-qid가 있으면 문제 은행의 같은 문제와 id를 맞춘다(은행 쪽이 우선, loadAll 참고)
+      var q = { id: d.getAttribute("data-qid") || (week.id + "-" + hash(text)), week: week.id, src: "page", type: "self",
                 q: text, answerHtml: a.innerHTML };
       var mc = parseChoices(text, a.textContent);
       if (mc) { q.type = "mc"; q.q = mc.stem; q.options = mc.options; q.answer = mc.answer; }
@@ -116,7 +117,8 @@
       .catch(function () { return []; }));
     return Promise.all(jobs).then(function (lists) {
       var seen = {}, all = [];
-      [].concat.apply([], lists).forEach(function (q) { if (!seen[q.id]) { seen[q.id] = 1; all.push(q); } });
+      // 문제 은행(마지막 job)을 먼저 넣어, 같은 id면 자동 채점되는 은행 문제가 남게 한다
+      [].concat.apply(lists.pop(), lists).forEach(function (q) { if (!seen[q.id]) { seen[q.id] = 1; all.push(q); } });
       all.sort(function (a, b) { return weekInfo(a.week).num - weekInfo(b.week).num; });
       return all;
     });

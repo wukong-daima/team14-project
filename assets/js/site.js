@@ -16,9 +16,9 @@
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
 
-  // ----- 경로 유틸: index.html과 weeks/*.html 둘 다에서 동작하도록 상대 경로 계산
-  var inWeeks = /\/weeks\//.test(location.pathname);
-  var root = inWeeks ? "../" : "./";
+  // ----- 경로 유틸: index.html과 weeks/*.html, quiz/ 에서 모두 동작하도록 상대 경로 계산
+  var inSub = /\/(weeks|quiz)\//.test(location.pathname);
+  var root = inSub ? "../" : "./";
 
   // ----- 전공/중학생 모드
   function applyLevel(level) {
@@ -55,6 +55,7 @@
       '<a class="brand" href="' + root + 'index.html"><span class="dot"></span>Team14 · 최신딥러닝 랩</a>' +
       '<nav class="nav-links" aria-label="주요 메뉴">' +
         '<a href="' + root + 'index.html#weeks">주차별 공부</a>' +
+        '<a href="' + root + 'quiz/index.html">퀴즈</a>' +
         '<a href="' + root + 'index.html#concept">프로젝트 소개</a>' +
         '<a href="' + root + 'slides/index.html">발표 모드</a>' +
       '</nav>' +
@@ -113,6 +114,18 @@
     });
   }
 
+  // ----- 예상 문제 아래에 "이 주차 퀴즈로 풀기" 링크
+  function linkQuiz() {
+    var id = document.body.getAttribute("data-week");
+    var exam = document.querySelector("section.exam");
+    if (!id || !exam || !exam.querySelector("details.quiz")) return;
+    var p = document.createElement("p");
+    p.className = "small";
+    p.innerHTML = '<a class="btn small" href="' + root + 'quiz/index.html?week=' + id + '">이 주차 문제를 퀴즈로 풀기 →</a>' +
+      ' <span class="muted">자동 채점 · 오답 노트</span>';
+    exam.appendChild(p);
+  }
+
   // ----- 초기화
   // 파비콘 (별도 파일 없이 SVG 데이터 URI)
   (function () {
@@ -128,6 +141,7 @@
     renderWeekNav();
     renderToc();
     decorateCompare();
+    linkQuiz();
     // URL에 ?easy 가 있으면 쉬운 모드로 (발표 중 링크로 바로 전환하기 위함)
     if (/[?&]easy\b/.test(location.search)) { store.set("t14.level", "easy"); applyLevel("easy"); }
   });

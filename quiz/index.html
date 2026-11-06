@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>전 주차 퀴즈 — Team14 랩</title>
+  <meta name="description" content="주차별 예상 문제를 모아 풀고, 틀린 문제만 다시 푸는 퀴즈. 기록은 이 브라우저에만 저장됩니다.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <style>
+    /* 퀴즈 페이지 전용 스타일. 공통 규칙은 assets/css/site.css */
+    [hidden] { display: none !important; }   /* .btn 의 display 가 hidden 속성을 덮지 않도록 */
+    .stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 8px 0 24px; }
+    .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+    .stat b { display: block; font-size: 1.5rem; font-family: var(--mono); }
+    .stat span { color: var(--muted); font-size: .85rem; }
+
+    .tabs { display: flex; gap: 6px; margin: 0 0 16px; flex-wrap: wrap; }
+    .tabs button { border: 1px solid var(--line); background: var(--surface); color: var(--muted); padding: 8px 14px; border-radius: 10px; font-weight: 600; }
+    .tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+    .chip { border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 6px 12px; font-size: .88rem; }
+    .chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+    .chip .n { font-family: var(--mono); font-size: .78rem; margin-left: 4px; }
+    .setup-row { display: grid; gap: 12px 18px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin: 10px 0 16px; }
+    .setup-row label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+    select, textarea, input[type="text"] {
+      width: 100%; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line);
+      border-radius: 10px; padding: 8px 10px;
+    }
+    textarea { min-height: 96px; resize: vertical; }
+
+    .progress { height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+    .progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .2s ease; }
+    .qmeta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: .82rem; color: var(--muted); margin-bottom: 8px; }
+    .qtext { font-size: 1.08rem; font-weight: 600; white-space: pre-line; margin: 4px 0 14px; }
+    .options { display: grid; gap: 8px; margin: 0 0 14px; }
+    .opt { text-align: left; border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 10px; padding: 10px 12px; }
+    .opt:hover:not(:disabled) { background: var(--surface-2); }
+    .opt:disabled { cursor: default; }
+    .opt.correct { background: #e3f6ee; border-color: var(--ok); color: #0f5e3f; }
+    .opt.wrong { background: #fde8ec; border-color: var(--danger); color: #8c1d33; }
+    .feedback { margin: 12px 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); font-size: .95rem; }
+    .feedback .verdict { font-weight: 700; margin-bottom: 6px; }
+    .feedback .verdict.ok { color: var(--ok); }
+    .feedback .verdict.no { color: var(--danger); }
+    .feedback .verdict.meh { color: #8a6a00; }
+    .answer-body { white-space: pre-line; }
+    .self-grade { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-top: 14px; }
+
+    .result-week { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: .92rem; margin: 10px 0; }
+    .bar { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; grid-column: 1 / -1; }
+    .bar i { display: block; height: 100%; background: var(--ok); }
+
+    .note { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 10px 0; background: var(--surface); }
+    .note summary { cursor: pointer; font-weight: 600; list-style: none; }
+    .note summary::-webkit-details-marker { display: none; }
+    .note[open] summary { margin-bottom: 8px; }
+    .note .qmeta { margin: 0 0 4px; }
+    .empty { color: var(--muted); padding: 18px 0; }
+    .hint { font-size: .82rem; color: var(--muted); }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .opt.correct { background: #12352a; color: #8fe3bf; }
+      :root:not([data-theme="light"]) .opt.wrong { background: #3d1820; color: #f3a6b5; }
+    }
+    :root[data-theme="dark"] .opt.correct { background: #12352a; color: #8fe3bf; }
+    :root[data-theme="dark"] .opt.wrong { background: #3d1820; color: #f3a6b5; }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="wrap"></div></header>
+
+  <main class="wrap">
+    <section class="week-header fade-in">
+      <div class="meta"><span class="pill accent">퀴즈</span><span>주차별 예상 문제 모음</span></div>
+      <h1>전 주차 퀴즈</h1>
+      <p class="muted">각 주차 페이지의 예상 문제를 모아 풉니다. 객관식과 계산 문제는 자동 채점하고, 서술형은 정답을 보고 스스로 채점합니다.
+        틀리거나 애매했던 문제는 <b>오답 노트</b>에 모입니다. 기록은 이 브라우저에만 저장됩니다.</p>
+    </section>
+
+    <section class="stats" id="stats" aria-live="polite"></section>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-play" aria-selected="true" aria-controls="panel-play">문제 풀기</button>
+      <button type="button" role="tab" id="tab-notes" aria-selected="false" aria-controls="panel-notes">오답 노트</button>
+    </div>
+
+    <section id="panel-play" role="tabpanel" aria-labelledby="tab-play">
+      <div class="card" id="setup">
+        <h2 style="margin-top:0">범위 고르기</h2>
+        <div class="chips" id="week-chips" aria-label="주차 선택"></div>
+        <div class="setup-row">
+          <div>
+            <label for="scope">문제 범위</label>
+            <select id="scope">
+              <option value="all">전체</option>
+              <option value="new">아직 안 푼 문제</option>
+              <option value="wrong">틀렸거나 애매한 문제</option>
+            </select>
+          </div>
+          <div>
+            <label for="count">문제 수</label>
+            <select id="count">
+              <option value="5">5문제</option>
+              <option value="10" selected>10문제</option>
+              <option value="20">20문제</option>
+              <option value="0">전부</option>
+            </select>
+          </div>
+          <div>
+            <label for="shuffle">순서</label>
+            <select id="shuffle">
+              <option value="1">섞기</option>
+              <option value="0">주차 순서대로</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn primary" type="button" id="start">시작하기</button>
+          <span class="small muted" id="pool-info"></span>
+        </div>
+        <p class="hint" id="load-status">문제를 불러오는 중…</p>
+      </div>
+
+      <div class="card" id="play" hidden></div>
+      <div class="card" id="result" hidden></div>
+    </section>
+
+    <section id="panel-notes" role="tabpanel" aria-labelledby="tab-notes" hidden>
+      <div class="row" style="justify-content:space-between">
+        <p class="small muted" style="margin:0">틀렸거나 애매하다고 표시한 문제입니다. 다시 맞히면 목록에서 빠집니다.</p>
+        <button class="btn small" type="button" id="retry-wrong">오답만 다시 풀기</button>
+      </div>
+      <div id="notes"></div>
+      <div class="row" style="margin-top:24px">
+        <button class="btn small" type="button" id="reset">기록 전체 지우기</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="wrap">
+    Team14 · 최신딥러닝이론및응용 · 문제 출처는 각 주차 페이지의 "예상 문제"와 <code>assets/data/quiz/</code>의 문제 은행입니다.
+  </div></footer>
+
+  <script src="../assets/js/weeks.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script src="../assets/js/quiz.js"></script>
+</body>
+</html>

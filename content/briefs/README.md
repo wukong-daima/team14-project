@@ -14,6 +14,7 @@
 | week04.md | 4주차 학습 방법론 | **week2_fm.pdf p.56~57, 68~90** + week4_agent.pdf p.84~93 | 페이지 초안 완성. 원본 슬라이드는 2주차 PDF 후반부, 2주차 개념 9·10의 심화 |
 | week06.md | 6주차 에이전트 | **week4_agent.pdf (93p, "Week 4-1 AI Agent")** | 페이지 초안 완성. 파일명은 week4지만 내용은 6주차 요약과 1:1 대응 |
 | week08.md | 8주차 하네스 엔지니어링 | week5_self_evolving_agent.pdf (92p, Week 5-1 Introduction) | 페이지 초안 완성. Reflexion·Voyager·R-Zero는 다음 수업 범위 |
+| week09.md | 9주차 자가 진화 하네스 (2): 리워드·다양성·검증 | 새 PDF 없음. week5_self_evolving_agent.pdf p.20~92 이어서 + 노션 #09 구두 내용 | 브리프만 작성, 페이지는 아직 템플릿 |
 
 ## 작업 흐름
 

@@ -114,6 +114,50 @@
           <div data-level="easy">
             <p>지금은 AI가 "말로 쓴 풀이"를 보고 고쳐줘요. 그런데 말로 쓴 풀이와 머릿속 생각이 다를 수 있어요. 그래서 앞으로는 AI의 머릿속 신호를 직접 들여다보고 고쳐주는 방법이 연구되고 있어요.</p>
           </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 260" role="img" aria-label="'A를 생각하지 마'라는 프롬프트를 받은 모델의 출력 CoT에는 A가 없지만 내부 hidden state에는 A 신호가 있다. 지금은 CoT를 Reflector가 읽어 하네스를 고치고, 떠오르는 방향은 해석 도구로 hidden state를 직접 읽어 하네스를 고친다">
+              <defs><marker id="ar9b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor">
+                <text x="20" y="24" font-weight="700" font-size="13">말로 쓴 생각(CoT)과 머릿속 연산(hidden state)은 다를 수 있다</text>
+                <!-- 프롬프트 -->
+                <rect x="20" y="104" width="130" height="56" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="85" y="127" text-anchor="middle" font-weight="700">프롬프트</text>
+                <text x="85" y="146" text-anchor="middle" font-size="11" opacity=".85">"A를 생각하지 마"</text>
+                <line x1="150" y1="132" x2="196" y2="132" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9b)"/>
+                <!-- 모델 내부 -->
+                <rect x="200" y="50" width="220" height="170" rx="12" fill="var(--accent)" fill-opacity=".08" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="310" y="72" text-anchor="middle" font-weight="700">모델 내부 (hidden state)</text>
+                <rect x="222" y="150" width="22" height="40" rx="3" fill="currentColor" opacity=".25"/>
+                <rect x="252" y="130" width="22" height="60" rx="3" fill="currentColor" opacity=".25"/>
+                <rect x="282" y="96" width="22" height="94" rx="3" fill="var(--danger)" opacity=".85"/>
+                <rect x="312" y="160" width="22" height="30" rx="3" fill="currentColor" opacity=".25"/>
+                <rect x="342" y="140" width="22" height="50" rx="3" fill="currentColor" opacity=".25"/>
+                <rect x="372" y="166" width="22" height="24" rx="3" fill="currentColor" opacity=".25"/>
+                <text x="293" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="var(--danger)">A 신호</text>
+                <text x="310" y="208" text-anchor="middle" font-size="11" opacity=".75">활성화 (예시)</text>
+                <!-- 출력 CoT -->
+                <rect x="470" y="50" width="190" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="565" y="74" text-anchor="middle" font-weight="700">출력 CoT (토큰)</text>
+                <text x="565" y="94" text-anchor="middle" font-size="11" opacity=".85">"…A 없이 풀어 보겠다…"</text>
+                <line x1="420" y1="80" x2="466" y2="80" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9b)"/>
+                <text x="565" y="134" text-anchor="middle" font-size="22" font-weight="700" fill="var(--danger)">≠</text>
+                <!-- 해석 도구 -->
+                <rect x="470" y="160" width="190" height="60" rx="10" fill="none" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 3"/>
+                <text x="565" y="184" text-anchor="middle" font-weight="700" fill="var(--ok)">해석 도구</text>
+                <text x="565" y="204" text-anchor="middle" font-size="11" opacity=".85">hidden state 직접 분석 (Goodfire 등)</text>
+                <line x1="420" y1="190" x2="466" y2="190" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#ar9b)"/>
+                <!-- 하네스 -->
+                <rect x="730" y="104" width="150" height="56" rx="10" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="805" y="127" text-anchor="middle" font-weight="700">하네스 갱신</text>
+                <text x="805" y="146" text-anchor="middle" font-size="11" opacity=".85">스킬 · 메모리 · 프롬프트</text>
+                <path d="M660 80 L700 80 L700 122 L726 122" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9b)"/>
+                <text x="705" y="44" text-anchor="middle" font-size="11" opacity=".85">지금: Reflector</text>
+                <path d="M660 190 L700 190 L700 142 L726 142" fill="none" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#ar9b)"/>
+                <text x="705" y="238" text-anchor="middle" font-size="11" fill="var(--ok)">떠오르는 방향</text>
+              </g>
+            </svg>
+            <figcaption>지금의 하네스는 출력된 CoT만 읽고 반성합니다. 출력에 A가 없어도 내부에는 A 신호가 남을 수 있어서, hidden state를 직접 읽어 하네스에 쓰는 연구가 나오고 있습니다(활성화 막대는 설명용 예시).</figcaption>
+          </figure>
         </div></section>
 
         <section class="concept" id="c4"><div class="card">
@@ -191,6 +235,43 @@
           <div data-level="easy">
             <p>실력은 내가 푼 문제, 남이 만들어준 연습 문제, 선생님 시범으로 늘어요. 공부법만 바꿀지 머리를 훈련할지 정해주는 코치도 필요한데, 언제 무엇을 해야 하는지는 아직 아무도 몰라요.</p>
           </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 270" role="img" aria-label="경험의 세 출처인 솔버 자신의 시행착오, 다른 에이전트의 합성 경험, 사람 데모가 Feedback-Agent로 모이고, Feedback-Agent가 하네스 갱신과 가중치 갱신 중 무엇을 할지 고른다. 언제 어느 쪽을 골라야 하는지는 열린 문제다">
+              <defs><marker id="ar9c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor">
+                <text x="20" y="24" font-weight="700" font-size="13">경험은 세 곳에서 오고, 무엇을 갱신할지는 따로 정해야 한다</text>
+                <!-- 경험의 세 출처 -->
+                <rect x="20" y="44" width="230" height="54" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="135" y="66" text-anchor="middle" font-weight="700">① 솔버 자신의 시행착오</text>
+                <text x="135" y="85" text-anchor="middle" font-size="11" opacity=".8">직접 풀고 맞고 틀린 기록</text>
+                <rect x="20" y="112" width="230" height="54" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="135" y="134" text-anchor="middle" font-weight="700">② 합성 경험</text>
+                <text x="135" y="153" text-anchor="middle" font-size="11" opacity=".8">다른 에이전트가 낸 문제 (Challenger)</text>
+                <rect x="20" y="180" width="230" height="54" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="135" y="202" text-anchor="middle" font-weight="700">③ 사람 전문가 데모</text>
+                <text x="135" y="221" text-anchor="middle" font-size="11" opacity=".8">DemoEvolve</text>
+                <line x1="250" y1="71" x2="336" y2="128" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9c)"/>
+                <line x1="250" y1="139" x2="336" y2="139" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9c)"/>
+                <line x1="250" y1="207" x2="336" y2="150" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9c)"/>
+                <!-- Feedback-Agent -->
+                <rect x="340" y="104" width="200" height="70" rx="12" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="440" y="132" text-anchor="middle" font-weight="700">Feedback-Agent</text>
+                <text x="440" y="152" text-anchor="middle" font-size="11" opacity=".85">최근 궤적을 보고 갱신 대상 선택 (SIA)</text>
+                <!-- 두 갱신 대상 -->
+                <rect x="630" y="54" width="250" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="755" y="79" text-anchor="middle" font-weight="700">하네스 갱신</text>
+                <text x="755" y="98" text-anchor="middle" font-size="11" opacity=".8">프롬프트 · 스킬 · 서브에이전트 · 메모리</text>
+                <rect x="630" y="164" width="250" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="755" y="189" text-anchor="middle" font-weight="700">가중치 갱신</text>
+                <text x="755" y="208" text-anchor="middle" font-size="11" opacity=".8">교정 궤적으로 SFT 등</text>
+                <line x1="540" y1="128" x2="626" y2="88" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9c)"/>
+                <line x1="540" y1="150" x2="626" y2="190" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar9c)"/>
+                <text x="585" y="144" text-anchor="middle" font-size="20" font-weight="700" fill="var(--danger)">?</text>
+                <text x="440" y="258" text-anchor="middle" font-size="11" fill="var(--danger)">열린 문제: 새 지식을 하네스만으로 넣을 수 있나, 가중치를 바꿔야 하나의 기준이 아직 없다</text>
+              </g>
+            </svg>
+            <figcaption>하네스만 바꾸던 방식의 다음 단계는 하네스와 가중치를 함께 고치는 것입니다. 무엇을 고칠지는 별도 에이전트가 고르는데, 그 기준은 아직 정해지지 않았습니다.</figcaption>
+          </figure>
         </div></section>
 
         <section class="concept" id="c10"><div class="card">

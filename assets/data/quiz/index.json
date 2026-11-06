@@ -1,3 +1,6 @@
 {
-  "banks": ["week09.json"]
+  "banks": [
+    "week09.json",
+    "week09-agent.json"
+  ]
 }

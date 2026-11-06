@@ -6,3 +6,6 @@ raw/
 private/
 node_modules/
 .playwright-mcp/
+
+# quiz-forge 중간 산출물
+_workspace/

@@ -52,7 +52,7 @@
     var h = document.querySelector(".site-header .wrap");
     if (!h) return;
     h.innerHTML =
-      '<a class="brand" href="' + root + 'index.html"><span class="dot"></span>Team14 · 최신딥러닝 랩</a>' +
+      '<a class="brand" href="' + root + 'index.html"><span class="dot"></span>EvoLecture · Team14</a>' +
       '<nav class="nav-links" aria-label="주요 메뉴">' +
         '<a href="' + root + 'index.html#weeks">주차별 공부</a>' +
         '<a href="' + root + 'quiz/index.html">퀴즈</a>' +

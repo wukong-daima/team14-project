@@ -1,8 +1,9 @@
-# Team14 · 최신딥러닝 인터랙티브 랩
+# EvoLecture — 자가 진화 강의 하네스 (Team14)
 
 연세대학교 공학대학원 인공지능학과 **최신딥러닝이론및응용** 14조 조별과제.
 주차별 강의 내용을 도형과 인터랙션으로 공부하고, 수업에서 다룬 모델(DeepSeek 등)과
-Claude · GPT · 공개 모델의 동작을 **공개 자료 범위에서** 비교하는 정적 사이트입니다.
+Claude · GPT · 공개 모델의 동작을 **공개 자료 범위에서** 비교하는 정적 사이트 위에,
+**자가 진화 하네스가 학습 콘텐츠를 실제로 개선하는지 O·T·G로 분해해 검증**하는 연구를 올립니다. 설계는 [PLAN.md](PLAN.md) v2.
 
 - **사이트: https://wukong-daima.github.io/team14-project/** (GitHub Pages, `main` 브랜치 루트에서 자동 배포)
 - 발표 모드: `slides/index.html` (reveal.js)

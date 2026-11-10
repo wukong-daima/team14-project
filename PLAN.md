@@ -77,7 +77,7 @@ G  = Δ − O − T                                       남는 진짜 개선
 ### 3.5 벤치마크 분리와 보안
 
 - 공개 세트: `assets/data/quiz/*.json` (현재 62문제 → 목표 150+).
-- 비공개 세트: **별도 private 저장소** `team14-heldout`(생성 예정)에 두고, Actions에서만 토큰으로 읽는다. 목표 50+. 조원도 사이트 콘텐츠를 쓸 때 비공개 세트를 보지 않는다(보면 사람 오버피팅).
+- 비공개 세트: **별도 private 저장소** `wukong-daima/team14-heldout`에 두고, Actions에서만 토큰으로 읽는다. 목표 50+. 조원도 사이트 콘텐츠를 쓸 때 비공개 세트를 보지 않는다(보면 사람 오버피팅). 생성: `gh repo create wukong-daima/team14-heldout --private` 후 `heldout/index.json`(`{"banks": []}`)과 `heldout/weekNN.json`을 공개 세트와 같은 형식으로. 구현: `evolve/README.md`.
 - 비공개 세트는 공개 세트와 **같은 개념 격자**에서 quiz-forge로 뽑되 문장·수치를 다르게.
 
 ### 3.6 비용·안전

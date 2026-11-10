@@ -1,0 +1,59 @@
+name: evolve-round
+# 자가 진화 루프 주 1회. 결과는 PR 로만 올라가고 자동 머지하지 않는다.
+on:
+  schedule:
+    - cron: "0 18 * * 0"   # 매주 일요일 18:00 UTC = 월요일 03:00 KST
+  workflow_dispatch:
+    inputs:
+      weeks:
+        description: "대상 주차 (예: week02,week04,week08)"
+        default: "week02,week04,week08"
+      mock:
+        description: "mock 모드 (API 미사용)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  round:
+    runs-on: ubuntu-latest
+    env:
+      HAS_HELDOUT: ${{ secrets.HELDOUT_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 비공개 평가 세트 체크아웃 (시크릿 있을 때만)
+        if: env.HAS_HELDOUT == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: wukong-daima/team14-heldout
+          token: ${{ secrets.HELDOUT_TOKEN }}
+          path: _heldout
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install anthropic
+      - name: 라운드 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          HELDOUT_DIR: ${{ github.workspace }}/_heldout/heldout
+          EVOLVE_MAX_USD: "5"
+        run: |
+          git config user.name "evolve-bot"
+          git config user.email "evolve-bot@users.noreply.github.com"
+          MOCK=""
+          if [ "${{ inputs.mock }}" = "true" ]; then MOCK="--mock"; fi
+          python evolve/round.py --weeks "${{ inputs.weeks || 'week02,week04,week08' }}" --pr $MOCK
+      - name: 리포트 보관
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolve-reports
+          path: |
+            evolve/reports/*.json
+            evolve/runs/*.json

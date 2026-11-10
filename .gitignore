@@ -10,3 +10,6 @@ node_modules/
 # quiz-forge 중간 산출물
 _workspace/
 openclaw-backup-check/
+.venv/
+evolve/runs/
+__pycache__/

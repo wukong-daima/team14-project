@@ -84,7 +84,8 @@
     var week = bank.week;
     return (bank.questions || []).map(function (b) {
       var q = { id: b.id || (week + "-" + hash(norm(b.q))), week: week, src: bank.source || "bank",
-                q: norm(b.q), explanation: b.explanation || "", concept: b.concept || "", refs: b.refs || [] };
+                q: norm(b.q), explanation: b.explanation || "", concept: b.concept || "", refs: b.refs || [],
+                basic: !!b.basic, verified: b.verified || null };
       if (b.type === "mc" && Array.isArray(b.options) && typeof b.answer === "number") {
         q.type = "mc"; q.options = b.options; q.answer = b.answer;
       } else if (b.type === "num" && typeof b.answer === "number") {
@@ -210,7 +211,10 @@
     $("play").innerHTML =
       '<div class="progress" aria-hidden="true"><i style="width:' + (session.i / n * 100) + '%"></i></div>' +
       '<div class="qmeta"><span class="pill accent">' + w.num + '주차</span><span>' + esc(w.title) + '</span>' +
-        '<span class="pill">' + typeLabel + '</span><span class="spacer"></span><span class="mono">' + (session.i + 1) + ' / ' + n + '</span></div>' +
+        '<span class="pill">' + typeLabel + '</span>' +
+        (q.src === "agent" ? '<span class="pill compare" title="출제 에이전트가 만들고 풀이 시험·검증을 통과한 문제">AI 출제 · 검증</span>' : '') +
+        (q.basic ? '<span class="pill" title="강의를 안 들은 약한 모델도 맞힌 기초 문제">기초</span>' : '') +
+        '<span class="spacer"></span><span class="mono">' + (session.i + 1) + ' / ' + n + '</span></div>' +
       '<div class="qtext">' + esc(q.q) + '</div>' + body +
       '<div id="fb" aria-live="polite"></div>' +
       '<div class="actions"><button class="btn small" type="button" id="quit">그만하기</button>' +

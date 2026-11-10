@@ -12,3 +12,4 @@ _workspace/
 openclaw-backup-check/
 .venv/
 evolve/runs/
+__pycache__/

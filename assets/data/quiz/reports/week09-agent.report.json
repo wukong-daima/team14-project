@@ -1,0 +1,94 @@
+{
+  "week": "week09",
+  "generated": "2026-11-06",
+  "planned": 28,
+  "candidates": 28,
+  "kept": 22,
+  "dropped": 6,
+  "by_type": {
+    "mc": 14,
+    "num": 1,
+    "self": 7
+  },
+  "basic_kept": 7,
+  "answer_positions": {
+    "0": 4,
+    "1": 4,
+    "2": 3,
+    "3": 3
+  },
+  "concept_coverage": {
+    "agent-eval-four-principles": 2,
+    "artifact-create-vs-use": 1,
+    "context-engineering-ace-mce-metaharness": 1,
+    "cot-vs-internal-computation": 2,
+    "diversity-collapse-map-elites-island": 1,
+    "experience-sources-harness-vs-weights": 1,
+    "harness-reuse-open-problem": 2,
+    "pass-at-k": 2,
+    "pass-at-k-broken-task": 1,
+    "reward-hacking-eureka": 2,
+    "synthetic-problem-conditions": 2,
+    "tabular-feature-evolution": 2,
+    "three-research-problems": 2,
+    "workflow-design-adas-aflow": 1
+  },
+  "round1_pass1": {
+    "weak": 0.889,
+    "strong": 1.0
+  },
+  "round2_pass1": {
+    "weak": 0.686,
+    "strong": 1.0
+  },
+  "drop_reasons": [
+    {
+      "id": "w09a-c04",
+      "cell": "c04",
+      "q": "정수론·조합론·기하 문제를 푸는 전략을 진화 탐색으로 개선하려 한다. 전체 집단을 하나로 두고 점수만으로 선",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09a-c10",
+      "cell": "c10",
+      "q": "프론티어 모델의 pass@1이 낮게 나온 과제가 있다. pass@1 하나만으로는 '진짜 어려운 문제'와 '잘",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09a-c14",
+      "cell": "c14",
+      "q": "GPT를 교사 모델로 써서 만든 스킬·메모리(아티팩트)를 Qwen 학생 모델의 하네스에 그대로 넣었더니 기대",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09a-c17",
+      "cell": "c17",
+      "q": "자가 진화에 쓰는 경험의 세 출처 중 '사람 전문가의 데모'를 쓰는 진화 탐색 사례로 DemoEvolve가 ",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09a-c26",
+      "cell": "c26",
+      "q": "텍스트 분류에서 Zero-shot·Few-shot·ACE·MCE 하네스를 초기 후보로 두고, 코딩 에이전트가",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09a-c27",
+      "cell": "c27",
+      "q": "AFlow(Zhang et al. 2025)는 워크플로우를 그래프로 표현한 뒤 MCTS로 최적화한다. 이 워",
+      "why": [
+        "verifier:drop"
+      ]
+    }
+  ]
+}

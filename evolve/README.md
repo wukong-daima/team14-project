@@ -12,14 +12,23 @@ evolve/round.py        한 라운드 오케스트레이션 → evolve/reports/ro
 evolve/experiments.py  행동 실험 E1(effort) · E2(pass@k) · E3(하네스 효과)
 ```
 
-## 준비
+## 준비 — 두 가지 백엔드
+
+| 백엔드 | 과금 | 설정 |
+|---|---|---|
+| **claude-cli** (기본) | Claude **구독**(Pro/Max) 사용량. API 키 불필요 | 터미널에서 `claude` 실행 → `/login` 으로 구독 계정 로그인. 스크립트가 `claude -p` 를 도구 없이 1턴씩 호출 |
+| api | Anthropic API 키 과금 | `export ANTHROPIC_API_KEY=...` (설정돼 있으면 자동으로 api 백엔드) |
+
+`EVOLVE_BACKEND=api|claude-cli` 로 강제할 수 있습니다. 구독 백엔드는 5시간 창 사용량 제한을 따르므로 한 라운드(풀이 60회 + 제안 3회 정도)는 무리 없지만 `--k 10` 실험은 창을 나눠 돌리세요.
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install anthropic
-export ANTHROPIC_API_KEY=...            # 또는 ant auth login
+python3 -m venv .venv && .venv/bin/pip install anthropic     # api 백엔드일 때만 필요 (cli 는 표준 라이브러리만)
+claude -p "ANSWER: 2 라고만 답해" --model claude-haiku-5-5 --output-format json --bare --tools "" --no-session-persistence | head -c 300   # 로그인 확인
 # 비공개 세트(선택): git clone https://github.com/wukong-daima/team14-heldout.git _heldout
 export HELDOUT_DIR=$PWD/_heldout/heldout
 ```
+
+GitHub Actions 에서 구독으로 돌리려면: 로컬에서 `claude setup-token` 으로 장기 토큰을 만들어 저장소 시크릿 `CLAUDE_CODE_OAUTH_TOKEN` 에 넣습니다(워크플로가 자동 감지). API 키가 있으면 `ANTHROPIC_API_KEY` 시크릿으로도 됩니다.
 
 ## 실행
 
@@ -56,4 +65,4 @@ export HELDOUT_DIR=$PWD/_heldout/heldout
 
 ## GitHub Actions
 
-`.github/workflows/evolve.yml` — 매주 일요일 18:00 UTC(월 03:00 KST) + 수동 실행. 시크릿: `ANTHROPIC_API_KEY`(필수), `HELDOUT_TOKEN`(비공개 저장소 읽기용 PAT, 선택). 결과는 `evolve/round-NN` 브랜치의 PR 로만 올라간다.
+`.github/workflows/evolve.yml` — 매주 일요일 18:00 UTC(월 03:00 KST) + 수동 실행. 시크릿: `CLAUDE_CODE_OAUTH_TOKEN`(구독, `claude setup-token`) **또는** `ANTHROPIC_API_KEY`(API) 중 하나, `HELDOUT_TOKEN`(비공개 저장소 읽기용 PAT, 선택). 결과는 `evolve/round-NN` 브랜치의 PR 로만 올라간다.

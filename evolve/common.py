@@ -34,6 +34,9 @@ PRICE = {
 WEAK_MODEL = os.environ.get("EVOLVE_WEAK_MODEL", "claude-haiku-5-5")
 STRONG_MODEL = os.environ.get("EVOLVE_STRONG_MODEL", "claude-opus-5-5")
 MAX_USD = float(os.environ.get("EVOLVE_MAX_USD", "5"))
+# 백엔드: "api" = Anthropic SDK(API 키 과금) · "claude-cli" = 구독 로그인된 Claude Code 헤드리스(claude -p)
+BACKEND = os.environ.get("EVOLVE_BACKEND", "claude-cli" if not os.environ.get("ANTHROPIC_API_KEY") else "api")
+CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
 
 
 # ---------------------------------------------------------------- 문제 은행
@@ -172,14 +175,17 @@ class LLM:
         self.usage = usage or Usage()
         self.rng = random.Random(seed)
         self._client = None
-        if not mock:
-            import anthropic  # 지연 import: mock 모드는 SDK 없이도 동작
+        self.backend = BACKEND
+        if not mock and self.backend == "api":
+            import anthropic  # 지연 import: mock/cli 모드는 SDK 없이도 동작
             self._client = anthropic.Anthropic()
 
     def ask(self, model: str, system: str, user: str, effort: str = "low", max_tokens: int = 4000, mock_hint: dict | None = None) -> str:
         if self.mock:
             self.usage.add(model, len(system + user) // 3, 40)
             return self._mock_answer(mock_hint or {})
+        if self.backend == "claude-cli":
+            return self._ask_cli(model, system, user, effort)
         import anthropic
         for attempt in range(3):
             try:
@@ -203,6 +209,32 @@ class LLM:
         if r.stop_reason == "refusal":
             return ""
         return "".join(b.text for b in r.content if b.type == "text")
+
+    def _ask_cli(self, model: str, system: str, user: str, effort: str) -> str:
+        """구독 로그인된 Claude Code 를 헤드리스로 호출. 도구 없음, 세션 저장 없음, 1턴."""
+        import subprocess
+        cmd = [CLAUDE_BIN, "-p", user, "--system-prompt", system, "--model", model, "--effort", effort,
+               "--output-format", "json", "--bare", "--strict-mcp-config", "--tools", "", "--no-session-persistence"]
+        for attempt in range(3):
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            try:
+                j = json.loads(r.stdout.strip().splitlines()[-1]) if r.stdout.strip() else {}
+            except json.JSONDecodeError:
+                j = {}
+            if j and not j.get("is_error"):
+                u = j.get("usage") or {}
+                self.usage.add(model, int(u.get("input_tokens", 0)) + int(u.get("cache_read_input_tokens", 0)) + int(u.get("cache_creation_input_tokens", 0)), int(u.get("output_tokens", 0)))
+                return j.get("result", "") or ""
+            msg = (j.get("result") if j else "") or r.stderr.strip()[-300:] or r.stdout.strip()[-300:]
+            if "Not logged in" in msg:
+                raise RuntimeError("Claude Code 가 로그인돼 있지 않습니다. 터미널에서 `claude` 실행 후 /login (구독 계정), CI 는 `claude setup-token` 으로 만든 CLAUDE_CODE_OAUTH_TOKEN.")
+            if "rate" in msg.lower() or "limit" in msg.lower() or "overloaded" in msg.lower():
+                time.sleep(60 * (attempt + 1))
+                continue
+            if attempt == 2:
+                raise RuntimeError(f"claude -p 실패: {msg}")
+            time.sleep(5)
+        return ""
 
     def _mock_answer(self, hint: dict) -> str:
         """mock: condition 에 따라 정답률이 달라지는 가짜 풀이자 / 가짜 제안자."""

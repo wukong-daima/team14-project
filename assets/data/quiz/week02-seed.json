@@ -1,0 +1,280 @@
+{
+ "week": "week02",
+ "source": "seed",
+ "generated": "2026-11-11",
+ "note": "evolve 루프 시동용 시드. 담당 A가 quiz-forge로 재검증·확장한다.",
+ "questions": [
+  {
+   "id": "w02s-01",
+   "type": "mc",
+   "q": "GQA(Grouped-Query Attention)에서 KV 그룹 수 g를 양 극단으로 두면 각각 어떤 방식과 같아지는가?",
+   "options": [
+    "g=1은 MHA, g=H(쿼리 헤드 수)는 MQA",
+    "g=1은 MQA, g=H(쿼리 헤드 수)는 MHA",
+    "둘 다 MLA의 특수한 경우가 된다",
+    "g 값과 무관하게 KV 캐시 크기는 같다"
+   ],
+   "answer": 1,
+   "explanation": "GQA는 쿼리 헤드를 g개 그룹으로 묶어 그룹마다 K/V 하나를 둔다. 그룹이 하나(g=1)면 모든 헤드가 K/V 하나를 공유하는 MQA, 그룹 수가 헤드 수(g=H)면 헤드마다 K/V를 갖는 MHA다.",
+   "concept": "gqa-mqa-mha",
+   "difficulty": 1,
+   "refs": [
+    "week02.md 개념 3",
+    "p.22–27"
+   ]
+  },
+  {
+   "id": "w02s-02",
+   "type": "mc",
+   "q": "MQA(Multi-Query Attention)가 KV 캐시 메모리를 줄이는 방식은?",
+   "options": [
+    "K와 V를 저차원 잠재 벡터로 압축해 저장한다",
+    "모든 쿼리 헤드가 하나의 K/V 헤드를 공유한다",
+    "시퀀스를 최근 128토큰으로 잘라 저장한다",
+    "쿼리 헤드 수를 1개로 줄인다"
+   ],
+   "answer": 1,
+   "explanation": "MQA는 쿼리 헤드는 여러 개 유지하되 K, V를 한 벌만 두어 캐시를 1/H로 줄인다. 대신 품질이 떨어져 GQA가 절충안으로 쓰인다. 잠재 벡터 압축은 MLA의 방식이다.",
+   "concept": "gqa-mqa-mha",
+   "difficulty": 1,
+   "refs": [
+    "week02.md 개념 3",
+    "Shazeer 2019"
+   ]
+  },
+  {
+   "id": "w02s-03",
+   "type": "mc",
+   "q": "DeepSeek-V2의 MLA(Multi-head Latent Attention)가 KV 캐시를 줄이는 핵심 아이디어는?",
+   "options": [
+    "K와 V를 저차원 잠재 벡터 c로 공동 압축해 캐시하고, 필요할 때 up-projection으로 복원한다",
+    "쿼리 헤드를 그룹으로 묶어 K/V를 공유한다",
+    "가벼운 인덱서로 top-K 키만 골라 어텐션한다",
+    "위치 인코딩을 제거해 캐시 항목을 줄인다"
+   ],
+   "answer": 0,
+   "explanation": "MLA는 K/V 자체가 아니라 압축된 잠재 벡터 c만 저장하므로 캐시 크기가 헤드 수가 아니라 잠재 차원 d_c로 결정된다. 그룹 공유는 GQA, top-K 선택은 DSA의 방식이다.",
+   "concept": "mla",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 4",
+    "p.28"
+   ]
+  },
+  {
+   "id": "w02s-04",
+   "type": "mc",
+   "q": "DeepSeek Sparse Attention(DSA)을 적용했을 때 어텐션 연산 복잡도의 변화로 옳은 것은? (L=시퀀스 길이, K=선택 토큰 수)",
+   "options": [
+    "O(L) → O(1)",
+    "O(L²) → O(L log L)",
+    "O(L²) → O(LK)",
+    "O(LK) → O(L²)"
+   ],
+   "answer": 2,
+   "explanation": "DSA는 가벼운 projection으로 index score를 계산해 top-K 키를 고른 뒤 그 K개에만 어텐션하므로 쿼리당 비용이 L에서 K로 줄어 전체 O(LK)가 된다.",
+   "concept": "dsa",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 5",
+    "p.32–33"
+   ]
+  },
+  {
+   "id": "w02s-05",
+   "type": "mc",
+   "q": "DSA가 줄이는 것과 줄이지 못하는 것에 대한 설명으로 옳은 것은?",
+   "options": [
+    "KV 캐시 저장 메모리를 직접 줄인다",
+    "어텐션 연산량을 줄이지만, 모든 키의 KV는 여전히 캐시에 있어야 한다",
+    "토크나이저 어휘 크기를 줄인다",
+    "레이어 수를 줄여 메모리를 아낀다"
+   ],
+   "answer": 1,
+   "explanation": "top-K 선택을 하려면 후보가 되는 모든 키가 캐시에 있어야 하므로 DSA는 연산량을 줄이는 기법이다. 저장 메모리를 줄이는 것은 GQA, MLA, 슬라이딩 윈도우의 역할이다.",
+   "concept": "dsa",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 5"
+   ]
+  },
+  {
+   "id": "w02s-06",
+   "type": "mc",
+   "q": "Post-Norm보다 Pre-Norm이 깊은 Transformer 학습에 안정적인 이유로 가장 적절한 것은?",
+   "options": [
+    "정규화 연산 자체를 생략하기 때문",
+    "학습률이 자동으로 낮아지기 때문",
+    "어텐션 헤드 수가 줄어들기 때문",
+    "잔차 경로가 정규화를 거치지 않는 항등 경로라 그래디언트가 덧셈 형태로 전파되기 때문"
+   ],
+   "answer": 3,
+   "explanation": "Pre-Norm은 서브층 앞에서 정규화하고 잔차 합은 그대로 두므로 손실의 그래디언트가 항등 경로로 더해져 전달된다. Post-Norm은 매 층 Norm을 통과하며 야코비안이 곱으로 누적되어 폭발·소실한다.",
+   "concept": "pre-norm",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 7",
+    "Wang 2019"
+   ]
+  },
+  {
+   "id": "w02s-07",
+   "type": "mc",
+   "q": "RMSNorm이 LayerNorm보다 연산이 싼 이유는?",
+   "options": [
+    "평균 빼기(re-centering)를 생략하고 RMS로만 스케일하기 때문",
+    "분산 계산을 생략하고 평균만 빼기 때문",
+    "정규화를 tanh 함수로 대체하기 때문",
+    "정규화를 블록당 한 번만 수행하기 때문"
+   ],
+   "answer": 0,
+   "explanation": "RMSNorm은 LayerNorm의 두 단계(평균 빼기, 분산으로 나누기) 중 re-centering을 빼고 RMS로만 나눈다. tanh 대체는 DyT, 블록당 1회 정확 계산은 BHyT의 아이디어다.",
+   "concept": "rmsnorm",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 7",
+    "Zhang & Sennrich 2019"
+   ]
+  },
+  {
+   "id": "w02s-08",
+   "type": "mc",
+   "q": "DeepSeek MoE의 'auxiliary-loss-free' 부하 분산 전략은 전문가 쏠림을 어떻게 막는가?",
+   "options": [
+    "보조 손실(auxiliary loss)의 가중치를 크게 준다",
+    "전문가 수를 줄여 선택지를 제한한다",
+    "라우팅 bias를 조절해 덜 쓰인 전문가가 선택되게 한다",
+    "shared expert를 제거한다"
+   ],
+   "answer": 2,
+   "explanation": "기존 MoE는 쏠림을 막기 위해 보조 손실을 더했지만 DeepSeek은 손실 대신 각 전문가의 라우팅 bias를 조정하는 방식으로 균형을 맞춘다. shared expert는 항상 활성되는 공통 전문가로 별개 개념이다.",
+   "concept": "deepseek-moe",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 8",
+    "p.54"
+   ]
+  },
+  {
+   "id": "w02s-09",
+   "type": "mc",
+   "q": "RLHF를 PPO로 구현할 때 동시에 띄워야 하는 모델은 몇 개인가? (policy, reference, reward, value 기준)",
+   "options": [
+    "1개",
+    "2개",
+    "3개",
+    "4개"
+   ],
+   "answer": 3,
+   "explanation": "PPO 기반 RLHF는 정책 모델, 참조(reference) 모델, 보상 모델, 가치(value) 모델 네 개가 필요해 무겁고 불안정하다. DPO는 정책과 참조 두 개, GRPO는 가치 모델을 그룹 상대 평가로 대체한다.",
+   "concept": "rlhf-ppo",
+   "difficulty": 1,
+   "refs": [
+    "week02.md 개념 10",
+    "p.84"
+   ]
+  },
+  {
+   "id": "w02s-10",
+   "type": "mc",
+   "q": "DPO(Direct Preference Optimization)의 특징으로 옳은 것은?",
+   "options": [
+    "보상 모델을 두 개 써서 안정화한다",
+    "같은 프롬프트의 그룹 롤아웃을 상대 평가한다",
+    "보상 모델 없이 선호/비선호 답변 쌍으로 정책을 직접 최적화하는 offline 방식이다",
+    "교사 모델이 토큰 단위로 조밀한 감독을 준다"
+   ],
+   "answer": 2,
+   "explanation": "DPO는 RLHF의 복잡성을 피해 선호 쌍 데이터로 정책을 바로 학습한다. 그룹 상대 평가는 GRPO, 교사의 토큰 단위 감독은 On-Policy Distillation의 특징이다.",
+   "concept": "dpo",
+   "difficulty": 1,
+   "refs": [
+    "week02.md 개념 10"
+   ]
+  },
+  {
+   "id": "w02s-11",
+   "type": "mc",
+   "q": "GRPO에서 한 프롬프트의 그룹 롤아웃이 전부 성공하거나 전부 실패하면 어떤 일이 생기는가?",
+   "options": [
+    "그룹 상대 advantage가 모두 0이 되어 학습 신호가 없다",
+    "학습 신호가 최대가 된다",
+    "가치(value) 모델이 대신 학습한다",
+    "클리핑이 자동으로 해제된다"
+   ],
+   "answer": 0,
+   "explanation": "GRPO의 advantage는 그룹 내 보상을 평균과 표준편차로 정규화한 값이다. 결과가 모두 같으면 편차가 0이라 advantage가 0이 되고 그 프롬프트에서는 아무것도 배우지 못한다.",
+   "concept": "grpo",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 10",
+    "p.89"
+   ]
+  },
+  {
+   "id": "w02s-12",
+   "type": "mc",
+   "q": "Speculative decoding이 '이론상 무손실'이라고 하는 이유는?",
+   "options": [
+    "품질이 약간 떨어지지만 속도가 훨씬 빠르기 때문",
+    "출력 분포가 draft 모델의 분포로 바뀌기 때문",
+    "target 모델 호출을 아예 생략하기 때문",
+    "target 모델이 병렬 검증해 앞에서부터 일치하는 토큰만 수락하므로 target 분포가 보존되기 때문"
+   ],
+   "answer": 3,
+   "explanation": "draft 모델이 낸 초안을 target 모델이 한 번의 forward로 검증하고 첫 불일치 지점에서 target의 토큰으로 교체한다. 그래서 최종 출력은 target 모델 혼자 생성한 것과 같은 분포를 따른다.",
+   "concept": "speculative-decoding",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 12",
+    "p.92–94"
+   ]
+  },
+  {
+   "id": "w02s-13",
+   "type": "mc",
+   "q": "강의에서 연속시간 masked diffusion 언어 모델은 무엇과 동치라고 설명했는가?",
+   "options": [
+    "연속 가우시안 diffusion 모델",
+    "Multi-Token Prediction(MTP)",
+    "speculative decoding",
+    "random-order autoregressive 모델"
+   ],
+   "answer": 3,
+   "explanation": "토큰을 임의 순서로 하나씩 채우는 random-order AR과 masked diffusion은 같은 모델이며, 병렬 생성은 한 스텝에 몇 토큰을 unmask하느냐는 이산화 스케줄의 산물이다.",
+   "concept": "ar-vs-diffusion",
+   "difficulty": 3,
+   "refs": [
+    "week02.md 개념 13",
+    "p.101, 118"
+   ]
+  },
+  {
+   "id": "w02s-14",
+   "type": "num",
+   "q": "쿼리 헤드 32개인 모델에 GQA-8을 적용하면 KV 캐시는 MHA 대비 몇 분의 1이 되는가? 분모의 숫자만 쓰시오.",
+   "answer": 4,
+   "tol": 0,
+   "explanation": "KV 캐시는 KV 헤드 수에 비례한다. MHA는 32개, GQA-8은 8개이므로 32/8 = 4, 즉 1/4이다. MQA라면 1/32이다.",
+   "concept": "gqa-kv-cache",
+   "difficulty": 1,
+   "refs": [
+    "week02.md 개념 3"
+   ]
+  },
+  {
+   "id": "w02s-15",
+   "type": "num",
+   "q": "쿼리 헤드 32, KV 그룹 8(GQA-8), d_head 128, 레이어 32, 시퀀스 131,072토큰(128K), FP16(2바이트)일 때 KV 캐시 용량은 몇 GiB인가? (2진 단위, 1 GiB = 2^30 바이트)",
+   "answer": 16,
+   "tol": 0.5,
+   "explanation": "KV = 2(K,V) × 32층 × 8헤드 × 128 × 131,072 × 2바이트 = 17,179,869,184바이트 = 16 GiB(10진으로 약 17.2 GB). MHA였다면 64 GiB다.",
+   "concept": "gqa-kv-cache",
+   "difficulty": 2,
+   "refs": [
+    "week02.md 개념 3",
+    "2주차 KV 캐시 계산기"
+   ]
+  }
+ ]
+}

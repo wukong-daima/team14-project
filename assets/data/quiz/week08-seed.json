@@ -1,0 +1,226 @@
+{
+  "week": "week08",
+  "source": "seed",
+  "generated": "2026-11-11",
+  "note": "evolve 루프 베이스라인용 시드. 담당 A가 quiz-forge로 확장·재검증한다. 브리프 week08.md 와 슬라이드 페이지를 근거로 작성.",
+  "questions": [
+    {
+      "id": "w08s-01",
+      "type": "mc",
+      "q": "수업에서 정의한 '하네스(harness)'에 대한 설명으로 가장 정확한 것은?",
+      "options": [
+        "베이스 모델의 가중치를 소량의 과제 데이터로 미세조정(SFT·LoRA)해 특정 과제 성능을 끌어올리는 학습 절차 전체",
+        "가중치는 고정한 채, 모델의 사고·계획, 툴 호출, 컨텍스트·산출물 관리, 결과 평가 방식을 결정하는 외부 오케스트레이션 시스템",
+        "여러 모델의 출력을 다수결이나 가중 투표로 합쳐 하나의 답을 내도록 구성한 앙상블 서빙 계층과 그 라우팅 규칙",
+        "모델이 학습 도중 스스로 보상 함수와 환경 규칙을 수정하도록 허용해 자기 지능을 키우게 하는 강화학습 환경 설계"
+      ],
+      "answer": 1,
+      "explanation": "슬라이드 p.11의 정의: 하네스는 베이스 모델을 둘러싸고 실행을 오케스트레이션하는 시스템으로, 생각·계획, 툴 호출, 컨텍스트 인지·관리, 산출물 저장, 결과 평가 방식을 결정한다. 가중치 수정(미세조정)은 하네스가 아니라 RSI의 다른 경로(학습 파이프라인 개선)에 속한다. 배포 시스템 = 하네스 + API/서빙 + 인프라 + 모니터링 + 보안.",
+      "concept": "harness-definition",
+      "difficulty": 1,
+      "refs": [
+        "week08.md 개념 1",
+        "p.11"
+      ]
+    },
+    {
+      "id": "w08s-02",
+      "type": "mc",
+      "q": "하네스 디자인 패턴 중 '서브에이전트와 백엔드 잡'에서 수업이 강조한 핵심 원칙은?",
+      "options": [
+        "서브에이전트 수를 늘릴수록 탐색 폭이 커지므로, 자원이 허락하는 한 많은 병렬 작업을 동시에 띄워 가설을 넓게 훑는다",
+        "서브에이전트는 부모의 컨텍스트 창을 그대로 공유해야 결과가 유실되지 않으므로, 별도 프로세스 대신 같은 대화 안에서 역할만 나눈다",
+        "병렬성을 명시적이고 검사 가능하게 만들어, 출력을 채팅 컨텍스트가 아닌 파일·로그·상태 레코드로 남긴다",
+        "부모 에이전트가 모든 하위 작업을 직접 수행하고 서브에이전트는 결과 검증과 요약만 맡겨 책임 소재를 단순하게 유지한다"
+      ],
+      "answer": 2,
+      "explanation": "p.17: 부모 에이전트는 launch/inspect logs/cancel/merge 를 맡는 작은 프로세스 매니저 역할을 하고, 핵심은 병렬성을 명시적·검사 가능하게 만드는 것이다. 서브에이전트 출력이 채팅 컨텍스트에만 있으면 금방 사라지므로 파일·로그·상태 레코드로 저장해야 중단 후 복구와 실행 이력 추론이 가능하다.",
+      "concept": "design-patterns",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 2",
+        "p.17"
+      ]
+    },
+    {
+      "id": "w08s-03",
+      "type": "mc",
+      "q": "ACE(Agentic Context Engineering)의 세 구성요소를 역할 순서대로 바르게 나열한 것은?",
+      "options": [
+        "Curator(플레이북 초안 작성) → Generator(초안을 참조해 과제 궤적 생성) → Reflector(궤적을 읽고 플레이북 전체를 다시 요약)",
+        "Reflector(과제 분석과 계획 수립) → Curator(계획에 따라 실행하고 궤적 기록) → Generator(실행 결과를 보고서로 생성)",
+        "Generator(플레이북 참조해 궤적 생성) → Curator(궤적의 성공·실패를 채점) → Reflector(채점 결과로 플레이북 전체 재작성)",
+        "Generator(플레이북 참조해 궤적 생성) → Reflector(궤적에서 통찰 증류) → Curator(델타 업데이트로 플레이북 갱신)"
+      ],
+      "answer": 3,
+      "explanation": "p.21: Generator가 bullet 을 참조해 과제 궤적을 만들고, Reflector 가 성공/실패 궤적에서 통찰을 증류하며, Curator 가 증분적·항목화된 엔트리로 플레이북을 갱신한다. 전체를 재작성하지 않고 델타만 반영하므로 Context Collapse 와 Brevity Bias 를 피한다.",
+      "concept": "ace",
+      "difficulty": 1,
+      "refs": [
+        "week08.md 개념 4",
+        "p.21~22"
+      ]
+    },
+    {
+      "id": "w08s-04",
+      "type": "mc",
+      "q": "ACE가 '델타 업데이트(Delta Update)'로 해결하려는 이전 메모리 시스템의 두 가지 한계는?",
+      "options": [
+        "반복 재작성으로 과거 경험이 유실·과단순화되는 Context Collapse 와, 간결한 지시를 선호해 세부를 빠뜨리는 Brevity Bias",
+        "컨텍스트 창이 짧아 긴 실행 로그를 한 번에 넣지 못하는 Length Limit 와, 토큰 수에 비례해 호출 비용이 늘어나는 Cost Scaling",
+        "여러 에이전트가 같은 플레이북을 동시에 수정해 충돌하는 Race Condition 과, 오래된 항목이 지워지지 않고 쌓이는 Memory Leak",
+        "모델이 자기 출력물을 다시 학습 데이터로 삼아 품질이 무너지는 Model Collapse 와, 검색 결과가 질의와 멀어지는 Retrieval Drift"
+      ],
+      "answer": 0,
+      "explanation": "p.22: Context Collapse 는 플레이북을 반복 재작성하면서 과거 경험 정보가 사라지거나 과단순화되는 현상, Brevity Bias 는 LLM 이 간결한 지시를 선호해 세부를 빠뜨리는 경향이다. ACE 는 전체 재작성이나 요약 대신 필요한 변경분만 생성하는 델타 업데이트로 둘을 해결한다.",
+      "concept": "ace",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 4",
+        "p.22"
+      ]
+    },
+    {
+      "id": "w08s-05",
+      "type": "mc",
+      "q": "MCE(Meta Context Engineering)가 ACE와 구별되는 핵심 아이디어는?",
+      "options": [
+        "플레이북을 더 자주, 더 짧게 전체 재작성해 항상 최신 상태를 유지하고 오래된 bullet 은 주기적으로 일괄 삭제한다",
+        "컨텍스트를 어떻게 관리할지(메커니즘)와 무엇을 담을지(내용)를 분리하고, Meta-Agent가 관리 방법 자체를 스킬로 진화시킨다",
+        "컨텍스트 엔지니어링을 보조 수단으로 격하하고, 과제별 실패 궤적으로 모델 가중치를 직접 갱신해 컨텍스트 의존을 줄인다",
+        "사람이 작성한 휴리스틱 갱신 규칙을 더 많이 추가하고 규칙 적용 순서를 고정해 플레이북 품질의 재현성을 보장한다"
+      ],
+      "answer": 1,
+      "explanation": "p.23~24: MCE(Ye et al. 2026)는 메커니즘과 산출물 내용을 분리한다. Meta-Agent 가 Agentic Crossover → Skill Generation 으로 컨텍스트 엔지니어링 방법을 자유 형식 스킬로 진화시키고, Base-Agent 가 그 스킬을 실행해 과제별 컨텍스트를 만든다. ACE 와 달리 휴리스틱 규칙을 강제하지 않는다.",
+      "concept": "mce-meta-harness",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 5",
+        "p.23~24"
+      ]
+    },
+    {
+      "id": "w08s-06",
+      "type": "mc",
+      "q": "ADAS와 AFlow의 워크플로우 탐색 방법을 바르게 짝지은 것은?",
+      "options": [
+        "ADAS: 워크플로우를 그래프로 두고 MCTS 로 노드를 탐색 / AFlow: 메타 에이전트가 자연어로 새 설계를 제안하는 meta-agent search",
+        "ADAS: MAP-Elites 와 island 진화로 후보 풀의 다양성 유지 / AFlow: 코딩 에이전트가 자기 코드베이스를 수정해 아카이브에 저장",
+        "ADAS: 메타 에이전트가 새 워크플로우를 제안하는 meta-agent search / AFlow: 그래프(노드=LLM 호출, 엣지=코드 논리) 위 MCTS",
+        "ADAS: 프롬프트 변이를 거듭하는 진화 탐색 / AFlow: PRM 으로 실패 스텝을 찾고 교사 모델의 교정 궤적으로 SFT 하는 공동 최적화"
+      ],
+      "answer": 2,
+      "explanation": "p.28~29: ADAS(Hu et al. 2025)는 meta-agent search, AFlow(Zhang et al. 2025)는 그래프 표현 + MCTS(점수와 균등 탐색의 soft mixture 로 노드 선택, LLM 이 수정 워크플로우 생성, top-k 평균이 정체되면 종료)다. 수업 요약본처럼 둘을 묶어 MCTS 라고 하면 부정확하다.",
+      "concept": "adas-vs-aflow",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 6",
+        "p.28~29"
+      ]
+    },
+    {
+      "id": "w08s-07",
+      "type": "mc",
+      "q": "Autodata agent에서 '딱 맞는 난이도'의 학습·평가 데이터를 고르는 기준으로 옳은 것은?",
+      "options": [
+        "Weak Solver 와 Strong Solver 가 모두 푸는 문제만 남겨 정답의 신뢰도를 높이고 나머지는 재출제 대기열로 보낸다",
+        "Weak Solver 와 Strong Solver 가 모두 못 푸는 문제만 남겨 학습 데이터의 난이도 상한을 최대한 끌어올린다",
+        "Judge 가 문장 길이와 보기 수를 기준으로 가장 복잡하다고 평가한 문제만 남겨 변별력을 확보한다",
+        "Strong Solver 는 풀지만 Weak Solver 는 못 푸는 문제를 남긴다"
+      ],
+      "answer": 3,
+      "explanation": "p.27: 메인 에이전트가 Challenger(문제 제안), Weak Solver(충분히 어려운지 검사), Strong Solver(여전히 풀리는지 검사), Verifier/Judge(품질 평가)를 관리한다. 약한 풀이자가 맞히면 너무 쉬운 것이고 강한 풀이자도 못 풀면 결함이거나 너무 어려운 것이므로, 강한 쪽만 푸는 구간이 목표 난이도다.",
+      "concept": "autodata-agent",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 6",
+        "p.27"
+      ]
+    },
+    {
+      "id": "w08s-08",
+      "type": "mc",
+      "q": "STOP(Self-Taught Optimizer, 2023)의 결과가 하네스 엔지니어링에 주는 '경고'로 옳은 것은?",
+      "options": [
+        "유능한 모델(GPT-4)에서는 반복마다 성능이 올랐지만 약한 모델(GPT-3.5·Mixtral)에서는 떨어졌으므로, 재귀 구조만으로는 부족하고 지능이 핵심이다",
+        "재귀적 자기개선은 모델 크기와 무관하게 항상 같은 지점으로 수렴하므로, 하네스만 잘 설계하면 베이스 모델 선택은 결과에 영향을 주지 않는다",
+        "Improver 가 자기 코드를 수정하면 반드시 평가 함수를 우회하는 보상 해킹이 발생하므로, 자기 수정은 하네스 설계에서 전면 금지해야 한다",
+        "약한 모델일수록 개선 여지가 커서 재귀 개선의 이득이 가장 크므로, 하네스 최적화 연구는 소형 오픈 모델에 자원을 집중해야 한다"
+      ],
+      "answer": 0,
+      "explanation": "p.31~33: STOP 은 원래 Improver → 개선된 Improver(여러 후보 생성·평가·선택) → 그 Improver 를 자기 코드에 적용하는 초기 재귀적 스캐폴딩 개선 사례다. GPT-4 에서는 반복마다 평균 성능이 올랐지만 GPT-3.5·Mixtral 에서는 하락했다. 결론: 하네스 개선은 배포를 좋게 하지만 베이스 모델이 메커니즘을 개선할 만큼 유능해야 한다.",
+      "concept": "stop-warning",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 7",
+        "p.31~33"
+      ]
+    },
+    {
+      "id": "w08s-09",
+      "type": "mc",
+      "q": "AlphaEvolve가 후보 프로그램 풀의 다양성을 유지하기 위해 쓰는 장치로 옳게 짝지은 것은?",
+      "options": [
+        "실행 성능을 보상으로 GRPO 를 돌려 LLM 파라미터를 갱신하고, 롤아웃 아카이브에 인간 전문가 시연을 추가해 참조 경험으로 쓴다",
+        "UCB 밴딧으로 기여도 높은 변이 LLM 을 우선 고르고, 코드 임베딩 유사도와 LLM 판단으로 중복 변이를 거절해 풀을 정리한다",
+        "특성 공간 영역마다 고성능 프로그램을 유지하는 MAP-Elites 와, 여러 집단이 다른 경로를 탐색하는 Island 진화",
+        "PRM 으로 행동 정확도·추론 품질이 낮은 스텝을 찾고, 교사 모델이 교정 행동을 생성해 Soft SFT 로 학생 가중치를 갱신한다"
+      ],
+      "answer": 2,
+      "explanation": "p.40, 42: AlphaEvolve(Novikov et al. 2025)는 후보 프로그램 풀을 유지하며 고정 LLM 에게 diff 생성을 시키고, MAP-Elites 와 Island 진화로 다양성을 지킨다. 코드의 진화 영역은 EVOLVE-BLOCK 주석으로 표시하고 파라미터는 갱신하지 않는다. 보기의 GRPO 는 ThetaEvolve, 인간 시연은 DemoEvolve, UCB 밴딧·중복 거절은 ShinkaEvolve, PRM·교사 교정은 Continual Harness 의 장치다.",
+      "concept": "evolutionary-search",
+      "difficulty": 3,
+      "refs": [
+        "week08.md 개념 8",
+        "p.40~44"
+      ]
+    },
+    {
+      "id": "w08s-10",
+      "type": "mc",
+      "q": "HDA(Harness-Delta Attribution) 연구에서 벤치마크별로 지배적이었던 이득 메커니즘을 바르게 짝지은 것은?",
+      "options": [
+        "ALFWorld: 일반화 개선(G)이 대부분 / CREATE: 데이터셋 지름길에 의한 오버피팅(O) / SWE-bench Verified: 재시도에 의한 테스트타임 스케일링(T)",
+        "ALFWorld: 오버피팅(O, 집계 이득의 98%) / CREATE: 테스트타임 스케일링(T) / SWE-bench Verified: 일반화 개선(G)이 가장 뚜렷",
+        "ALFWorld: 호출 횟수 증가에 의한 테스트타임 스케일링(T) / CREATE: 일반화 개선(G) / SWE-bench Verified: 벤치마크 암기에 의한 오버피팅(O)",
+        "세 벤치마크 모두 일반화 개선(G)이 이득의 대부분을 차지했고, 오버피팅과 테스트타임 스케일링은 측정 오차 수준에 머물렀다"
+      ],
+      "answer": 1,
+      "explanation": "p.63~65: ALFWorld 는 5개 모델 모두 학습 성공률 100% 에 도달했지만 집계 이득의 98% 가 오버피팅으로 귀속됐다(진화가 사실상 executor 를 대체). CREATE 는 추론 계산 추가가 주된 요인으로, call-matched 베이스라인이 이득의 49% 를 회복했고 한 모델에서는 진화 하네스를 능가했다. SWE-bench Verified 는 가장 충실한 이득(G)을 보였지만 주로 약한 executor 에서였다.",
+      "concept": "hda-results",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 11",
+        "p.63~65"
+      ]
+    },
+    {
+      "id": "w08s-11",
+      "type": "num",
+      "q": "HDA 분해에서 베이스 하네스 B = 55점, 진화 하네스 E = 95점, 오버피팅 특성을 중화한 E_neutral = 67점, 베이스를 같은 호출 횟수로 돌린 B_cc = 63점이었다. 일반화 개선 G 는 몇 점인가? (Δ = E − B = O + T + G, O = E − E_neutral, T = B_cc − B)",
+      "answer": 4,
+      "tol": 0.01,
+      "explanation": "Δ = 95 − 55 = 40, O = 95 − 67 = 28, T = 63 − 55 = 8, 따라서 G = 40 − 28 − 8 = 4. 40점 향상 중 진짜 일반화 개선은 4점뿐이고, 측정된 O 는 하한이므로 실제 오버피팅 몫은 이보다 클 수 있다.",
+      "concept": "hda-decomposition",
+      "difficulty": 2,
+      "refs": [
+        "week08.md 개념 11",
+        "p.57~58"
+      ]
+    },
+    {
+      "id": "w08s-12",
+      "type": "num",
+      "q": "어떤 벤치마크에서 하네스 진화로 Δ = 30점이 올랐다. 호출 횟수를 맞춘 베이스라인 B_cc 가 그 이득의 60% 를 회복했고, 하드코딩 규칙을 제거하자 E 가 9점 떨어졌다. 세 메커니즘 중 가장 큰 몫을 차지한 메커니즘의 점수는 몇 점인가?",
+      "answer": 18,
+      "tol": 0.01,
+      "explanation": "T = 30 × 0.6 = 18, O = 9, G = 30 − 18 − 9 = 3. 가장 큰 몫은 테스트타임 스케일링 T = 18점이다. 수업의 CREATE 사례처럼 이득 대부분이 추론 계산을 더 쓴 데서 온 경우로, 비용으로 환산해 보고해야 한다.",
+      "concept": "hda-decomposition",
+      "difficulty": 3,
+      "refs": [
+        "week08.md 개념 11",
+        "p.57~58, 64"
+      ]
+    }
+  ]
+}

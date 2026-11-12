@@ -269,5 +269,24 @@ def jdump(obj, path: Path):
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def update_report_index():
+    """정적 사이트(lab/)가 읽을 수 있게 evolve/reports/index.json 을 다시 만든다 (Pages 는 디렉터리 목록이 없음)."""
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    rounds, exps = [], []
+    for p in sorted(REPORT_DIR.glob("round-*.json")):
+        try:
+            r = json.loads(p.read_text(encoding="utf-8"))
+            rounds.append({"file": p.name, "round": r.get("round"), "date": r.get("date"), "weeks": r.get("weeks"), "mock": r.get("mock"), "accepted": r.get("accepted")})
+        except Exception:
+            continue
+    for p in sorted(REPORT_DIR.glob("exp-*.json")):
+        try:
+            r = json.loads(p.read_text(encoding="utf-8"))
+            exps.append({"file": p.name, "exp": r.get("exp"), "weeks": r.get("weeks"), "mock": r.get("mock")})
+        except Exception:
+            continue
+    jdump({"generated": time.strftime("%Y-%m-%dT%H:%M:%S"), "rounds": rounds, "experiments": exps}, REPORT_DIR / "index.json")
+
+
 def log(*a):
     print(*a, file=sys.stderr, flush=True)

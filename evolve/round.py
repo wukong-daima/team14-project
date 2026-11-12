@@ -16,7 +16,7 @@ import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
-from common import LLM, REPORT_DIR, ROOT, RUN_DIR, WEAK_MODEL, WEEK_DIR, jdump, load_bank, log
+from common import LLM, REPORT_DIR, ROOT, RUN_DIR, WEAK_MODEL, WEEK_DIR, jdump, load_bank, log, update_report_index
 from diagnose import diagnose
 from propose import apply_patches, propose
 from solve import run as solve_run
@@ -108,6 +108,7 @@ def main():
         "usage": llm.usage.to_dict(),
     }
     jdump(report, REPORT_DIR / f"{tag}.json")
+    update_report_index()
     log(f"[5/5] 리포트 → evolve/reports/{tag}.json")
     log(f"  R {R_before} → {R_after}  Δ공개={d_pub} Δ비공개={d_hid} O={O} G={G}  패치 {len(patches)}개  accepted={accepted}  ${report['usage']['usd']}")
 

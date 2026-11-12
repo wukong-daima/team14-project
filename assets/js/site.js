@@ -17,7 +17,7 @@
   };
 
   // ----- 경로 유틸: index.html과 weeks/*.html, quiz/ 에서 모두 동작하도록 상대 경로 계산
-  var inSub = /\/(weeks|quiz)\//.test(location.pathname);
+  var inSub = /\/(weeks|quiz|lab)\//.test(location.pathname);
   var root = inSub ? "../" : "./";
 
   // ----- 전공/중학생 모드
@@ -57,6 +57,7 @@
         '<a href="' + root + 'index.html#weeks">주차별 공부</a>' +
         '<a href="' + root + 'quiz/index.html">퀴즈</a>' +
         '<a href="' + root + 'index.html#concept">프로젝트 소개</a>' +
+        '<a href="' + root + 'lab/index.html">실험실</a>' +
         '<a href="' + root + 'slides/index.html">발표 모드</a>' +
       '</nav>' +
       '<span class="spacer"></span>' +

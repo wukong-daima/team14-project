@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>실험실 — EvoLecture</title>
+  <meta name="description" content="자가 진화 루프 라운드 리포트와 행동 실험 결과. 개선분을 오버피팅(O)·테스트타임(T)·일반화(G)로 분해해 보여줍니다.">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <style>
+    .stat { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 14px 0; }
+    .stat .card { padding: 14px 16px; }
+    .stat .v { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; }
+    .stat .l { color: var(--muted); font-size: .82rem; }
+    .chart { background: var(--surface-2); border-radius: 12px; padding: 12px; margin: 10px 0; }
+    .chart svg { width: 100%; height: auto; }
+    .chart text { font-family: var(--mono); font-size: 11px; fill: var(--text); }
+    .empty { border: 2px dashed var(--line); border-radius: var(--radius); padding: 26px; text-align: center; color: var(--muted); }
+    .round { margin: 18px 0; }
+    .round h3 { margin: 0 0 6px; }
+    .prereg td:first-child { white-space: nowrap; font-weight: 600; }
+    .legend span { display: inline-block; margin-right: 12px; font-size: .82rem; color: var(--muted); }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="wrap"></div></header>
+  <main class="wrap">
+    <section class="week-header fade-in">
+      <div class="meta"><span class="pill compare">LAB</span><span>자가 진화 루프 · 행동 실험 결과</span></div>
+      <h1>실험실</h1>
+      <div data-level="pro"><p class="lead">evolve 루프가 남긴 라운드 리포트(<code>evolve/reports/</code>)를 그대로 읽어 보여줍니다. 숫자는 사람이 손대지 않습니다. 비공개 세트가 없으면 O·G 는 비워 두고 "개선"을 주장하지 않습니다.</p></div>
+      <div data-level="easy"><p>AI가 사이트를 스스로 고친 뒤 "정말 좋아졌나"를 시험 점수로 재는 곳이에요. 공개된 문제만 잘 풀게 됐으면 '외운 것'(O), 숨겨 둔 문제까지 잘 풀면 '진짜 실력'(G)이에요.</p></div>
+    </section>
+
+    <h2 id="prereg">0. 분석 계획 (결과 보기 전에 고정)</h2>
+    <div class="card">
+      <table class="prereg">
+        <tr><td>질문</td><td>재학습 없는 자가 진화 루프가 학습 콘텐츠를 실제로 개선하는가? 개선분은 O(오버피팅)·T(테스트타임)·G(일반화) 중 어디서 오는가?</td></tr>
+        <tr><td>보상 R</td><td><code>R = 0.6 · Acc_public + 0.4 · SourcePass</code>. 비공개 세트 정답률은 보상에 쓰지 않는다.</td></tr>
+        <tr><td>분해</td><td><code>Δ = Acc_after − Acc_before</code> (공개), <code>O = Δ_public − Δ_heldout</code>, <code>T</code> = 호출 수 동일 설계라 0 (호출 수 효과는 E1·E2 로 별도), <code>G = Δ − O − T</code></td></tr>
+        <tr><td>채택 기준</td><td>유출 검사 통과 · HTML 정상 · <code>R_after &gt; R_before</code>. 채택돼도 사람이 PR 을 검토한다.</td></tr>
+        <tr><td>표본 목표</td><td>공개 150+ · 비공개 50+ 문항, 라운드 3회 이상, 풀이 시드 3개 평균±표준편차</td></tr>
+        <tr><td>예상 결과 (미리 적어 둠)</td><td>O가 Δ의 절반 이상일 가능성이 크다. 그 경우 "수업(8주차)이 경고한 현상을 재현했다"로 보고하며 결과를 숨기지 않는다.</td></tr>
+        <tr><td>한계</td><td>풀이자는 사람이 아니라 모델(haiku)이다. 정답률은 "콘텐츠가 풀이자에게 주는 정보량"의 대리 지표다.</td></tr>
+      </table>
+    </div>
+
+    <h2 id="rounds">1. 라운드</h2>
+    <div id="rounds-box"><div class="empty">아직 실행된 라운드가 없습니다. <code>python evolve/round.py --weeks week02,week04,week08</code> 을 실행하면 여기에 나타납니다.</div></div>
+
+    <h2 id="exps">2. 행동 실험 (Claude 와 수업 방식 비교)</h2>
+    <p class="small muted">E3 자료 없음/브리프/페이지 조건 정답률 · E2 pass@k vs pass^k · E1 effort(테스트타임 스케일링). 해석은 공개 문서 범위에서만 합니다.</p>
+    <div id="exps-box"><div class="empty">아직 실험 결과가 없습니다. <code>python evolve/experiments.py e3 --weeks week02,week04,week08</code></div></div>
+
+    <div class="week-nav"><a class="btn" href="../index.html">← 홈</a><a class="btn" href="../weeks/week08.html#play">8주차 HDA Lab 시뮬레이터 →</a></div>
+  </main>
+  <footer class="site-footer"><div class="wrap">EvoLecture · Team14 · 이 페이지의 숫자는 리포트 JSON 을 그대로 읽은 것입니다.</div></footer>
+
+  <script src="../assets/js/weeks.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script>
+  (function () {
+    var NS = "http://www.w3.org/2000/svg";
+    function el(t, a, txt) { var e = document.createElementNS(NS, t); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; }
+    function pct(x) { return x == null ? "–" : (x * 100).toFixed(1) + "%"; }
+    function num(x, d) { return x == null ? "–" : Number(x).toFixed(d == null ? 3 : d); }
+    function h(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+
+    // Δ 를 O / T / G 로 쪼갠 누적 막대 (음수는 왼쪽으로)
+    function decompBar(d) {
+      var svg = el("svg", { viewBox: "0 0 700 90" });
+      var W = 560, x0 = 110, scale = W / 0.5; // ±50%p 범위
+      var zero = x0 + W / 2;
+      svg.appendChild(el("line", { x1: zero, y1: 10, x2: zero, y2: 60, stroke: "currentColor", "stroke-opacity": .4 }));
+      var parts = [["O", d.O, "var(--danger)"], ["T", d.T, "var(--warn)"], ["G", d.G, "var(--ok)"]];
+      var cur = zero;
+      parts.forEach(function (p) {
+        if (p[1] == null) return;
+        var w = p[1] * scale;
+        svg.appendChild(el("rect", { x: Math.min(cur, cur + w), y: 18, width: Math.abs(w), height: 24, fill: p[2], opacity: .9 }));
+        if (Math.abs(w) > 18) svg.appendChild(el("text", { x: cur + w / 2, y: 34, "text-anchor": "middle", fill: "#fff" }, p[0]));
+        cur += w;
+      });
+      svg.appendChild(el("text", { x: 8, y: 34 }, "Δ공개 " + pct(d.delta_public)));
+      svg.appendChild(el("text", { x: x0, y: 76, opacity: .6 }, "−50%p"));
+      svg.appendChild(el("text", { x: zero, y: 76, "text-anchor": "middle", opacity: .6 }, "0"));
+      svg.appendChild(el("text", { x: x0 + W, y: 76, "text-anchor": "end", opacity: .6 }, "+50%p"));
+      if (d.O == null) svg.appendChild(el("text", { x: zero + 8, y: 56, opacity: .7 }, "비공개 세트 없음 → O·G 미산출 (Δ공개만 표시)"));
+      if (d.O == null && d.delta_public != null) svg.appendChild(el("rect", { x: Math.min(zero, zero + d.delta_public * scale), y: 18, width: Math.abs(d.delta_public * scale), height: 24, fill: "var(--accent)", opacity: .5 }));
+      return svg;
+    }
+
+    function bars(rows, maxV, fmt) { // rows: [{label, value, color}]
+      var svg = el("svg", { viewBox: "0 0 700 " + (rows.length * 30 + 10) });
+      rows.forEach(function (r, i) {
+        var y = 6 + i * 30, w = Math.max(2, (r.value || 0) / maxV * 480);
+        svg.appendChild(el("text", { x: 8, y: y + 15 }, r.label));
+        svg.appendChild(el("rect", { x: 150, y: y, width: 480, height: 20, rx: 5, fill: "currentColor", opacity: .07 }));
+        svg.appendChild(el("rect", { x: 150, y: y, width: w, height: 20, rx: 5, fill: r.color || "var(--accent)", opacity: .9 }));
+        svg.appendChild(el("text", { x: 640, y: y + 15 }, fmt(r.value)));
+      });
+      return svg;
+    }
+
+    function renderRound(r) {
+      var box = h("div", "round card");
+      box.appendChild(h("h3", null, "라운드 " + r.round + " · " + r.date + " · " + (r.weeks || []).join(", ") + (r.mock ? ' <span class="pill todo">mock (가짜 풀이자)</span>' : "") + (r.accepted ? ' <span class="pill ok">채택</span>' : ' <span class="pill">기각</span>')));
+      var st = h("div", "stat");
+      [["Acc 공개", pct(r.baseline.acc_public) + " → " + pct(r.after.acc_public)],
+       ["Acc 비공개", pct(r.baseline.acc_heldout) + " → " + pct(r.after.acc_heldout)],
+       ["R", num(r.baseline.R) + " → " + num(r.after.R)],
+       ["자료 없음(B)", pct(r.baseline.acc_none)],
+       ["패치", (r.patches || []).length + "개"],
+       ["비용", "$" + num(r.usage && r.usage.usd, 3)]].forEach(function (s) {
+        var c = h("div", "card"); c.appendChild(h("div", "v", s[1])); c.appendChild(h("div", "l", s[0])); st.appendChild(c);
+      });
+      box.appendChild(st);
+      var ch = h("div", "chart"); ch.appendChild(decompBar(r.decomposition || {})); box.appendChild(ch);
+      box.appendChild(h("div", "legend", '<span><i style="background:var(--danger)"></i>O 오버피팅</span><span><i style="background:var(--warn)"></i>T 테스트타임</span><span><i style="background:var(--ok)"></i>G 일반화</span><span><i style="background:var(--accent)"></i>Δ (미분해)</span>'));
+      if (r.weak_concepts && r.weak_concepts.length) box.appendChild(h("p", "small", "약한 개념: " + r.weak_concepts.map(function (w) { return w.week + " · " + w.concept + " (" + pct(w.acc) + ")"; }).join(" / ")));
+      if (r.patches && r.patches.length) box.appendChild(h("p", "small", "패치: " + r.patches.map(function (p) { return p.week + "#" + p.card_id + " " + (p.title || ""); }).join(" / ")));
+      if (r.checks && r.checks.leaks && r.checks.leaks.length) box.appendChild(h("p", "small", '<span class="badge check">유출 의심</span> ' + r.checks.leaks.length + "건"));
+      return box;
+    }
+
+    function renderExp(e) {
+      var box = h("div", "round card");
+      var title = { e1: "E1 테스트타임 스케일링 (effort)", e2: "E2 pass@k vs pass^k", e3: "E3 하네스 효과 (자료 없음 / 브리프 / 페이지)" }[e.exp] || e.exp;
+      box.appendChild(h("h3", null, title + " · " + e.weeks + (e.mock ? ' <span class="pill todo">mock</span>' : "")));
+      var ch = h("div", "chart");
+      if (e.exp === "e3") ch.appendChild(bars(e.runs.map(function (r) { return { label: { none: "자료 없음", brief: "브리프", page: "사이트 페이지" }[r.condition] || r.condition, value: r.acc, color: { none: "var(--muted)", brief: "var(--warn)", page: "var(--accent)" }[r.condition] }; }), 1, pct));
+      else if (e.exp === "e1") ch.appendChild(bars(e.runs.map(function (r) { return { label: "effort " + r.effort, value: r.acc }; }), 1, pct));
+      else if (e.exp === "e2") { var r0 = e.runs[0]; ch.appendChild(bars([{ label: "pass@" + r0.k, value: r0.pass_at_k, color: "var(--accent)" }, { label: "pass^" + r0.k, value: r0.pass_hat_k, color: "var(--danger)" }, { label: "평균 정답률", value: r0.acc, color: "var(--muted)" }], 1, pct)); if (e.suspect_broken) box.appendChild(h("p", "small", "pass@k = 0 (결함 의심): " + (e.suspect_broken.length ? e.suspect_broken.join(", ") : "없음") + " · 전부 정답(너무 쉬움): " + (e.too_easy || []).length + "문항")); }
+      box.appendChild(ch);
+      if (e.usage) box.appendChild(h("p", "small muted", "비용 $" + num(e.usage.usd, 3) + " · 모델 " + e.model));
+      return box;
+    }
+
+    fetch("../evolve/reports/index.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (idx) {
+      if (!idx) return;
+      if (idx.rounds && idx.rounds.length) {
+        var rb = document.getElementById("rounds-box"); rb.innerHTML = "";
+        Promise.all(idx.rounds.map(function (m) { return fetch("../evolve/reports/" + m.file, { cache: "no-store" }).then(function (r) { return r.json(); }); })).then(function (rs) {
+          rs.sort(function (a, b) { return b.round - a.round; }).forEach(function (r) { rb.appendChild(renderRound(r)); });
+        });
+      }
+      if (idx.experiments && idx.experiments.length) {
+        var eb = document.getElementById("exps-box"); eb.innerHTML = "";
+        idx.experiments.forEach(function (m) { fetch("../evolve/reports/" + m.file, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (e) { eb.appendChild(renderExp(e)); }); });
+      }
+    }).catch(function () {});
+  })();
+  </script>
+</body>
+</html>

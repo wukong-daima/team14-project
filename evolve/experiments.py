@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 from types import SimpleNamespace
 
-from common import LLM, REPORT_DIR, WEAK_MODEL, jdump, log
+from common import LLM, REPORT_DIR, WEAK_MODEL, jdump, log, update_report_index
 from solve import run as solve_run
 
 
@@ -47,6 +47,7 @@ def main():
     out["usage"] = llm.usage.to_dict()
     p = REPORT_DIR / f"exp-{a.exp}-{a.weeks.replace(',', '_')}{'-mock' if a.mock else ''}.json"
     jdump(out, p)
+    update_report_index()
     log(f"→ {p}")
 
 

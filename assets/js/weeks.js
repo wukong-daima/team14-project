@@ -22,7 +22,7 @@ window.WEEKS = [
   { id: "week09", num: 9, title: "자가 진화 하네스 (2): 리워드 · 다양성 · 검증", tag: "하네스",
     summary: "리워드가 부정확할 때의 3대 문제, MAP-Elites · Island로 다양성 지키기, pass@k로 망가진 문제 찾기",
     owner: "담당 C", status: "done", hero: "pass@k vs pass^k 실험실" },
-  { id: "week10", num: 10, title: "10주차 (자료 대기)", tag: "예정",
-    summary: "수업 후 요약·자료가 오면 브리프를 만들고 채웁니다.",
-    owner: "담당 C", status: "todo", hero: "미정" },
+  { id: "week10", num: 10, title: "AI for Science (1): 데이터에서 과학 법칙 찾기", tag: "AI4Science",
+    summary: "왜 방정식인가(외삽), 식별 가능성, SINDy · PDE-FIND · 심볼릭 회귀 · AI Feynman, 신경망에서 식을 뽑는 심볼릭 증류",
+    owner: "담당 C", status: "done", hero: "SINDy 희소 회귀 실험실" },
 ];

@@ -3,125 +3,402 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- [1] 제목: "N주차 · 주제" -->
-  <title>10주차 · 자료 대기 — Team14 랩</title>
+  <title>10주차 · AI for Science (1): 데이터에서 과학 법칙 찾기 — Team14 랩</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/site.css">
   <style>
-    /* 이 주차 전용 스타일만 여기에. 공통 규칙은 assets/css/site.css */
+    .sd-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin: 8px 0 4px; }
+    .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+    .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 10px; }
+    .verdict { display: inline-block; margin-top: 10px; padding: 6px 12px; border-radius: 10px; font-size: .92rem; font-weight: 700; }
+    .verdict.ok { background: #e3f6ee; color: var(--ok); }
+    .verdict.hard { background: #fff6d6; color: #8a6a00; }
+    .verdict.bad { background: #fde8ec; color: var(--danger); }
+    .formula { font-family: var(--mono); font-size: .92rem; background: var(--surface-2); padding: 8px 12px; border-radius: 8px; display: inline-block; }
+    .steps { margin: 6px 0 0; padding-left: 1.2em; }
+    .steps li { margin: 2px 0; }
   </style>
 </head>
-<!-- [2] data-week 는 assets/js/weeks.js 의 id 와 같아야 prev/next 내비게이션이 붙습니다 -->
 <body data-week="week10">
   <header class="site-header"><div class="wrap"></div></header>
 
   <main class="wrap">
     <section class="week-header fade-in">
-      <div class="meta"><span class="pill accent">WEEK 10 · 예정</span><span>담당: 담당 C</span><span>·</span><span>마지막 수정: 2026-11-xx</span></div>
-      <h1>10주차 (수업 후 채웁니다)</h1>
-      <!-- [3] 한 줄 요약: 전공/쉬운 두 벌 -->
-      <div data-level="pro"><p class="lead">이 주차를 한 문장으로. 무엇을, 왜, 어떤 대가로.</p></div>
-      <div data-level="easy"><p>이 주차를 중학생에게 한 문장으로.</p></div>
+      <div class="meta"><span class="pill accent">WEEK 10 · AI for Science</span><span>담당: 담당 C</span><span>·</span><span>마지막 수정: 2026-11-13</span><span>·</span><span>노션 #10 요약 + 받아쓰기 대조 (강의 PDF 미확보)</span></div>
+      <h1>AI for Science (1): 관측 데이터에서 과학 법칙 찾기</h1>
+      <div data-level="pro"><p class="lead">테이블 관측 데이터(X → Y)에서 <b>지배방정식</b>을 찾는 법을 배웁니다. 왜 방정식인가(외삽 · 해석 · 의사결정 · 새 발견), 왜 어려운가(<b>식별 가능성</b>), 어떻게 찾는가(후보 항과 희소성의 <b>SINDy</b> → 편미분방정식의 <b>PDE-FIND</b> → 식 구조까지 찾는 <b>심볼릭 회귀</b> → 탐색을 줄이는 <b>AI Feynman</b>), 그리고 신경망에서 식을 뽑는 <b>심볼릭 증류</b>까지 다룹니다.</p></div>
+      <div data-level="easy"><p>AI는 연습한 범위 안에서는 잘 맞히지만, 한 번도 안 본 범위는 잘 못 맞혀요. 뉴턴처럼 "공식"을 알아내면 안 본 범위도 계산할 수 있어요. 이번 주는 숫자표에서 공식을 찾아내는 방법을 배워요.</p></div>
     </section>
 
-      <div class="callout" style="border-left-color:var(--warn)"><b>아직 수업 전입니다.</b> 수업 요약과 자료가 오면 <code>content/briefs/week10.md</code> 브리프를 먼저 만들고 이 페이지를 채웁니다. 완성 예시는 <a href="week02.html">2주차</a>.</div>
     <div class="layout">
       <nav class="toc" aria-label="이 페이지 목차"></nav>
       <div>
 
-        <!-- ================= [4] 핵심 개념 지도 (SVG 한 장) ================= -->
         <h2 id="map">1. 한눈에 보기</h2>
         <figure class="figure">
-          <svg viewBox="0 0 800 220" role="img" aria-label="이 주차 개념 지도">
-            <!-- 박스/화살표로 개념 관계를 그립니다. 색은 currentColor 와 var(--accent) 만 쓰면 다크모드에서도 보입니다. -->
-            <g font-family="Noto Sans KR, sans-serif" font-size="14" fill="currentColor">
-              <rect x="20" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="100" y="116" text-anchor="middle">개념 A</text>
-              <line x1="180" y1="110" x2="240" y2="110" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="240" y="80" width="160" height="60" rx="10" fill="none" stroke="currentColor"/>
-              <text x="320" y="116" text-anchor="middle">개념 B</text>
+          <svg viewBox="0 0 900 340" role="img" aria-label="목표의 사다리: 예측, 계수 추정, 방정식 구조 발견, 인과 발견 순으로 어려워진다. 계수 추정에는 SINDy와 PDE-FIND, 구조 발견에는 심볼릭 회귀와 AI Feynman이 대응하고, 신경망과 방정식을 잇는 것이 심볼릭 증류다. 전체를 가로막는 것이 식별 가능성이다">
+            <defs><marker id="ar10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+            <g font-family="Noto Sans KR, sans-serif" font-size="13" fill="currentColor">
+              <text x="20" y="26" font-weight="700">맞히기에서 "왜"로: 목표가 어려워지는 순서와 이번 수업의 방법</text>
+              <!-- 사다리 -->
+              <rect x="20" y="50" width="190" height="62" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="115" y="76" text-anchor="middle" font-weight="700">① 예측</text>
+              <text x="115" y="96" text-anchor="middle" font-size="11" opacity=".8">Y 값만 잘 맞힌다</text>
+              <rect x="244" y="50" width="190" height="62" rx="12" fill="var(--accent)" fill-opacity=".1" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="339" y="76" text-anchor="middle" font-weight="700">② 계수 추정</text>
+              <text x="339" y="96" text-anchor="middle" font-size="11" opacity=".8">식의 꼴은 알고 숫자를 찾는다</text>
+              <rect x="468" y="50" width="190" height="62" rx="12" fill="var(--accent)" fill-opacity=".1" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="563" y="76" text-anchor="middle" font-weight="700">③ 구조 발견</text>
+              <text x="563" y="96" text-anchor="middle" font-size="11" opacity=".8">식 자체를 찾는다</text>
+              <rect x="692" y="50" width="190" height="62" rx="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3"/>
+              <text x="787" y="76" text-anchor="middle" font-weight="700">④ 인과 발견</text>
+              <text x="787" y="96" text-anchor="middle" font-size="11" opacity=".8">방향까지 (이 수업 범위 밖)</text>
+              <line x1="210" y1="81" x2="240" y2="81" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10)"/>
+              <line x1="434" y1="81" x2="464" y2="81" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10)"/>
+              <line x1="658" y1="81" x2="688" y2="81" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10)"/>
+              <text x="450" y="134" text-anchor="middle" font-size="11" opacity=".7">오른쪽으로 갈수록 어렵고 중요하다</text>
+              <!-- 방법 -->
+              <rect x="20" y="158" width="190" height="78" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="115" y="182" text-anchor="middle" font-weight="700">신경망 회귀</text>
+              <text x="115" y="202" text-anchor="middle" font-size="11" opacity=".85">내삽에 강하다</text>
+              <text x="115" y="220" text-anchor="middle" font-size="11" opacity=".85">외삽 · 설명에 약하다</text>
+              <rect x="244" y="158" width="190" height="78" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="339" y="182" text-anchor="middle" font-weight="700">SINDy · PDE-FIND</text>
+              <text x="339" y="202" text-anchor="middle" font-size="11" opacity=".85">후보 항을 깔아 놓고</text>
+              <text x="339" y="220" text-anchor="middle" font-size="11" opacity=".85">계수를 희소하게 피팅</text>
+              <rect x="468" y="158" width="190" height="78" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+              <text x="563" y="182" text-anchor="middle" font-weight="700">심볼릭 회귀 · AI Feynman</text>
+              <text x="563" y="202" text-anchor="middle" font-size="11" opacity=".85">진화로 구조 탐색</text>
+              <text x="563" y="220" text-anchor="middle" font-size="11" opacity=".85">분리 가능성으로 탐색 축소</text>
+              <line x1="115" y1="112" x2="115" y2="156" stroke="currentColor" stroke-opacity=".5" stroke-width="1.5"/>
+              <line x1="339" y1="112" x2="339" y2="156" stroke="var(--accent)" stroke-opacity=".7" stroke-width="1.5"/>
+              <line x1="563" y1="112" x2="563" y2="156" stroke="var(--accent)" stroke-opacity=".7" stroke-width="1.5"/>
+              <!-- 증류 -->
+              <path d="M115 236 L115 286 L240 286" fill="none" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#ar10)"/>
+              <rect x="244" y="262" width="190" height="48" rx="10" fill="var(--surface-2)" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 3"/>
+              <text x="339" y="283" text-anchor="middle" font-weight="700" fill="var(--ok)">심볼릭 증류</text>
+              <text x="339" y="300" text-anchor="middle" font-size="11" opacity=".85">신경망이 배운 관계를 식으로</text>
+              <path d="M434 286 L563 286 L563 240" fill="none" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#ar10)"/>
+              <!-- 걸림돌 -->
+              <rect x="692" y="158" width="190" height="152" rx="10" fill="none" stroke="var(--danger)" stroke-width="1.5" stroke-dasharray="5 3"/>
+              <text x="787" y="182" text-anchor="middle" font-weight="700" fill="var(--danger)">걸림돌: 식별 가능성</text>
+              <text x="706" y="208" font-size="12">같은 데이터를 설명하는</text>
+              <text x="706" y="226" font-size="12">식이 여러 개일 수 있다</text>
+              <text x="706" y="254" font-size="12">해법: 추가 실험</text>
+              <text x="706" y="272" font-size="12">(능동 실험 설계)</text>
+              <text x="706" y="296" font-size="11" opacity=".75">노이즈 변수 → SciNet</text>
             </g>
           </svg>
-          <figcaption>한 줄 캡션</figcaption>
+          <figcaption>방정식을 찾는 방법은 "계수만 찾기"에서 "구조까지 찾기"로 넓어집니다. 어느 방법이든 데이터가 식을 하나로 정해 주지 못하면(식별 불가) 틀린 식을 법칙으로 착각할 수 있습니다.</figcaption>
         </figure>
 
-        <!-- ================= [5] 개념 카드 (반복) ================= -->
+        <div class="callout">
+          <b>이번 주 강의 PDF는 아직 받지 못했습니다.</b> 이 페이지는 노션 자동 회의록의 요약과 받아쓰기 전문만으로 썼습니다. 페이지 번호는 교수님이 수업 중 말로 부른 것(4 · 11 · 16 · 27페이지)만 적었고, 논문 저자와 연도는 공개 논문과 맞춰 본 것이라 PDF를 받으면 다시 대조합니다. "구두"는 받아쓰기에서 확인한 말입니다. 요약본은 음성 인식이라 고유명사 오류가 많아 아래 정정 상자를 함께 보세요.
+        </div>
+
         <h2 id="concepts">2. 핵심 개념</h2>
 
-        <section class="concept" id="c1">
-          <div class="card">
-            <div class="num">CONCEPT 01</div>
-            <h3>개념 이름 (영문 약어)</h3>
-            <div data-level="pro">
-              <p>전공 수준 설명 3~5문장. 정의 → 왜 필요한가 → 어떻게 동작 → 대가(트레이드오프).</p>
-            </div>
-            <div data-level="easy">
-              <p>중학생 비유 2~3문장. 일상 사물로.</p>
-            </div>
-            <!-- 요약본과 원본이 다를 때 -->
-            <div class="callout fix">요약본의 "X"는 원본 자료 기준 "Y"입니다 (슬라이드 p.NN).</div>
-            <figure class="figure">
-              <svg viewBox="0 0 600 160"><!-- 개념 도형 --></svg>
-              <figcaption>캡션</figcaption>
-            </figure>
+        <section class="concept" id="c1"><div class="card">
+          <div class="num">CONCEPT 01 · 구두 · 강조 많음</div>
+          <h3>왜 방정식을 찾는가: 외삽 · 해석 · 의사결정 · 새 발견</h3>
+          <div data-level="pro">
+            <p>문제 설정은 테이블 데이터에서 X(온도 x1, 압력 x2, 조성 x3 …)로 Y(전도율 같은 물성)를 만드는 <b>방정식</b>을 찾는 것입니다. Y를 정해 놓고 X를 만드는 역설계(inverse design)와는 방향이 반대입니다. 가장 큰 이유는 <b>외삽(extrapolation)</b>입니다. 실험 데이터가 0~200도에만 있을 때 250도, 300도의 물성을 묻는 것이 외삽인데, 일반 신경망은 물론 테이블 · 시계열 파운데이션 모델도 학습 범위 밖 예측에 약합니다. 방정식이 정확하면 범위 밖에서도 그대로 쓸 수 있습니다. 그 밖에 왜 그렇게 예측했는지 <b>해석</b>하고, Y를 올리려면 온도와 압력 중 무엇을 올릴지 <b>의사결정</b>하고, 몰랐던 법칙을 <b>발견</b>하는 데 씁니다.</p>
+            <p><b>실전 팁(구두):</b> 방정식 <b>구조</b>를 먼저 찾고 그 식의 <b>계수</b>를 신경망으로 보정하면 외삽 성능이 크게 오릅니다. 학습 분포와 테스트 분포가 많이 다른 테이블 문제에서 써 볼 만하다고 했습니다.</p>
           </div>
-        </section>
+          <div data-level="easy">
+            <p>0도부터 200도까지만 실험해 봤는데 300도에서는 어떻게 될까요? AI는 본 적 없는 범위라 잘 못 맞혀요. 하지만 "온도 × 온도에 비례한다" 같은 공식을 알아내면 300도도 바로 계산할 수 있어요.</p>
+          </div>
+        </div></section>
 
-        <!-- ================= [6] 직접 해보기 (주차당 대표 1개) ================= -->
+        <section class="concept" id="c2"><div class="card">
+          <div class="num">CONCEPT 02 · p.11~ (구두로 부른 번호)</div>
+          <h3>예측을 넘어서: 예측 → 계수 추정 → 구조 발견 → 인과 발견</h3>
+          <div data-level="pro">
+            <p>Y를 잘 맞히는 모델은 이미 많습니다. 이제는 예측이 <b>왜</b> 나왔는지, 변수 사이 관계가 무엇인지, 빠진 변수나 필요 없는 변수는 없는지를 묻습니다. 따뜻한 물이 식는 온도를 10분 관측했다고 합시다. 다음 10분을 맞히는 것은 신경망도 합니다. 그러나 "물의 양을 늘리면?", "용기를 바꾸면?"은 온도 T(t)가 따르는 미분방정식을 알아야 답할 수 있습니다. 목표는 어려운 순서로 ① <b>예측</b>, ② <b>계수 추정</b>(식의 꼴은 아는데 계수를 모름), ③ <b>방정식 구조 발견</b>(교과서 식이 실제와 안 맞아 식이나 보정항을 새로 찾음), ④ <b>인과 발견</b>입니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>"10분 뒤 물 온도는?"은 맞히기 문제예요. "물을 더 부으면 어떻게 돼?"는 원리를 알아야 답할 수 있어요. 맞히기 → 숫자 채우기 → 공식 찾기 → 원인 찾기 순서로 점점 어려워져요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c3"><div class="card">
+          <div class="num">CONCEPT 03 · 구두</div>
+          <h3>방정식 발견 ≠ 인과 발견: 상관과 개입(do)</h3>
+          <div data-level="pro">
+            <p>y = a·x1² + e^(b·x2)를 찾았다고 인과를 안 것은 아닙니다. 식은 x1에 대해 풀어 쓸 수도 있어서, x1이 먼저인지 y가 먼저인지 <b>방향</b>을 알려주지 않습니다. <b>상관</b>: 병원 기록에서 A 치료제를 받은 10명 중 9명이 호전됐다는 0.9는 상관입니다. A가 비싼 약이면 부유해서 운동과 식단이 좋은 환자가 주로 받았을 수 있습니다(교란). <b>개입(do-operation)</b>: 환자의 조건과 무관하게 A와 B를 <b>무작위로 배정</b>해 같은 조건끼리 비교해야 약의 효과가 나옵니다. 현실에서는 구하기 어려운 경우가 많습니다. 이 수업은 인과를 더 다루지 않습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>공식은 "같이 변한다"만 알려주고 "누가 원인인지"는 안 알려줘요. 비싼 약을 먹은 사람이 더 건강했다면 약 덕분인지 부자라서인지 몰라요. 그래서 제비뽑기로 약을 나눠 줘야 진짜 효과를 알 수 있어요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c4"><div class="card">
+          <div class="num">CONCEPT 04 · p.16~ (구두로 부른 번호) · 핵심 키워드</div>
+          <h3>식별 가능성(Identifiability)</h3>
+          <div data-level="pro">
+            <p>관측 데이터를 설명하는 방정식이 <b>여러 개</b>일 수 있습니다. 데이터만으로 식을 하나로 정하지 못하면 식별 가능성이 성립하지 않는다(non-identifiable)고 합니다. 예: (q1, q2, r, F) = (1, 1, 1, 1), (2, 2, 1, 4) 두 행만 있으면 F = q1·q2, F = q1·q2 / r, F = q1·q2 / r²이 모두 맞습니다. r이 1로만 관측됐기 때문입니다. 식별이 안 되는데 LLM 코딩 도구에 "식을 찾아 줘"라고 하면 그중 하나를 내놓고, 그것을 과학 법칙으로 착각하면 <b>뒤따르는 실험이 전부 틀어집니다</b>. 해법은 <b>추가 실험</b>이고, 최소한의 실험으로 식별 가능하게 만드는 것이 <b>능동 실험 설계(Active Experimental Design)</b>입니다. 관측이 적거나 다양하지 않거나 변수가 아주 많으면 식별이 어렵습니다. 현실의 센서 테이블은 열이 많고 관련 없는 <b>노이즈 변수</b>가 섞여 있어 더 어렵습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>점 하나를 지나는 선은 아주 많아요. 그중 하나를 골라 "이게 법칙이야!"라고 하면 틀릴 수 있어요. 그래서 일부러 다른 조건(거리를 2배로)에서 실험을 한 번 더 해서 가짜 공식을 걸러내요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 270" role="img" aria-label="q1과 q2를 1로 고정했을 때 세 후보 식 F = q1 q2, F = q1 q2 나누기 r, F = q1 q2 나누기 r 제곱의 곡선. r = 1에서는 세 곡선이 한 점에서 만나고, r = 2에서는 1, 0.5, 0.25로 갈라진다">
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor" id="fig-ident"></g>
+            </svg>
+            <figcaption>r = 1에서만 관측하면 세 식이 같은 값을 냅니다. r = 2에서 한 번만 더 재면 예측이 1 / 0.5 / 0.25로 갈려 하나만 남습니다(q1 = q2 = 1로 그린 예시).</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c5"><div class="card">
+          <div class="num">CONCEPT 05 · 구두</div>
+          <h3>SciNet: 방정식 대신 변수를 줄인다</h3>
+          <div class="callout fix">요약본의 "SINet"은 <b>SciNet</b>(Iten et al. 2020)입니다. 받아쓰기에는 "사이넥", "SINET"으로 나오고, 위치 관측을 두 변수로 줄이는 설명과 2020년이라는 언급이 일치합니다(논문 서지는 외부 대조).</div>
+          <div data-level="pro">
+            <p>변수가 너무 많을 때, 관측을 신경망 <b>인코더</b>로 소수의 잠재 변수로 압축하고 그 잠재 변수에 질문을 붙여 답하게 합니다. 방정식을 찾는 방법은 <b>아닙니다</b>. 예: 0초 1 m, 1초 3 m, 2초 5 m …의 관측은 "초기 위치 1 m, 속도 2 m/s" 두 변수면 전부 복원됩니다. 모든 관측을 그대로 쓰는 것보다 압축한 뒤 질의응답하는 편이 성능이 좋은 경우가 많다는 것을 보였습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>위치 기록 100줄을 다 외울 필요 없이 "처음 위치"와 "빠르기" 두 개만 알면 돼요. AI가 이런 핵심 숫자 몇 개를 스스로 뽑게 하는 방법이에요. 공식을 찾아 주지는 않아요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c6"><div class="card">
+          <div class="num">CONCEPT 06 · p.27~ (구두로 부른 번호) · 이번 수업 핵심</div>
+          <h3>SINDy: 후보 항을 깔아 놓고 희소하게 고른다</h3>
+          <div class="callout fix">요약본의 "계수는 랜덤 또는 1로 초기화해 경사하강법으로 최적화"는 학생 질문에 대한 구두 답변입니다. 원 논문(Brunton et al. 2016, 외부 대조)은 <b>최소제곱을 반복</b>해 풉니다. 답안의 핵심은 "피팅 → 임계값 → 재피팅 반복"입니다.</div>
+          <div data-level="pro">
+            <p>관련 있을 법한 <b>후보 항</b>(1, x, y, z, x², xy, xz, y², z² …)을 미리 만들어 두고, y ≈ Σ 계수 × 항이 되도록 계수를 피팅합니다. 제약 없이 피팅하면 <b>거의 모든 계수가 0이 아닌 값</b>이 되어 모든 항이 살아남고, 실제와 다른 복잡한 식이 나옵니다. 그래서 <b>희소성(sparsity)</b>을 줍니다.</p>
+            <ol class="steps">
+              <li>전체 후보 항으로 계수를 피팅한다</li>
+              <li>계수 크기가 <b>임계값 미만인 항을 0으로</b> 지운다 (예: a = 10, b = 0.01, c = −20이면 b 항 삭제)</li>
+              <li>남은 항만으로 <b>다시 피팅</b>한다</li>
+              <li>더 지워지는 항이 없을 때까지 2~3을 반복한다</li>
+            </ol>
+            <p>한계: 라이브러리에 없는 항(지수 함수를 안 넣었다면 지수 항)은 찾지 못합니다. <b>고차원</b>(행은 적고 열은 많음. 미지수 100개에 식 2개면 못 푸는 것과 같음)에서는 데이터 행렬을 <b>SVD</b>로 분해해 특이값 상위 r개 성분만 남겨 차원을 줄인 뒤 적용합니다. SVD 자체는 분해이고, 상위 r개만 취해서 축소가 됩니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>재료 후보를 잔뜩 꺼내 놓고 요리 맛을 맞춰 봐요. 아주 조금만 쓰인 재료는 빼고 다시 맞춰요. 더 뺄 게 없을 때까지 반복하면 진짜 필요한 재료 몇 개만 남아요. 아래 실험실에서 직접 해 보세요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c7"><div class="card">
+          <div class="num">CONCEPT 07 · 구두</div>
+          <h3>PDE-FIND: 편미분방정식으로 확장</h3>
+          <div class="callout fix">요약본의 "Ridge 회귀(L2 페널티)로 희소성 부여"는 정확하지 않습니다. L2 페널티만으로는 계수가 <b>작아질 뿐 정확히 0이 되지 않습니다</b>. 원 논문(Rudy et al. 2017, 외부 대조)은 Ridge 회귀에 <b>임계값 반복</b>을 더한 방식입니다. 또 "ODE는 변수 하나"는 <b>미분하는 독립변수가 하나</b>(보통 시간)라는 뜻입니다.</div>
+          <div data-level="pro">
+            <p>용어부터 구분합니다. <b>ODE</b>(상미분방정식)는 미분하는 변수가 하나(보통 시간 t)이고 무작위성이 없습니다. <b>PDE</b>(편미분방정식)는 시간과 공간처럼 <b>둘 이상</b>의 변수에 대한 미분이 들어갑니다. <b>SDE</b>(확률미분방정식)는 무작위 노이즈 항이 더해진 것으로, 디퓨전 모델이 SDE로 해석됩니다. PDE-FIND는 SINDy와 같은 생각입니다. 후보 항을 미리 정하되 그 안에 <b>공간 미분</b>(u_x, u_xx, u·u_x …)이 들어가고, 계수를 희소하게 피팅합니다. SINDy가 피팅 후 임계값으로 후처리했다면, PDE-FIND는 Ridge 회귀(L2 페널티)로 계수를 작게 누르는 것을 함께 씁니다. 나비에–스토크스 방정식을 거의 그대로 복원했습니다(계수 1 자리에 0.9931, 0.9910 정도).</p>
+          </div>
+          <div data-level="easy">
+            <p>"시간에 따라 어떻게 변하나"만 보던 것을 "시간과 위치에 따라 어떻게 변하나"까지 넓힌 거예요. 방법은 똑같이 후보를 깔아 놓고 필요 없는 것을 빼요. 물이 흐르는 유명한 공식도 거의 똑같이 찾아냈어요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c8"><div class="card">
+          <div class="num">CONCEPT 08 · 구두</div>
+          <h3>심볼릭 회귀: 식의 구조까지 찾는다</h3>
+          <div class="callout fix">요약본의 "SymPy 등 패키지"에서, SymPy는 수식 계산 · 간소화 라이브러리이지 심볼릭 회귀 패키지가 아닙니다. 수업에서 설명한 Evolve → Simplify → Optimize 루프와 "2023년" 언급은 <b>PySR</b>(Cranmer 2023)과 일치합니다. 음성 인식 오류일 가능성이 높으며 PDF로 확인이 필요합니다.</div>
+          <div data-level="pro">
+            <p>SINDy와 PDE-FIND는 항을 미리 정하고 계수만 찾았습니다. 심볼릭 회귀는 <b>표현식 구조와 계수를 모두</b> 찾습니다. 경우의 수가 폭발하므로 8~9주차의 하네스 탐색처럼 <b>진화 알고리즘</b>을 씁니다. 선호하는 답은 <b>오차도 낮고 복잡도(연산 수)도 낮은</b> 식입니다. 오차가 같아도 식이 길고 복잡하면 과적합일 가능성이 크기 때문입니다. ① <b>Evolve</b>: 연산자 바꾸기, 노드 추가 · 삭제, 무작위 식으로 교체 같은 <b>정해진 규칙</b>으로 새 구조를 제안하고, 피팅했을 때 오차가 줄면 받아들이고 커지면(예: 0.1 → 2.0) 버립니다. ② <b>Simplify</b>: 같은 함수를 더 간단히 씁니다(x + 2 + 3 → x + 5). ③ <b>Optimize</b>: 구조가 정해졌으니 계수를 피팅합니다. 소개된 연구는 LLM 대중화 전이라 규칙 기반 변이를 쓰고, 지금은 Evolve를 <b>LLM · 에이전트</b>가 대신하는 연구가 늘고 있습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>레고로 공식을 조립해요. 블록을 하나 바꾸거나 끼우거나 빼 보고, 같은 모양을 더 적은 블록으로 다시 만들고, 숫자를 맞춰요. 잘 맞으면서 블록이 적은 공식이 이겨요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 250" role="img" aria-label="심볼릭 회귀의 반복: Evolve에서 새 구조를 제안하고, Simplify에서 식을 간단히 하고, Optimize에서 계수를 피팅한 뒤 오차가 줄었으면 수용하고 아니면 버린다. 최종적으로 오차와 복잡도가 모두 낮은 식을 고른다">
+              <defs><marker id="ar10b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor">
+                <text x="20" y="24" font-weight="700" font-size="13">심볼릭 회귀의 한 바퀴 (예시 식)</text>
+                <rect x="20" y="60" width="200" height="92" rx="12" fill="var(--accent)" fill-opacity=".1" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="120" y="84" text-anchor="middle" font-weight="700">① Evolve</text>
+                <text x="120" y="104" text-anchor="middle" font-size="11" opacity=".85">연산자 변경 · 노드 추가/삭제</text>
+                <text x="120" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12">a·x → a·x² + 2 + 3</text>
+                <rect x="270" y="60" width="200" height="92" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="370" y="84" text-anchor="middle" font-weight="700">② Simplify</text>
+                <text x="370" y="104" text-anchor="middle" font-size="11" opacity=".85">같은 함수를 더 짧게</text>
+                <text x="370" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12">a·x² + 5</text>
+                <rect x="520" y="60" width="200" height="92" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="620" y="84" text-anchor="middle" font-weight="700">③ Optimize</text>
+                <text x="620" y="104" text-anchor="middle" font-size="11" opacity=".85">구조 고정, 계수 피팅</text>
+                <text x="620" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12">1.5·x² + 4.9</text>
+                <line x1="220" y1="106" x2="266" y2="106" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10b)"/>
+                <line x1="470" y1="106" x2="516" y2="106" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10b)"/>
+                <line x1="720" y1="106" x2="756" y2="106" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10b)"/>
+                <rect x="760" y="50" width="120" height="50" rx="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/>
+                <text x="820" y="71" text-anchor="middle" font-weight="700" fill="var(--ok)">오차 감소</text>
+                <text x="820" y="88" text-anchor="middle" font-size="11">수용</text>
+                <rect x="760" y="112" width="120" height="50" rx="10" fill="none" stroke="var(--danger)" stroke-width="1.5"/>
+                <text x="820" y="133" text-anchor="middle" font-weight="700" fill="var(--danger)">오차 증가</text>
+                <text x="820" y="150" text-anchor="middle" font-size="11">버림</text>
+                <path d="M820 162 L820 200 L120 200 L120 156" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar10b)"/>
+                <text x="470" y="194" text-anchor="middle" font-size="11" opacity=".8">다시 Evolve로 (반복)</text>
+                <text x="20" y="236" font-size="12">최종 선택: <tspan font-weight="700">오차도 낮고 복잡도(연산 수)도 낮은</tspan> 식. 오차가 같으면 짧은 식이 이긴다 (과적합 방지)</text>
+              </g>
+            </svg>
+            <figcaption>SINDy가 "어떤 항을 남길까"만 고른다면, 심볼릭 회귀는 식의 모양 자체를 바꿔 가며 찾습니다. 경우의 수가 많아 진화 탐색을 씁니다.</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c9"><div class="card">
+          <div class="num">CONCEPT 09 · 구두</div>
+          <h3>AI Feynman: 성질을 먼저 검사해 탐색 공간을 줄인다</h3>
+          <div class="callout fix">요약본은 "덧셈 분리 가능성과 곱셈 분리 가능성 검사"라고 했지만, 수업에서 말한 것은 ① 두 입력에 <b>같은 값을 더해도</b> 출력이 같으면 변수를 줄일 수 있다는 것과 ② <b>곱셈 분리</b> 두 가지입니다. 요약본의 "f(u,v) = f(u)·f(v)"는 g(u)·h(v)로 써야 맞습니다. 덧셈 분리 검사가 슬라이드에 따로 있는지는 PDF 확인이 필요합니다.</div>
+          <div data-level="pro">
+            <p>심볼릭 회귀보다 효율적으로 탐색하려는 방법입니다. 먼저 데이터에 맞는 근사 함수 f̂를 구하고, 거기에 입력을 바꿔 넣어 <b>구조적 성질</b>을 검사합니다. ① 두 입력에 같은 값을 더해도 출력이 그대로면 그 두 변수는 한 변수로 묶을 수 있어 <b>변수가 줄어듭니다</b>. ② <b>곱셈 분리</b>가 성립하는지 봅니다.</p>
+            <p><span class="formula">f(u, v) = f(u, v0) · f(u0, v) / f(u0, v0) &nbsp;→&nbsp; f(u, v) = g(u) · h(v)</span></p>
+            <p>오른쪽에서 f(u, v0)는 u만의 함수, f(u0, v)는 v만의 함수, f(u0, v0)는 상수이기 때문입니다. 쪼개진다는 것을 알면 u와 v가 섞인 항(예: e^(uv))은 <b>고려하지 않아도 되어</b> 경우의 수가 크게 줄어듭니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>큰 퍼즐을 풀기 전에 "이 퍼즐, 두 조각으로 나눠서 따로 풀어도 되나?"를 먼저 확인해요. 된다면 작은 퍼즐 두 개만 풀면 되니까 훨씬 빨라요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c10"><div class="card">
+          <div class="num">CONCEPT 10 · 구두</div>
+          <h3>심볼릭 증류: 신경망에서 방정식을 뽑는다</h3>
+          <div class="callout fix">요약본의 "iClear 워크샵"은 <b>ICLR</b> 2026 워크숍, "심도치"는 <b>SymTorch</b>입니다. 2020년 논문의 저자는 받아쓰기에 "칼 크레모"로 나오지만 <b>Miles Cranmer</b> 외(NeurIPS 2020)가 맞습니다(외부 대조).</div>
+          <div data-level="pro">
+            <p>내삽(학습 분포 안)에서는 신경망 예측이 대개 더 정확하고, 방정식은 외삽과 설명 가능성이 장점입니다. 둘을 합치려는 것이 심볼릭 증류입니다. <b>신경망으로 학습해 예측 성능은 유지하고</b>, 그 신경망이 배운 관계를 <b>식으로 뽑아</b> 해석과 진단에 씁니다. ① <b>2020년 NeurIPS 논문</b>: 입자들의 위치 · 속도 · 질량으로 각 입자의 가속도를 예측하는 문제입니다. 입자 간 관계와 자기 정보를 모두 써야 하므로 <b>그래프 신경망(GNN)</b>으로 모델링하고 거기서 식을 추출했습니다. 특수한 구조에서만 되는 제약이 많은 방법입니다. ② <b>2026년 SymTorch</b>: GNN, PINN, 트랜스포머 등 <b>임의의 신경망</b>에서 <b>레이어 · 블록별</b> 입출력 관계식을 뽑습니다. 완벽하지 않고 오차가 있습니다. LLM에서는 "방정식"을 정의하기 어려워 활용이 아직 불분명하지만, 수치 데이터를 다루는 테이블 · 시계열 파운데이션 모델은 레이어별 식을 점검해 틀린 식을 배우는 레이어만 골라 파인튜닝하는 식으로 쓸 수 있다고 했습니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>문제를 잘 맞히지만 설명은 못 하는 친구(신경망)에게서 "너 사실 이 공식 쓰고 있지?"를 알아내는 거예요. 그러면 잘 맞히면서 설명도 할 수 있어요.</p>
+          </div>
+          <figure class="figure">
+            <svg viewBox="0 0 900 230" role="img" aria-label="심볼릭 증류: 데이터로 신경망을 학습해 예측에 쓰고, 신경망의 레이어별 입력과 출력 쌍에 심볼릭 회귀를 적용해 식을 뽑아 해석과 외삽에 쓴다">
+              <defs><marker id="ar10c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+              <g font-family="Noto Sans KR, sans-serif" font-size="12" fill="currentColor">
+                <text x="20" y="24" font-weight="700" font-size="13">신경망은 예측을, 뽑아낸 식은 설명과 외삽을 맡는다</text>
+                <rect x="20" y="84" width="130" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="85" y="109" text-anchor="middle" font-weight="700">관측 데이터</text>
+                <text x="85" y="128" text-anchor="middle" font-size="11" opacity=".85">X → Y</text>
+                <line x1="150" y1="114" x2="196" y2="114" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10c)"/>
+                <rect x="200" y="50" width="260" height="128" rx="12" fill="var(--accent)" fill-opacity=".08" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="330" y="72" text-anchor="middle" font-weight="700">신경망 (GNN · 트랜스포머 등)</text>
+                <rect x="222" y="88" width="62" height="70" rx="6" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+                <text x="253" y="127" text-anchor="middle" font-size="11">레이어 1</text>
+                <rect x="299" y="88" width="62" height="70" rx="6" fill="var(--ok)" fill-opacity=".15" stroke="var(--ok)" stroke-width="1.5"/>
+                <text x="330" y="127" text-anchor="middle" font-size="11">레이어 2</text>
+                <rect x="376" y="88" width="62" height="70" rx="6" fill="none" stroke="currentColor" stroke-opacity=".5"/>
+                <text x="407" y="127" text-anchor="middle" font-size="11">레이어 3</text>
+                <line x1="460" y1="92" x2="566" y2="72" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar10c)"/>
+                <rect x="570" y="44" width="310" height="52" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <text x="725" y="66" text-anchor="middle" font-weight="700">예측 (내삽에 강함)</text>
+                <text x="725" y="84" text-anchor="middle" font-size="11" opacity=".85">성능은 그대로 유지</text>
+                <path d="M330 158 L330 200 L566 200" fill="none" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#ar10c)"/>
+                <text x="448" y="194" text-anchor="middle" font-size="11" fill="var(--ok)">블록의 입력 · 출력 쌍</text>
+                <rect x="570" y="140" width="310" height="76" rx="10" fill="none" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 3"/>
+                <text x="725" y="162" text-anchor="middle" font-weight="700" fill="var(--ok)">식 추출 (심볼릭 회귀)</text>
+                <text x="725" y="182" text-anchor="middle" font-size="11" opacity=".85">이 블록이 배운 관계식 → 해석 · 진단 · 외삽</text>
+                <text x="725" y="202" text-anchor="middle" font-size="11" opacity=".85">틀린 식을 배운 레이어만 골라 파인튜닝</text>
+              </g>
+            </svg>
+            <figcaption>2020년 방식은 GNN 같은 특수한 구조에서만 식을 뽑았고, SymTorch는 임의의 신경망에서 레이어 · 블록 단위로 뽑습니다(오차 있음).</figcaption>
+          </figure>
+        </div></section>
+
+        <section class="concept" id="c11"><div class="card">
+          <div class="num">CONCEPT 11 · p.4~ (구두로 부른 번호)</div>
+          <h3>사례: 레이저 가공 · 파지 가설 · 태양전지</h3>
+          <div class="callout fix">요약본의 "사례 2: 가설을 제안하고 생물학자가 실험으로 검증"에서 가설을 낸 주체는 <b>AI co-scientist</b>(받아쓰기 "에코사이언티스트")이고, 방정식 발견이 아니라 가설 제안 사례입니다. 공개 자료에는 연구실의 미발표 실험 결과와 같은 가설을 AI가 독립적으로 내놓았다고 알려져 있어, 순서를 단정하지 않습니다(확인 필요).</div>
+          <div data-level="pro">
+            <p>① <b>레이저 가공 홀 깊이</b>: 레이저 출력, 이동 속도, 빔 반경, 금속의 열 특성으로 홀 깊이를 예측합니다. 내삽이면 신경망으로 충분하지만, 외삽과 <b>역설계</b>(원하는 깊이를 내는 조건 찾기)를 하려면 식이 필요합니다. 심볼릭 회귀로 교과서 식에 <b>(1 + k2 · X) 꼴의 보정항</b>을 붙였더니 훨씬 정확해졌습니다. ② <b>파지 가설</b>: 세균을 감염시키는 바이러스(파지)와 관련된 이동성 유전 요소가 <b>서로 다른 세균 종</b> 사이에서도 발견되는 이유가 오랜 의문이었는데, AI가 낸 가설이 생물학자의 실험 결과와 맞았습니다. ③ 태양전지의 소재와 구조 설계에도 같은 접근을 씁니다. 교수님은 방법론 논문은 PNAS 같은 저널이나 패키지 논문으로, 응용 사례는 Nature · Science 같은 과학 저널로 나오는 흐름을 짚었고, AI의 큰 방향을 Physical AI, <b>AI for Science</b>, 재귀적 자기개선 셋으로 봤습니다(구두 견해).</p>
+          </div>
+          <div data-level="easy">
+            <p>레이저로 구멍을 뚫을 때 "세기 · 빠르기 · 재료"로 깊이를 계산하는 공식을 AI가 더 정확하게 고쳐 줬어요. 세균 연구에서는 과학자들이 오래 고민한 수수께끼에 AI가 그럴듯한 답을 내놓았어요.</p>
+          </div>
+        </div></section>
+
+        <section class="concept" id="c12"><div class="card">
+          <div class="num">CONCEPT 12 · 구두 · 예고</div>
+          <h3>앞으로 다룰 것</h3>
+          <div data-level="pro">
+            <p>오늘은 "일반적으로 방정식을 찾는 법"까지였습니다. 뒤에 올 내용은 ① <b>물리 제약</b>을 반영한 방정식 탐색(PINN 언급), ② <b>LLM · 에이전트</b> 기반 탐색, ③ <b>실험계획법</b>(최소 비용으로 정확한 식을 얻으려면 어떤 실험을 더 해야 하나), ④ 가설 제시 → 실험 설계 → 데이터 수집 → 방정식 탐색의 <b>루프 완전 자동화</b>입니다. 그 뒤에는 AI로 수학 · 물리 난제를 푸는 사례를 봅니다.</p>
+          </div>
+          <div data-level="easy">
+            <p>다음에는 "물리 법칙을 지키면서 찾기", "AI 비서가 대신 찾기", "어떤 실험을 더 할지 고르기", "이 과정을 전부 자동으로 돌리기"를 배워요.</p>
+          </div>
+        </div></section>
+
         <h2 id="play">3. 직접 해보기</h2>
         <section class="playground" id="playground">
-          <h3>🎮 인터랙션 제목</h3>
-          <p class="small muted">무엇을 조작하면 무엇이 바뀌는지 한 줄.</p>
+          <h3>🎮 SINDy 희소 회귀 실험실: 항을 지우면 외삽이 살아난다</h3>
+          <p class="small muted">숨은 정답은 y = 1.5x² − 2x 입니다. x가 −2~2인 구간에서 잰 관측 24개로 후보 항 6개의 계수를 맞춥니다. 반복 횟수 0은 제약 없는 피팅이고, 1 이상은 임계값 미만 계수를 지우고 다시 피팅한 결과입니다. 오른쪽 붉은 구간(x = 2~4)은 학습에 쓰지 않은 외삽 구간입니다(결정적 난수라 같은 설정이면 같은 결과).</p>
+          <div class="preset-row">
+            <button class="btn small" type="button" data-preset="dense">제약 없이 피팅</button>
+            <button class="btn small" type="button" data-preset="sparse">임계값 0.3, 수렴까지</button>
+            <button class="btn small" type="button" data-preset="over">임계값이 너무 클 때 (1.8)</button>
+          </div>
           <div class="controls">
-            <label>슬라이더 이름 <output id="o1">8</output>
-              <input type="range" id="r1" min="1" max="64" value="8"></label>
+            <label>관측 노이즈 <output id="oN">0.20</output>
+              <input type="range" id="rN" min="0" max="50" step="1" value="20"></label>
+            <label>임계값 λ <output id="oL">0.30</output>
+              <input type="range" id="rL" min="0" max="250" step="5" value="30"></label>
+            <label>반복 횟수 <output id="oI">0</output>
+              <input type="range" id="rI" min="0" max="4" step="1" value="0"></label>
+          </div>
+          <div class="sd-legend">
+            <span><i class="sw" style="background:#1f9d6a"></i>숨은 정답 (점선)</span>
+            <span><i class="sw" style="background:#2d5bff"></i>찾은 식</span>
+            <span><i class="sw" style="background:#d6455d;opacity:.35"></i>외삽 구간</span>
           </div>
           <div class="stage">
-            <svg id="stage-svg" viewBox="0 0 700 200" width="100%"></svg>
+            <svg id="sd-svg" viewBox="0 0 760 430" width="100%" role="img" aria-label="관측 점, 숨은 정답 곡선, 찾은 식의 곡선과 후보 항별 계수 막대"></svg>
           </div>
-          <div class="readout" id="readout"></div>
+          <div class="readout" id="sd-readout"></div>
+          <div id="sd-verdict"></div>
+          <p class="small muted" style="margin-top:10px">읽는 법: 반복 0에서는 6개 항이 전부 살아남고 외삽 오차가 큽니다. 임계값을 주면 x와 x²만 남아 외삽 오차가 줄어듭니다. 임계값을 너무 키우면 진짜 항(1.5x²)까지 지워집니다. 후보에 없는 항은 애초에 찾을 수 없다는 점도 기억하세요.</p>
         </section>
 
-        <!-- ================= [7] 모델 비교 ================= -->
         <h2 id="compare">4. 최신 모델과 비교하기</h2>
         <details class="compare" open>
-          <summary>⚖️ 수업 모델 vs Claude · GPT · 공개 모델</summary>
+          <summary>⚖️ 수업 내용 vs Claude · GPT · Gemini 쪽 공개 정보</summary>
           <div class="body">
             <table>
-              <thead><tr><th>개념</th><th>수업에서 (DeepSeek 등)</th><th>Claude</th><th>GPT / Gemini / 공개 모델</th><th>출처</th></tr></thead>
+              <thead><tr><th>비교 축</th><th>수업에서</th><th>Claude</th><th>GPT / Gemini / 공개 도구</th><th>출처</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>개념 A</td>
-                  <td>수업에서 다룬 방식</td>
-                  <td>공개 문서 범위의 사실 <span class="badge src">출처</span> / 또는 <span class="badge private">비공개</span></td>
-                  <td>Llama/Qwen 등 공개 모델은 config로 확인 가능</td>
-                  <td><a href="#">논문/문서 링크</a></td>
-                </tr>
+                <tr><td>외삽</td><td>신경망과 테이블 · 시계열 파운데이션 모델은 학습 범위 밖 예측에 약함(구두)</td><td colspan="2">범용 LLM 제품의 외삽 성능을 방정식 발견과 같은 조건에서 비교한 업체 공개 자료는 확인하지 못함 <span class="badge private">비공개</span></td><td>구두</td></tr>
+                <tr><td>LLM 코딩 도구로 식 찾기</td><td>식별이 안 되는 데이터에서 Codex · Claude Code에 시키면 여러 후보 중 하나를 내놓아 법칙으로 착각할 수 있음(구두)</td><td>Claude Code가 식별 가능성을 스스로 점검하는지 공개 정보 없음 <span class="badge private">비공개</span></td><td>Codex도 공개 정보 없음 <span class="badge private">비공개</span></td><td>구두</td></tr>
+                <tr><td>가설 생성 에이전트</td><td>AI co-scientist가 파지 관련 가설 제안(구두)</td><td>—</td><td>Google의 AI co-scientist(Gemini 기반 다중 에이전트)로 알려짐 <span class="badge check">확인 필요</span></td><td>구두 · Google 공개 자료</td></tr>
+                <tr><td>심볼릭 회귀의 Evolve</td><td>규칙 기반 변이를 LLM · 에이전트가 대신하는 연구가 늘고 있음(구두)</td><td>—</td><td>9주차의 AlphaEvolve(Google DeepMind)가 같은 계열의 진화 탐색. 방정식 발견 전용 사례는 다음 수업 예정 <span class="badge check">확인 필요</span></td><td>구두 · <a href="week09.html#c6">9주차</a></td></tr>
+                <tr><td>모델 해석</td><td>SymTorch로 레이어별 식 추출, LLM 적용은 아직 불분명(구두)</td><td>Anthropic은 해석 가능성 연구를 공개해 왔으나 심볼릭 증류 방식은 아님 <span class="badge check">확인 필요</span></td><td>SymTorch(ICLR 2026 워크숍) <span class="badge check">확인 필요</span></td><td>구두</td></tr>
+                <tr><td>테이블 · 시계열 파운데이션 모델</td><td>Kumo, TimesFM을 예로 듦. 트랜스포머 구조라 레이어별 식 점검 가능(구두)</td><td>—</td><td>TimesFM은 Google Research 공개 모델 <span class="badge src">출처</span> · "Kumo"가 가리키는 정확한 모델명 <span class="badge check">확인 필요</span></td><td>구두</td></tr>
               </tbody>
             </table>
-            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료면 "확인 필요".</p>
+            <p class="small muted">작성 규칙: 추측으로 칸을 채우지 않습니다. 모르면 "비공개", 2차 자료나 구두 언급은 "확인 필요". 레이저 가공 논문과 파지 가설 논문의 서지는 확인하지 못해 표에 넣지 않았습니다.</p>
           </div>
         </details>
 
-        <!-- ================= [8] 시험 포인트 ================= -->
         <h2 id="exam">5. 시험 포인트</h2>
         <section class="exam">
           <div class="card">
             <ul>
-              <li>클로즈북 기말에 나올 법한 포인트 1</li>
-              <li>포인트 2</li>
+              <li>방정식을 찾는 네 가지 이유(외삽 · 해석 · 의사결정 · 새 발견)와 신경망이 외삽에 약한 이유. "구조를 찾고 계수는 신경망으로 보정"</li>
+              <li>예측 → 계수 추정 → 구조 발견 → 인과 발견의 구분. 방정식 발견이 인과 발견이 아닌 이유(방향성 없음), 상관과 개입(do), 무작위 배정</li>
+              <li><b>식별 가능성</b>의 정의와 쿨롱 예시, 식별이 안 될 때의 위험과 해법(능동 실험 설계)</li>
+              <li><b>SINDy 절차</b>(후보 항 → 피팅 → 임계값 미만 0 → 재피팅 → 수렴), 희소성이 필요한 이유, 한계(라이브러리 밖 항), 고차원에서 SVD</li>
+              <li>ODE · PDE · SDE의 구분, PDE-FIND가 SINDy와 같은 점과 다른 점</li>
+              <li>심볼릭 회귀가 SINDy와 다른 점(구조까지 탐색), Evolve → Simplify → Optimize, 오차와 복잡도를 함께 보는 이유</li>
+              <li>AI Feynman의 곱셈 분리 검사식 <b>f(u, v) = f(u, v0) · f(u0, v) / f(u0, v0)</b>와 탐색 공간이 주는 이유</li>
+              <li>심볼릭 증류의 목적, 2020년 GNN 방식과 SymTorch의 차이, 내삽(신경망)과 외삽(방정식)의 장단점</li>
+              <li>SciNet은 방정식을 찾지 않고 변수를 줄인다는 점</li>
             </ul>
           </div>
           <h3>예상 문제</h3>
-          <details class="quiz"><summary>Q1. 문제</summary><div class="answer">정답과 해설</div></details>
-          <details class="quiz"><summary>Q2. 문제</summary><div class="answer">정답과 해설</div></details>
+          <details class="quiz" data-qid="w10-sindy-steps"><summary>Q1. SINDy로 y = a·x² + b·x + c·e^x 의 계수를 피팅했더니 a = 10, b = 0.01, c = −20이 나왔다. 임계값이 0.1일 때 다음에 할 일을 순서대로 쓰고, 언제 멈추는지 쓰라.</summary><div class="answer">|b| = 0.01 &lt; 0.1이므로 b 항(x)을 0으로 지운다. 남은 x²과 e^x 항만으로 a, c를 다시 피팅한다. 새 계수에 다시 임계값을 적용하고, 더 지워지는 항이 없을 때(수렴)까지 반복한다.</div></details>
+          <details class="quiz" data-qid="w10-sparsity"><summary>Q2. 후보 항을 많이 만들어 놓고 아무 제약 없이 계수를 피팅하면 어떤 문제가 생기는가? 해결책과 그 효과를 쓰라.</summary><div class="answer">거의 모든 계수가 0이 아닌 값으로 피팅되어 모든 항이 살아남고, 실제와 다른 복잡한 식이 된다(과적합, 외삽에 약함). 계수에 희소성 제약을 주면(임계값 미만 제거 또는 페널티) 중요한 항만 0이 아닌 값으로 남아 단순한 식을 얻는다.</div></details>
+          <details class="quiz" data-qid="w10-identifiability"><summary>Q3. 관측 (q1, q2, r, F) = (1, 1, 1, 1), (2, 2, 1, 4)가 있다. (a) F = q1·q2, F = q1·q2 / r, F = q1·q2 / r² 중 데이터와 맞는 식은? (b) 이 상황을 무엇이라 하는가? (c) 식을 하나로 정하려면 어떤 관측을 추가해야 하는가?</summary><div class="answer">(a) 세 식 모두 맞는다(r = 1이라 r 항이 드러나지 않는다). (b) 식별 가능성이 성립하지 않는다(non-identifiable). (c) r을 바꾼 실험. 예: (q1, q2, r) = (1, 1, 2)에서 F를 재면 세 식의 예측이 1, 0.5, 0.25로 갈려 하나만 남는다. 최소 실험으로 이것을 하는 것이 능동 실험 설계다.</div></details>
+          <details class="quiz" data-qid="w10-causal"><summary>Q4. y = a·x1² + e^(b·x2)라는 식을 데이터에서 찾았다. "x1이 y의 원인이다"라고 결론 내릴 수 없는 이유를 쓰고, 인과를 확인하려면 무엇이 필요한지 병원 치료제 예로 설명하라.</summary><div class="answer">식은 x1에 대해 풀어 쓸 수도 있어 변수 사이의 방향을 알려주지 않는다. 방정식 발견과 인과 발견은 다른 문제다. 관측 기록에서 A 치료제를 받은 사람이 더 호전됐다는 것은 상관이며, 부유함 같은 교란 요인이 섞였을 수 있다. 인과를 보려면 개입(do)이 필요하다. 환자의 조건과 무관하게 A와 B를 무작위로 배정해 비교한다.</div></details>
+          <details class="quiz" data-qid="w10-separability"><summary>Q5. f(u, v) = u² · e^v 가 곱셈 분리 가능한지 AI Feynman의 검사식 f(u, v) = f(u, v0) · f(u0, v) / f(u0, v0)로 확인하라. f(u, v) = u + v는 어떤가? 분리 가능하면 무엇이 좋은가?</summary><div class="answer">u²e^(v0) · u0²e^v / (u0²e^(v0)) = u²e^v 로 성립하므로 분리 가능하다. u + v는 (u + v0)(u0 + v) / (u0 + v0) ≠ u + v 이므로 곱셈 분리가 안 된다. 분리 가능하면 u만의 함수와 v만의 함수를 따로 찾으면 되고, u와 v가 섞인 항을 탐색하지 않아도 되어 경우의 수가 크게 준다.</div></details>
+          <details class="quiz" data-qid="w10-scinet"><summary>Q6. (객관식) 다음 중 옳지 않은 것은? ① SINDy는 미리 정한 후보 항의 계수만 찾으므로 라이브러리에 없는 항은 찾지 못한다 ② 심볼릭 회귀는 식의 구조까지 탐색하며, 오차와 복잡도가 모두 낮은 식을 선호한다 ③ SciNet은 관측 데이터에서 지배방정식을 직접 찾아내는 방법이다 ④ 2020년의 심볼릭 증류 논문은 그래프 신경망처럼 특수한 구조에서 식을 추출했다</summary><div class="answer">③. SciNet은 방정식을 찾지 않는다. 변수를 신경망으로 압축한 뒤 질문에 답하게 한다.</div></details>
+          <details class="quiz" data-qid="w10-distill"><summary>Q7. 내삽 문제만 풀 것이라면 방정식 없이 신경망으로 충분하다고 했다. 그런데도 방정식을 찾는 이유 두 가지를 레이저 가공 사례로 설명하고, 신경망과 방정식의 장점을 합치는 방법의 이름을 쓰라.</summary><div class="answer">① 학습 범위 밖 조건(더 센 출력 등)에서의 깊이를 맞히는 외삽, ② 원하는 깊이를 내는 공정 조건을 거꾸로 찾는 역설계와 해석이 식이 있어야 쉽다. 신경망으로 예측 성능을 유지하면서 그 신경망이 배운 관계를 식으로 뽑는 것이 심볼릭 증류다.</div></details>
         </section>
 
-        <!-- ================= [9] 출처 ================= -->
         <h2 id="refs">6. 출처</h2>
         <ul class="small">
-          <li>논문/문서 1</li>
+          <li>노션 "[연세대] 최신 딥러닝 이론 및 응용 #10" (2026-11-13 기록, 자동 회의록의 요약 + 받아쓰기). 음성 인식이라 고유명사 오류가 많습니다.</li>
+          <li>이번 주 강의 PDF는 미확보입니다. 받으면 페이지 번호와 논문 서지를 대조합니다.</li>
+          <li>외부 대조(슬라이드 인용 여부는 PDF 확인 필요): Brunton, Proctor, Kutz 2016 (SINDy) · Rudy et al. 2017 (PDE-FIND) · Udrescu &amp; Tegmark 2020 (AI Feynman) · Cranmer et al. 2020 (NeurIPS, 심볼릭 증류) · Cranmer 2023 (PySR) · Iten et al. 2020 (SciNet)</li>
+          <li>구두 언급(출처 확인 필요): 레이저 가공 홀 깊이 논문, 파지 가설(AI co-scientist) 논문, SymTorch(ICLR 2026 워크숍), 태양전지 사례, Kumo · TimesFM</li>
+          <li>팀 브리프: <code>content/briefs/week10.md</code></li>
         </ul>
 
         <div id="week-nav"></div>
@@ -134,18 +411,230 @@
   <script src="../assets/js/weeks.js"></script>
   <script src="../assets/js/site.js"></script>
   <script>
-    // [10] 이 주차의 인터랙션 스크립트. 다른 주차와 충돌하지 않도록 IIFE 안에 둡니다.
-    (function () {
-      var r1 = document.getElementById("r1"), o1 = document.getElementById("o1");
-      var svg = document.getElementById("stage-svg"), readout = document.getElementById("readout");
-      function render() {
-        var v = +r1.value; o1.value = v;
-        svg.innerHTML = '<rect x="10" y="80" width="' + (v * 10) + '" height="40" rx="6" fill="var(--accent)"/>';
-        readout.textContent = "값: " + v;
-      }
-      r1.addEventListener("input", render);
-      render();
+  (function () {
+    var NS = "http://www.w3.org/2000/svg";
+    function el(tag, attrs, text) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    var C = { fit: "#2d5bff", ex: "#d6455d", truth: "#1f9d6a" };
+    var MONO = "IBM Plex Mono, monospace";
+
+    // ---------- 정적 도형: 식별 가능성 (쿨롱 예시) ----------
+    (function drawIdent() {
+      var g = document.getElementById("fig-ident");
+      var x0 = 70, y0 = 44, W = 520, H = 170;
+      function X(r) { return x0 + (r - 0.5) / 2.5 * W; }
+      function Y(f) { return y0 + (1 - f / 2) * H; }
+      g.appendChild(el("text", { x: 20, y: 24, "font-weight": 700, "font-size": 13, fill: "currentColor" }, "같은 관측을 설명하는 식이 셋: 어디서 재야 갈릴까"));
+      g.appendChild(el("rect", { x: x0, y: y0, width: W, height: H, fill: "currentColor", opacity: .04 }));
+      [0, 0.5, 1, 1.5, 2].forEach(function (f) {
+        g.appendChild(el("line", { x1: x0, y1: Y(f), x2: x0 + W, y2: Y(f), stroke: "currentColor", "stroke-opacity": .12 }));
+        g.appendChild(el("text", { x: x0 - 8, y: Y(f) + 4, "text-anchor": "end", "font-size": 11, "font-family": MONO, fill: "currentColor", opacity: .7 }, f));
+      });
+      [0.5, 1, 1.5, 2, 2.5, 3].forEach(function (r) {
+        g.appendChild(el("text", { x: X(r), y: y0 + H + 16, "text-anchor": "middle", "font-size": 11, "font-family": MONO, fill: "currentColor", opacity: .7 }, r));
+      });
+      g.appendChild(el("text", { x: x0 + W / 2, y: y0 + H + 34, "text-anchor": "middle", "font-size": 11, fill: "currentColor", opacity: .7 }, "거리 r  (q1 = q2 = 1)"));
+      g.appendChild(el("text", { x: 22, y: y0 + H / 2, "font-size": 11, fill: "currentColor", opacity: .7 }, "F"));
+      var fs = [
+        { f: function () { return 1; }, c: C.fit, name: "F = q1·q2" },
+        { f: function (r) { return 1 / r; }, c: C.truth, name: "F = q1·q2 / r" },
+        { f: function (r) { return 1 / (r * r); }, c: C.ex, name: "F = q1·q2 / r²" }
+      ];
+      fs.forEach(function (o, i) {
+        var d = "";
+        for (var r = 0.72; r <= 3.0001; r += 0.04) d += (d ? "L" : "M") + X(r).toFixed(1) + " " + Y(o.f(r)).toFixed(1) + " ";
+        g.appendChild(el("path", { d: d, fill: "none", stroke: o.c, "stroke-width": 2.5 }));
+        g.appendChild(el("circle", { cx: X(2), cy: Y(o.f(2)), r: 5, fill: "none", stroke: o.c, "stroke-width": 2 }));
+        g.appendChild(el("rect", { x: 640, y: 70 + i * 26, width: 14, height: 4, fill: o.c }));
+        g.appendChild(el("text", { x: 662, y: 76 + i * 26, "font-size": 12, "font-family": MONO, fill: "currentColor" }, o.name));
+        g.appendChild(el("text", { x: 838, y: 76 + i * 26, "font-size": 12, "font-family": MONO, fill: "currentColor", opacity: .8 }, "→ " + o.f(2)));
+      });
+      g.appendChild(el("text", { x: 838, y: 52, "font-size": 11, fill: "currentColor", opacity: .7 }, "r = 2"));
+      g.appendChild(el("line", { x1: X(1), y1: y0, x2: X(1), y2: y0 + H, stroke: "currentColor", "stroke-opacity": .45, "stroke-dasharray": "3 3" }));
+      g.appendChild(el("circle", { cx: X(1), cy: Y(1), r: 6, fill: "currentColor" }));
+      g.appendChild(el("text", { x: X(1) + 10, y: Y(1) - 10, "font-size": 11, "font-weight": 700, fill: "currentColor" }, "관측 (r = 1): 셋 다 통과"));
+      g.appendChild(el("line", { x1: X(2), y1: y0, x2: X(2), y2: y0 + H, stroke: "currentColor", "stroke-opacity": .45, "stroke-dasharray": "3 3" }));
+      g.appendChild(el("text", { x: X(2) + 8, y: y0 + 14, "font-size": 11, "font-weight": 700, fill: "currentColor" }, "추가 실험 (r = 2): 갈라짐"));
+      g.appendChild(el("text", { x: 640, y: 170, "font-size": 11, fill: "currentColor", opacity: .8 }, "q만 바꾸는 실험은 아무리 더 해도"));
+      g.appendChild(el("text", { x: 640, y: 188, "font-size": 11, fill: "currentColor", opacity: .8 }, "세 식을 가르지 못합니다."));
     })();
+
+    // ---------- 인터랙션: SINDy 희소 회귀 ----------
+    var TERMS = [
+      function () { return 1; }, function (x) { return x; }, function (x) { return x * x; },
+      function (x) { return x * x * x; }, function (x) { return Math.sin(3 * x); }, function (x) { return Math.cos(3 * x); }
+    ];
+    var NAMES = ["1", "x", "x²", "x³", "sin 3x", "cos 3x"];
+    var TRUE = [0, -2, 1.5, 0, 0, 0];
+    function truth(x) { return 1.5 * x * x - 2 * x; }
+
+    function makeData(noise) {
+      var r = T14.rand(77), xs = [], ys = [];
+      for (var i = 0; i < 24; i++) {
+        var x = -2 + 4 * i / 23, g = (r() + r() + r() + r() - 2) * Math.sqrt(3); // 평균 0, 분산 1 근사
+        xs.push(x); ys.push(truth(x) + noise * g);
+      }
+      return { x: xs, y: ys };
+    }
+    // 가우스 소거 (부분 피벗)
+    function solve(A, b) {
+      var n = b.length, i, j, k, t;
+      A = A.map(function (row) { return row.slice(); }); b = b.slice();
+      for (i = 0; i < n; i++) {
+        var p = i;
+        for (j = i + 1; j < n; j++) if (Math.abs(A[j][i]) > Math.abs(A[p][i])) p = j;
+        t = A[i]; A[i] = A[p]; A[p] = t; t = b[i]; b[i] = b[p]; b[p] = t;
+        if (Math.abs(A[i][i]) < 1e-12) continue;
+        for (j = i + 1; j < n; j++) {
+          var f = A[j][i] / A[i][i];
+          for (k = i; k < n; k++) A[j][k] -= f * A[i][k];
+          b[j] -= f * b[i];
+        }
+      }
+      var x = [];
+      for (i = n - 1; i >= 0; i--) {
+        var s = b[i];
+        for (k = i + 1; k < n; k++) s -= A[i][k] * x[k];
+        x[i] = Math.abs(A[i][i]) < 1e-12 ? 0 : s / A[i][i];
+      }
+      return x;
+    }
+    // 살아 있는 항만으로 최소제곱 (정규방정식)
+    function lsq(d, active) {
+      var idx = [];
+      active.forEach(function (a, i) { if (a) idx.push(i); });
+      var full = TERMS.map(function () { return 0; });
+      if (!idx.length) return full;
+      var A = [], b = [];
+      idx.forEach(function (ti, i) {
+        A.push([]); var bi = 0;
+        idx.forEach(function (tj, j) {
+          var s = 0;
+          for (var t = 0; t < d.x.length; t++) s += TERMS[ti](d.x[t]) * TERMS[tj](d.x[t]);
+          A[i].push(s + (i === j ? 1e-9 : 0));
+        });
+        for (var t = 0; t < d.x.length; t++) bi += TERMS[ti](d.x[t]) * d.y[t];
+        b.push(bi);
+      });
+      var c = solve(A, b);
+      idx.forEach(function (ti, i) { full[ti] = c[i]; });
+      return full;
+    }
+    // 반복 임계값 최소제곱: 단계별 계수 기록 (hist[0] = 제약 없는 피팅)
+    function stlsq(d, lam, maxIter) {
+      var active = TERMS.map(function () { return true; }), c = lsq(d, active), hist = [c], converged = false;
+      for (var it = 0; it < maxIter; it++) {
+        var next = c.map(function (v, i) { return active[i] && Math.abs(v) >= lam; });
+        if (next.every(function (v, i) { return v === active[i]; })) { converged = true; break; }
+        active = next; c = lsq(d, active); hist.push(c);
+      }
+      return { hist: hist, converged: converged };
+    }
+    function pred(c, x) { var s = 0; for (var i = 0; i < c.length; i++) s += c[i] * TERMS[i](x); return s; }
+    function rmse(c, a, b) {
+      var s = 0, n = 0;
+      for (var x = a; x <= b + 1e-9; x += 0.05) { var e = pred(c, x) - truth(x); s += e * e; n++; }
+      return Math.sqrt(s / n);
+    }
+    function eq(c) {
+      var out = "";
+      c.forEach(function (v, i) {
+        if (v === 0) return;
+        var a = Math.abs(v).toFixed(2), term = i === 0 ? a : a + "·" + NAMES[i];
+        out += (out ? (v < 0 ? " − " : " + ") : (v < 0 ? "−" : "")) + term;
+      });
+      return "y = " + (out || "0");
+    }
+
+    var rN = document.getElementById("rN"), rL = document.getElementById("rL"), rI = document.getElementById("rI");
+    var oN = document.getElementById("oN"), oL = document.getElementById("oL"), oI = document.getElementById("oI");
+    var svg = document.getElementById("sd-svg"), readout = document.getElementById("sd-readout"), verdict = document.getElementById("sd-verdict");
+
+    function render() {
+      var noise = +rN.value / 100, lam = +rL.value / 100, iters = +rI.value;
+      oN.value = noise.toFixed(2); oL.value = lam.toFixed(2); oI.value = iters === 0 ? "0 (제약 없음)" : iters;
+      var d = makeData(noise), res = stlsq(d, lam, iters);
+      var c = res.hist[res.hist.length - 1], used = res.hist.length - 1;
+      // 요청한 횟수를 다 썼는데도 더 지울 항이 있는지 확인
+      var more = iters > 0 && !res.converged && stlsq(d, lam, iters + 1).hist.length - 1 > used;
+
+      svg.innerHTML = "";
+      // --- 위: 곡선
+      var x0 = 56, y0 = 16, W = 684, H = 220, xa = -2, xb = 4, ya = -6, yb = 20;
+      function X(x) { return x0 + (x - xa) / (xb - xa) * W; }
+      function Y(y) { return y0 + (1 - (Math.max(ya, Math.min(yb, y)) - ya) / (yb - ya)) * H; }
+      svg.appendChild(el("rect", { x: x0, y: y0, width: W, height: H, fill: "currentColor", opacity: .04 }));
+      svg.appendChild(el("rect", { x: X(2), y: y0, width: X(4) - X(2), height: H, fill: C.ex, opacity: .1 }));
+      svg.appendChild(el("text", { x: X(0), y: y0 + 14, "text-anchor": "middle", "font-size": 11, fill: "currentColor", opacity: .7 }, "학습 구간 (관측 있음)"));
+      svg.appendChild(el("text", { x: X(3), y: y0 + 14, "text-anchor": "middle", "font-size": 11, fill: C.ex }, "외삽 구간 (관측 없음)"));
+      [-5, 0, 5, 10, 15, 20].forEach(function (v) {
+        svg.appendChild(el("line", { x1: x0, y1: Y(v), x2: x0 + W, y2: Y(v), stroke: "currentColor", "stroke-opacity": v === 0 ? .3 : .1 }));
+        svg.appendChild(el("text", { x: x0 - 8, y: Y(v) + 4, "text-anchor": "end", "font-size": 11, "font-family": MONO, fill: "currentColor", opacity: .7 }, v));
+      });
+      [-2, -1, 0, 1, 2, 3, 4].forEach(function (v) {
+        svg.appendChild(el("text", { x: X(v), y: y0 + H + 16, "text-anchor": "middle", "font-size": 11, "font-family": MONO, fill: "currentColor", opacity: .7 }, v));
+      });
+      function curve(f, color, dash) {
+        var dd = "";
+        for (var x = xa; x <= xb + 1e-9; x += 0.05) dd += (dd ? "L" : "M") + X(x).toFixed(1) + " " + Y(f(x)).toFixed(1) + " ";
+        var a = { d: dd, fill: "none", stroke: color, "stroke-width": 2.5 };
+        if (dash) a["stroke-dasharray"] = "6 4";
+        svg.appendChild(el("path", a));
+      }
+      curve(truth, C.truth, true);
+      curve(function (x) { return pred(c, x); }, C.fit);
+      d.x.forEach(function (x, i) { svg.appendChild(el("circle", { cx: X(x), cy: Y(d.y[i]), r: 3.2, fill: "currentColor", opacity: .75 })); });
+
+      // --- 아래: 계수 막대
+      var by = 286, bh = 100, bw = W / 6, maxAbs = 2.5;
+      svg.appendChild(el("text", { x: x0, y: by - 12, "font-size": 11, fill: "currentColor", opacity: .7 }, "후보 항별 계수 (가운데 선이 0, 흐린 선이 ±임계값, 초록 표시가 정답 계수)"));
+      svg.appendChild(el("line", { x1: x0, y1: by + bh / 2, x2: x0 + W, y2: by + bh / 2, stroke: "currentColor", "stroke-opacity": .4 }));
+      if (lam > 0 && lam <= maxAbs) [1, -1].forEach(function (s) {
+        var yy = by + bh / 2 - s * lam / maxAbs * (bh / 2);
+        svg.appendChild(el("line", { x1: x0, y1: yy, x2: x0 + W, y2: yy, stroke: "currentColor", "stroke-opacity": .3, "stroke-dasharray": "3 3" }));
+      });
+      c.forEach(function (v, i) {
+        var cx = x0 + bw * i + bw / 2, vv = Math.max(-maxAbs, Math.min(maxAbs, v));
+        var h = Math.abs(vv) / maxAbs * (bh / 2), dead = v === 0;
+        if (!dead) svg.appendChild(el("rect", { x: cx - 22, y: vv >= 0 ? by + bh / 2 - h : by + bh / 2, width: 44, height: Math.max(h, 1.5), rx: 3, fill: C.fit, opacity: .85 }));
+        var ty = by + bh / 2 - TRUE[i] / maxAbs * (bh / 2);
+        svg.appendChild(el("line", { x1: cx - 30, y1: ty, x2: cx + 30, y2: ty, stroke: C.truth, "stroke-width": 2.5 }));
+        svg.appendChild(el("text", { x: cx, y: by + bh + 16, "text-anchor": "middle", "font-size": 12, "font-family": MONO, fill: "currentColor", opacity: dead ? .35 : 1 }, NAMES[i]));
+        svg.appendChild(el("text", { x: cx, y: by + bh + 32, "text-anchor": "middle", "font-size": 11, "font-family": MONO, fill: "currentColor", opacity: dead ? .35 : .8 }, dead ? "삭제" : v.toFixed(2)));
+      });
+
+      // --- readout
+      var alive = c.filter(function (v) { return v !== 0; }).length;
+      var eIn = rmse(c, -2, 2), eEx = rmse(c, 2, 4), c0 = res.hist[0], eEx0 = rmse(c0, 2, 4);
+      var html = "찾은 식: <b>" + eq(c) + "</b><br>" +
+        "살아남은 항 <b>" + alive + " / 6</b> · 학습 구간 오차(RMSE) <b>" + eIn.toFixed(3) + "</b> · 외삽 구간 오차 <b>" + eEx.toFixed(3) + "</b>";
+      if (iters > 0) html += "<br>제약 없이 피팅했을 때 외삽 오차 " + eEx0.toFixed(3) + " → 지금 " + eEx.toFixed(3) +
+        " · 실제로 돈 반복 " + used + "회" + (res.converged ? " (수렴)" : more ? " (아직 더 지울 항이 있음)" : "");
+      readout.innerHTML = html;
+
+      // --- 판정
+      var right = c.every(function (v, i) { return (v !== 0) === (TRUE[i] !== 0); });
+      var lostTrue = c[1] === 0 || c[2] === 0;
+      if (iters === 0) verdict.innerHTML = '<span class="verdict hard">제약 없는 피팅: 6개 항이 모두 살아남았습니다. 반복 횟수를 올려 임계값을 적용해 보세요.</span>';
+      else if (right) verdict.innerHTML = '<span class="verdict ok">정답과 같은 항(x, x²)만 남았습니다. 외삽 구간에서도 정답 곡선을 따라갑니다.</span>';
+      else if (lostTrue) verdict.innerHTML = '<span class="verdict bad">⚠ 임계값이 너무 커서 진짜 항까지 지워졌습니다. λ를 낮추세요.</span>';
+      else verdict.innerHTML = '<span class="verdict hard">가짜 항이 아직 남아 있습니다. λ를 올리거나 반복 횟수를 늘려 보세요.</span>';
+    }
+
+    [rN, rL, rI].forEach(function (r) { r.addEventListener("input", render); });
+    var presets = { dense: [20, 30, 0], sparse: [20, 30, 4], over: [20, 180, 4] };
+    document.querySelectorAll("[data-preset]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var p = presets[b.getAttribute("data-preset")];
+        rN.value = p[0]; rL.value = p[1]; rI.value = p[2]; render();
+      });
+    });
+    render();
+  })();
   </script>
 </body>
 </html>

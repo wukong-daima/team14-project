@@ -45,7 +45,7 @@ body { font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans
 .slide.dark::before { content: ""; position: absolute; left: 0; top: 0; width: 34px; height: 100%; background: #2d5bff; }
 h2 { font-size: 30px; margin: 0 0 22px; padding-left: 18px; border-left: 10px solid #2d5bff; line-height: 1.25; }
 .title-slide { padding: 50px 40px 0 70px; } .title-slide .meta { color: #9aa8bb; font-size: 16px; margin-bottom: 60px; }
-.title-slide h1 { font-size: 40px; line-height: 1.3; margin: 0 0 18px; } .title-slide .sub { color: #ff8a3d; font-size: 24px; margin-bottom: 90px; }
+.title-slide h1 { font-size: 36px; line-height: 1.35; margin: 0 0 18px; white-space: pre-line; } .title-slide .sub { color: #ff8a3d; font-size: 24px; margin-bottom: 90px; }
 .title-slide .meta2 { font-size: 18px; } .title-slide .url { color: #9aa8bb; font-size: 14px; margin-top: 8px; }
 .lead { font-size: 30px; font-weight: 700; margin: 30px 0 10px; line-height: 1.35; } .sublead { font-size: 22px; color: #5b6b7f; margin: 0 0 40px; }
 .formula-row { display: flex; align-items: center; gap: 28px; margin-bottom: 44px; }

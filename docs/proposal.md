@@ -1,4 +1,4 @@
-# 자가 진화 LLM 하네스의 학습 효과 검증: 오버피팅인가, 진짜 개선인가
+# 최신딥러닝이론및응용 강의 콘텐츠로 검증하는 자가 진화 LLM 하네스의 학습 효과: 오버피팅인가, 진짜 개선인가
 
 **연세대학교 공학대학원 인공지능학과 · 최신딥러닝이론및응용 · 14조 (EvoLecture)**
 제출일 2026-11-15 · 사이트 https://wukong-daima.github.io/team14-project/ · 저장소 https://github.com/wukong-daima/team14-project

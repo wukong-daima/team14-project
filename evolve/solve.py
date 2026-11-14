@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import re
 import time
 from pathlib import Path
@@ -63,6 +64,16 @@ def is_correct(q: dict, pred) -> bool:
     return abs(float(pred) - ans) <= tol
 
 
+def bootstrap_ci(values: list[float], n_boot: int = 2000, seed: int = 14) -> tuple[float, float]:
+    """문항 단위 재표집으로 평균의 95% 신뢰구간. 표본이 작을 때 '개선'을 과장하지 않기 위함."""
+    if not values:
+        return (0.0, 0.0)
+    rng = random.Random(seed)
+    n = len(values)
+    means = sorted(sum(values[rng.randrange(n)] for _ in range(n)) / n for _ in range(n_boot))
+    return (round(means[int(0.025 * n_boot)], 4), round(means[int(0.975 * n_boot)] - 1e-12, 4))
+
+
 def run(args, llm: LLM | None = None, html_override: dict | None = None, patched: bool = False) -> dict:
     weeks = args.weeks.split(",") if args.weeks else None
     bank = load_bank(args.bank, weeks)
@@ -98,6 +109,7 @@ def run(args, llm: LLM | None = None, html_override: dict | None = None, patched
         "bank": args.bank, "condition": args.condition, "model": args.model, "effort": args.effort, "k": args.k,
         "weeks": sorted({r["week"] for r in results}), "n": n,
         "acc": round(sum(r["acc"] for r in results) / n, 4),
+        "acc_ci95": bootstrap_ci([r["acc"] for r in results]),
         "pass_at_k": round(sum(r["pass_at_k"] for r in results) / n, 4),
         "pass_hat_k": round(sum(r["pass_hat_k"] for r in results) / n, 4),
         "by_week": {w: round(sum(r["acc"] for r in results if r["week"] == w) / max(1, sum(1 for r in results if r["week"] == w)), 4) for w in sorted({r["week"] for r in results})},
@@ -107,7 +119,7 @@ def run(args, llm: LLM | None = None, html_override: dict | None = None, patched
     if args.out:
         jdump(out, Path(args.out))
         log(f"→ {args.out}")
-    log(f"acc={summary['acc']} pass@{args.k}={summary['pass_at_k']} pass^{args.k}={summary['pass_hat_k']} n={n} ${summary['usage']['usd']}")
+    log(f"acc={summary['acc']} CI95={summary['acc_ci95']} pass@{args.k}={summary['pass_at_k']} pass^{args.k}={summary['pass_hat_k']} n={n} ${summary['usage']['usd']}")
     return out
 
 

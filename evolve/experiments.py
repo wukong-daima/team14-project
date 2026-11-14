@@ -8,9 +8,10 @@
 from __future__ import annotations
 
 import argparse
+import time
 from types import SimpleNamespace
 
-from common import LLM, REPORT_DIR, WEAK_MODEL, jdump, log, update_report_index
+from common import BACKEND, CLI_ISOLATION, LLM, REPORT_DIR, WEAK_MODEL, jdump, log, update_report_index
 from solve import run as solve_run
 
 
@@ -30,7 +31,8 @@ def main():
     ap.add_argument("--mock", action="store_true")
     a = ap.parse_args()
     llm = LLM(mock=a.mock)
-    out = {"exp": a.exp, "weeks": a.weeks, "model": a.model, "mock": a.mock, "runs": []}
+    out = {"exp": a.exp, "weeks": a.weeks, "model": a.model, "mock": a.mock, "date": time.strftime("%Y-%m-%dT%H:%M:%S"),
+           "backend": "mock" if a.mock else BACKEND, "cli_isolation": " ".join(CLI_ISOLATION) if BACKEND == "claude-cli" and not a.mock else None, "runs": []}
     if a.exp == "e3":
         for cond in ("none", "brief", "page"):
             r = solve_run(ns(weeks=a.weeks, condition=cond, model=a.model, limit=a.limit, mock=a.mock), llm)

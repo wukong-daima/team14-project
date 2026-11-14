@@ -13,6 +13,7 @@ import os
 import random
 import re
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
@@ -37,6 +38,9 @@ MAX_USD = float(os.environ.get("EVOLVE_MAX_USD", "5"))
 # 백엔드: "api" = Anthropic SDK(API 키 과금) · "claude-cli" = 구독 로그인된 Claude Code 헤드리스(claude -p)
 BACKEND = os.environ.get("EVOLVE_BACKEND", "claude-cli" if not os.environ.get("ANTHROPIC_API_KEY") else "api")
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
+# claude-cli 격리 옵션. 기본 --bare. --bare 는 키체인을 읽지 않아 구독 로그인만 된 PC(예: Windows 데스크톱 앱 로그인)에서는
+# "Not logged in" 이 난다. 그럴 때는 EVOLVE_CLI_ISOLATION=--safe-mode (CLAUDE.md·스킬·플러그인·훅·MCP 비활성, 인증은 정상).
+CLI_ISOLATION = os.environ.get("EVOLVE_CLI_ISOLATION", "--bare").split()
 
 
 # ---------------------------------------------------------------- 문제 은행
@@ -214,9 +218,10 @@ class LLM:
         """구독 로그인된 Claude Code 를 헤드리스로 호출. 도구 없음, 세션 저장 없음, 1턴."""
         import subprocess
         cmd = [CLAUDE_BIN, "-p", user, "--system-prompt", system, "--model", model, "--effort", effort,
-               "--output-format", "json", "--bare", "--strict-mcp-config", "--tools", "", "--no-session-persistence"]
+               "--output-format", "json", *CLI_ISOLATION, "--strict-mcp-config", "--tools", "", "--no-session-persistence"]
         for attempt in range(3):
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            # encoding 명시: Windows 기본 코드페이지(cp949)로는 UTF-8 응답을 못 읽는다. cwd 는 임시 폴더(저장소 맥락이 풀이자에게 새지 않게)
+            r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600, cwd=tempfile.gettempdir())
             try:
                 j = json.loads(r.stdout.strip().splitlines()[-1]) if r.stdout.strip() else {}
             except json.JSONDecodeError:

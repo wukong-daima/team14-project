@@ -1,4 +1,4 @@
-// deck.json → Team14.pptx (pptxgenjs). 16:9, 한국어.
+// deck.json → <output>.pptx (pptxgenjs). 16:9, 한국어. 슬라이드 notes 는 발표자 노트로 들어간다.
 const fs = require("fs");
 const path = require("path");
 const PptxGenJS = require("pptxgenjs");
@@ -39,6 +39,7 @@ function bulletRuns(items, size) {
 deck.slides.forEach((s, i) => {
   const n = i + 1;
   const slide = pptx.addSlide();
+  if (s.notes) slide.addNotes(s.notes);
   if (s.kind === "title") {
     slide.background = { color: C.ink };
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.35, h: H, fill: { color: C.blue }, line: { color: C.blue } });
@@ -100,4 +101,5 @@ deck.slides.forEach((s, i) => {
     if (s.caption) slide.addText(s.caption, { x: M, y: 1.45 + imgH + 0.05, w: imgW, h: 0.3, fontFace: FONT, fontSize: 9, color: C.muted });
   }
 });
-pptx.writeFile({ fileName: path.join(__dirname, "Team14.pptx") }).then((f) => console.log("wrote", f));
+// 출력 파일명은 deck.json 의 "output" (없으면 Team14). 중간발표는 Team14_mid.
+pptx.writeFile({ fileName: path.join(__dirname, (deck.output || "Team14") + ".pptx") }).then((f) => console.log("wrote", f));

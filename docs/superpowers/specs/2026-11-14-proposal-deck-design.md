@@ -10,7 +10,7 @@
 
 ## 제약
 - LibreOffice 없음 → PDF 는 HTML 덱을 Playwright 로 인쇄. 폰트는 Noto Sans KR(웹) / 맑은 고딕·Apple SD Gothic 대체.
-- 제목: "재학습 없는 LLM 자가 진화 루프의 학습 콘텐츠 개선 효과 검증: 오버피팅·테스트타임·일반화 분해".
+- 제목: "자가 진화 LLM 하네스의 학습 효과 검증: 오버피팅인가, 진짜 개선인가".
 
 ## 접근 (승인: 방법 1)
 1. (선택) 단일 데이터(`submission/deck.json`) → pptxgenjs PPTX + HTML 덱 → Playwright PDF. 내용 동일, 모양 유사.

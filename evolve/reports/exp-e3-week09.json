@@ -1,0 +1,128 @@
+{
+ "exp": "e3",
+ "weeks": "week09",
+ "model": "claude-haiku-5-5",
+ "mock": false,
+ "date": "2026-11-14T21:55:29",
+ "backend": "claude-cli",
+ "cli_isolation": "--safe-mode",
+ "runs": [
+  {
+   "condition": "none",
+   "bank": "public",
+   "model": "claude-haiku-5-5",
+   "effort": "low",
+   "k": 1,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 0.6667,
+   "acc_ci95": [
+    0.4444,
+    0.8889
+   ],
+   "pass_at_k": 0.6667,
+   "pass_hat_k": 0.6667,
+   "by_week": {
+    "week09": 0.6667
+   },
+   "mock": false,
+   "elapsed_s": 105.2,
+   "usage": {
+    "calls": 18,
+    "input_tokens": 24589,
+    "output_tokens": 7684,
+    "usd": 0.0063,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 18,
+      "usd": 0.0063
+     }
+    }
+   }
+  },
+  {
+   "condition": "brief",
+   "bank": "public",
+   "model": "claude-haiku-5-5",
+   "effort": "low",
+   "k": 1,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 1.0,
+   "acc_ci95": [
+    1.0,
+    1.0
+   ],
+   "pass_at_k": 1.0,
+   "pass_hat_k": 1.0,
+   "by_week": {
+    "week09": 1.0
+   },
+   "mock": false,
+   "elapsed_s": 101.6,
+   "usage": {
+    "calls": 36,
+    "input_tokens": 288509,
+    "output_tokens": 14586,
+    "usd": 0.0361,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 36,
+      "usd": 0.0361
+     }
+    }
+   }
+  },
+  {
+   "condition": "page",
+   "bank": "public",
+   "model": "claude-haiku-5-5",
+   "effort": "low",
+   "k": 1,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 0.9444,
+   "acc_ci95": [
+    0.8333,
+    1.0
+   ],
+   "pass_at_k": 0.9444,
+   "pass_hat_k": 0.9444,
+   "by_week": {
+    "week09": 0.9444
+   },
+   "mock": false,
+   "elapsed_s": 96.1,
+   "usage": {
+    "calls": 54,
+    "input_tokens": 518341,
+    "output_tokens": 20888,
+    "usd": 0.0623,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 54,
+      "usd": 0.0623
+     }
+    }
+   }
+  }
+ ],
+ "usage": {
+  "calls": 54,
+  "input_tokens": 518341,
+  "output_tokens": 20888,
+  "usd": 0.0623,
+  "by_model": {
+   "claude-haiku-5-5": {
+    "calls": 54,
+    "usd": 0.0623
+   }
+  }
+ }
+}

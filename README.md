@@ -9,7 +9,8 @@ Claude · GPT · 공개 모델의 동작을 **공개 자료 범위에서** 비�
 
 - **사이트: https://wukong-daima.github.io/team14-project/** (GitHub Pages, `main` 브랜치 루트에서 자동 배포)
 - 발표 모드: `slides/index.html` (reveal.js)
-- 계획: [PLAN.md](PLAN.md) · 작업 규칙: [CONTRIBUTING.md](CONTRIBUTING.md) · 주차별 콘텐츠 브리프: [content/briefs/](content/briefs/)
+- 계획: [PLAN.md](PLAN.md) · 제출용 제안서: [docs/proposal.md](docs/proposal.md) · 작업 규칙: [CONTRIBUTING.md](CONTRIBUTING.md) · 주차별 콘텐츠 브리프: [content/briefs/](content/briefs/)
+- 실험실(라운드·분해 결과): https://wukong-daima.github.io/team14-project/lab/ · 루프 실행법: [evolve/README.md](evolve/README.md)
 
 ## 주차 작업 시작하기
 

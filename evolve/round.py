@@ -46,6 +46,7 @@ def main():
     ap.add_argument("--mock", action="store_true")
     ap.add_argument("--apply", action="store_true", help="통과한 패치를 weeks/*.html 에 기록")
     ap.add_argument("--pr", action="store_true", help="--apply + 브랜치 생성 + 커밋 + 푸시 + PR")
+    ap.add_argument("--reward", default="full", choices=["full", "acc-only"], help="보상 변형 (ablation). acc-only 는 출처 항 없이 정답률만")
     a = ap.parse_args()
 
     no = next_round_no()
@@ -85,8 +86,11 @@ def main():
     def mean_rate(d):
         v = [x["rate"] for x in d.values() if x["rate"] is not None]
         return round(sum(v) / len(v), 3) if v else None
-    R_before = reward(base_pub["summary"]["acc"], mean_rate(sp_before))
-    R_after = reward(after_pub["summary"]["acc"], mean_rate(sp_after))
+    R_before = reward(base_pub["summary"]["acc"], mean_rate(sp_before), a.reward)
+    R_after = reward(after_pub["summary"]["acc"], mean_rate(sp_after), a.reward)
+    # 신뢰구간이 겹치면 '유의한 개선'이라 부르지 않는다 (채택 여부와는 별개로 리포트에 남김)
+    ci_b, ci_a = base_pub["summary"]["acc_ci95"], after_pub["summary"]["acc_ci95"]
+    ci_overlap = not (ci_a[0] > ci_b[1] or ci_b[0] > ci_a[1])
 
     # O·T·G (한 라운드 근사). T 는 호출 수를 늘린 비교가 없으면 0 으로 두고 표기.
     d_pub = round(after_pub["summary"]["acc"] - base_pub["summary"]["acc"], 4)
@@ -98,6 +102,9 @@ def main():
     accepted = checks["ok"] and R_after > R_before
     report = {
         "round": no, "date": dt.date.today().isoformat(), "weeks": weeks, "mock": a.mock, "model": a.model, "k": a.k,
+        "reward_variant": a.reward, "n_public": base_pub["summary"]["n"], "n_heldout": base_hid["summary"]["n"] if base_hid else 0,
+        "ci95": {"public_before": ci_b, "public_after": ci_a, "overlap": ci_overlap,
+                 "heldout_before": base_hid["summary"]["acc_ci95"] if base_hid else None, "heldout_after": after_hid["summary"]["acc_ci95"] if after_hid else None},
         "baseline": {"acc_public": base_pub["summary"]["acc"], "acc_heldout": base_hid["summary"]["acc"] if base_hid else None,
                      "acc_none": base_none["summary"]["acc"], "source_pass": sp_before, "R": R_before},
         "after": {"acc_public": after_pub["summary"]["acc"], "acc_heldout": after_hid["summary"]["acc"] if after_hid else None,
@@ -110,6 +117,7 @@ def main():
     jdump(report, REPORT_DIR / f"{tag}.json")
     update_report_index()
     log(f"[5/5] 리포트 → evolve/reports/{tag}.json")
+    log(f"  CI95 공개 {ci_b} → {ci_a} {'(겹침: 유의하지 않음)' if ci_overlap else '(분리: 유의)'}")
     log(f"  R {R_before} → {R_after}  Δ공개={d_pub} Δ비공개={d_hid} O={O} G={G}  패치 {len(patches)}개  accepted={accepted}  ${report['usage']['usd']}")
 
     if accepted and (a.apply or a.pr):
@@ -120,12 +128,12 @@ def main():
         br = f"evolve/{tag}"
         git("checkout", "-B", br)
         git("add", "-A", "weeks", "evolve/reports")
-        git("commit", "-m", f"evolve {tag}: 패치 {len(patches)}개 (R {R_before}→{R_after}, Δ공개 {d_pub}, O {O}, G {G})")
+        git("commit", "-m", f"evolve {tag}: 패치 {len(patches)}개 (R {R_before}→{R_after}, Δ공개 {d_pub}, O {O}, G {G}, reward={a.reward})")
         git("push", "-u", "origin", br, "--force")
         body = (f"자가 진화 루프 {tag} 결과. 사람이 검토 후 머지합니다.\n\n"
                 f"| 지표 | 전 | 후 |\n|---|---|---|\n| Acc 공개 | {report['baseline']['acc_public']} | {report['after']['acc_public']} |\n"
                 f"| Acc 비공개 | {report['baseline']['acc_heldout']} | {report['after']['acc_heldout']} |\n| R | {R_before} | {R_after} |\n\n"
-                f"분해: Δ공개 {d_pub} · O {O} · T {T} · G {G}\n\n패치: " + ", ".join(f"{p['week']}#{p['card_id']} ({p['concept']})" for p in patches)
+                f"분해: Δ공개 {d_pub} · O {O} · T {T} · G {G} · 보상 변형 {a.reward} · CI95 공개 {ci_b}→{ci_a} ({'겹침' if ci_overlap else '분리'})\n\n패치: " + ", ".join(f"{p['week']}#{p['card_id']} ({p['concept']})" for p in patches)
                 + f"\n\n비용 ${report['usage']['usd']} · mock={a.mock}\n\n리포트: `evolve/reports/{tag}.json`")
         subprocess.run(["gh", "pr", "create", "--base", "main", "--head", br, "--title", f"evolve {tag}: 콘텐츠 보강 제안", "--body", body], cwd=ROOT, check=False)
     elif not accepted:

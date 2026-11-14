@@ -71,7 +71,10 @@ def source_pass(week: str, html: str | None = None) -> dict:
     return {"src": n_src, "check": n_chk, "private": n_prv, "rate": round(n_src / judged, 3) if judged else None}
 
 
-def reward(acc_public: float, sp_rate: float | None) -> float:
+def reward(acc_public: float, sp_rate: float | None, variant: str = "full") -> float:
+    """variant: full = 0.6·Acc + 0.4·SourcePass · acc-only = Acc (ablation: 출처 항을 빼면 루프가 어떻게 달라지나)"""
+    if variant == "acc-only":
+        return round(acc_public, 4)
     return round(ALPHA * acc_public + BETA * (sp_rate if sp_rate is not None else 0.5), 4)
 
 

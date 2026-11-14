@@ -107,9 +107,11 @@
       var box = h("div", "round card");
       box.appendChild(h("h3", null, "라운드 " + r.round + " · " + r.date + " · " + (r.weeks || []).join(", ") + (r.mock ? ' <span class="pill todo">mock (가짜 풀이자)</span>' : "") + (r.accepted ? ' <span class="pill ok">채택</span>' : ' <span class="pill">기각</span>')));
       var st = h("div", "stat");
-      [["Acc 공개", pct(r.baseline.acc_public) + " → " + pct(r.after.acc_public)],
+      var ci = r.ci95 || {};
+      function ciTxt(c) { return c ? " [" + pct(c[0]) + "–" + pct(c[1]) + "]" : ""; }
+      [["Acc 공개 (n=" + (r.n_public || "?") + ")", pct(r.baseline.acc_public) + " → " + pct(r.after.acc_public) + '<div class="l">' + "CI95 " + ciTxt(ci.public_before) + " →" + ciTxt(ci.public_after) + (ci.overlap === false ? " · 분리" : ci.overlap === true ? " · 겹침(유의하지 않음)" : "") + "</div>"],
        ["Acc 비공개", pct(r.baseline.acc_heldout) + " → " + pct(r.after.acc_heldout)],
-       ["R", num(r.baseline.R) + " → " + num(r.after.R)],
+       ["R (" + (r.reward_variant || "full") + ")", num(r.baseline.R) + " → " + num(r.after.R)],
        ["자료 없음(B)", pct(r.baseline.acc_none)],
        ["패치", (r.patches || []).length + "개"],
        ["비용", "$" + num(r.usage && r.usage.usd, 3)]].forEach(function (s) {

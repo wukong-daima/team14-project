@@ -43,7 +43,7 @@ deck.slides.forEach((s, i) => {
     slide.background = { color: C.ink };
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.35, h: H, fill: { color: C.blue }, line: { color: C.blue } });
     slide.addText(s.meta[0], { x: 1, y: 0.9, w: 11, h: 0.4, fontFace: FONT, fontSize: 14, color: "9AA8BB" });
-    slide.addText(s.title, { x: 1, y: 2.0, w: 11.3, h: 1.9, fontFace: FONT, fontSize: 34, bold: true, color: C.white, valign: "top" });
+    slide.addText(s.title, { x: 1, y: 1.8, w: 11.3, h: 2.1, fontFace: FONT, fontSize: 30, bold: true, color: C.white, valign: "top" });
     slide.addText(s.subtitle, { x: 1, y: 3.95, w: 11, h: 0.6, fontFace: FONT, fontSize: 20, color: C.orange });
     slide.addText(s.meta[1], { x: 1, y: 5.3, w: 11, h: 0.4, fontFace: FONT, fontSize: 15, color: C.white });
     slide.addText(s.url, { x: 1, y: 5.8, w: 11, h: 0.4, fontFace: FONT, fontSize: 12, color: "9AA8BB" });

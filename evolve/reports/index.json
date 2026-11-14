@@ -1,5 +1,12 @@
 {
- "generated": "2026-11-14T10:10:06",
+ "generated": "2026-11-14T21:11:34",
  "rounds": [],
- "experiments": []
+ "experiments": [
+  {
+   "file": "exp-e3-week02_week04_week08.json",
+   "exp": "e3",
+   "weeks": "week02,week04,week08",
+   "mock": false
+  }
+ ]
 }

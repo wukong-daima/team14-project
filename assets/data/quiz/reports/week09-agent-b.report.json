@@ -1,0 +1,158 @@
+{
+  "week": "week09",
+  "generated": "2026-11-28",
+  "planned": 28,
+  "candidates": 24,
+  "kept": 11,
+  "dropped": 13,
+  "by_type": {
+    "mc": 6,
+    "num": 1,
+    "self": 4
+  },
+  "basic_kept": 2,
+  "answer_positions": {
+    "0": 1,
+    "1": 2,
+    "2": 1,
+    "3": 2
+  },
+  "concept_coverage": {
+    "agent-eval-four-principles": 1,
+    "artifact-create-vs-use": 2,
+    "context-engineering-ace-mce-metaharness": 1,
+    "cot-vs-internal-computation": 0,
+    "diversity-collapse-map-elites-island": 1,
+    "experience-sources-harness-vs-weights": 0,
+    "harness-reuse-open-problem": 0,
+    "pass-at-k": 1,
+    "pass-at-k-broken-task": 1,
+    "reward-hacking-eureka": 0,
+    "synthetic-problem-conditions": 1,
+    "tabular-feature-evolution": 1,
+    "three-research-problems": 1,
+    "workflow-design-adas-aflow": 1
+  },
+  "round1_pass1": {
+    "weak": 0.902,
+    "strong": 1.0
+  },
+  "round2_pass1": {
+    "weak": 0.524,
+    "strong": 1.0
+  },
+  "drop_reasons": [
+    {
+      "id": "w09b-c02",
+      "cell": "c02",
+      "q": "(수업 중 구두 설명) 리워드가 부정확한 자가 진화 루프에 대해 수업은 두 가지 연구 방향을 따로 구분했다.",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c03",
+      "cell": "c03",
+      "q": "AlphaEvolve식 진화에서 전략이 조합론 쪽으로 몰리는 것을 막으려는 두 설계다. 첫째 설계는 전략을 ",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c06",
+      "cell": "c06",
+      "q": "(수업 중 구두 설명) 수업은 에이전트에게 그냥 수학 문제를 만들라고 할 때 생기는 분야 쏠림을, 앞서 다룬",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c07",
+      "cell": "c07",
+      "q": "(수업 중 구두 설명, Q&A) 한 번 시도의 성공 확률이 p(0 < p < 1)인 에이전트에 대해, k를 ",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c09",
+      "cell": "c09",
+      "q": "팀이 직접 만든 벤치마크를 프론티어 모델(GPT·Claude)로 돌렸더니 pass@1이 15%로 낮게 나왔다",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c11",
+      "cell": "c11",
+      "q": "개발팀이 사내 정산 처리 에이전트를 만들면서 검증 계획을 세웠다. 개발 첫 주에 실제 실패 사례 30개를 손",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c15",
+      "cell": "c15",
+      "q": "(수업 중 구두 설명) 수업은 모델의 hidden state를 직접 분석해 하네스에 쓰는 흐름(Goodfir",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c17",
+      "cell": "c17",
+      "q": "수업은 자가 진화에 쓰는 경험(experience)의 출처를 셋으로 나눴다. 다음 두 경우가 각각 어느 출처",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c21",
+      "cell": "c21",
+      "q": "하네스 진화 루프를 정답표로 정확하게 채점되는 객관식 벤치마크에서 돌렸더니 점수가 계속 올랐다. 리워드 판정",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c22",
+      "cell": "c22",
+      "q": "리워드 해킹과 eureka-ing은 둘 다 '높은 점수가 실제 실력을 반영하지 않는' 경우로 소개됐지만, 높",
+      "why": [
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c24",
+      "cell": "c24",
+      "q": "(수업 중 구두 설명) 테이블 파운데이션 모델의 피처 생성 루프에서 GPT가 제안한 피처를 분야별로 세어 보",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c25",
+      "cell": "c25",
+      "q": "ACE는 Generator → Reflector → Curator 순서로 플레이북을 고치되, 플레이북 전체를",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    },
+    {
+      "id": "w09b-c28",
+      "cell": "c28",
+      "q": "한 팀이 워크플로우 후보를 트리로 쌓으면서, 매 라운드 지금까지 점수가 가장 높은 가지만 골라 확장했다. 그",
+      "why": [
+        "score:too_easy",
+        "verifier:drop"
+      ]
+    }
+  ]
+}

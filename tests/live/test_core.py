@@ -6,10 +6,10 @@ from conftest import raw_question
 from livelab import core
 
 
-def test_bank_week09_has_18_questions_without_answers():
+def test_bank_week09_has_25_questions_without_answers():
     b = core.bank("week09")
     assert b["set"] == "week09" and b["weeks"] == ["week09"]
-    assert len(b["questions"]) == 18
+    assert len(b["questions"]) == 25
     for q in b["questions"]:
         assert set(q) == {"id", "week", "type", "q", "options", "concept"}
 
@@ -118,7 +118,7 @@ def test_llm_api_error_maps_to_502(raising_llm_factory):
 def test_health_lists_sets_with_counts():
     h = core.health()
     assert h["live"] is True and h["model"] == "claude-haiku-5-5"
-    assert {(s["name"], s["n"]) for s in h["sets"]} == {("week09", 18), ("seed", 39)}
+    assert {(s["name"], s["n"]) for s in h["sets"]} == {("week09", 25), ("seed", 39)}
 
 
 def test_reports_include_recorded_week09_run():

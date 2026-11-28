@@ -26,10 +26,11 @@ QUIZ_DATA = os.path.join(ROOT, "assets", "data", "quiz")
 TYPE_RATIO = {"mc": 0.5, "num": 0.2, "self": 0.3}
 DIFF_CYCLE = [2, 3, 1, 2]
 HARD = {"format_error", "calc_mismatch"}          # 이 문제는 풀이 시험에도 안 보낸다
+SET = ""   # --set b: 이미 있는 은행을 덮어쓰지 않고 문항을 더한다. 작업 폴더 weekNN-b, id wNNb-*, 출력 weekNN-agent-b.json
 
 
 def ws(week, rnd=1):
-    d = os.path.join(ROOT, "_workspace", "quiz", week)
+    d = os.path.join(ROOT, "_workspace", "quiz", week + ("-" + SET if SET else ""))
     return d if rnd == 1 else os.path.join(d, "r%d" % rnd)
 
 
@@ -51,7 +52,15 @@ def save(path, obj):
 
 
 def short(week):                                  # week09 → w09a (a = agent)
-    return "w" + re.sub(r"\D", "", week).zfill(2) + "a"
+    return "w" + re.sub(r"\D", "", week).zfill(2) + (SET or "a")
+
+
+def bank_name(week):
+    return week + "-agent" + ("-" + SET if SET else "") + ".json"
+
+
+def report_name(week):
+    return bank_name(week)[:-len(".json")] + ".report.json"
 
 
 # ---------------------------------------------------------------- plan
@@ -134,7 +143,11 @@ def existing_questions(week):
             if s.strip() and not s.strip().endswith("문제"):
                 out.append((os.path.basename(p), s))
     for p in glob.glob(os.path.join(QUIZ_DATA, "*.json")):
-        if p.endswith("-agent.json") or p.endswith("index.json"):
+        name = os.path.basename(p)
+        if name == "index.json" or name == bank_name(week):
+            continue
+        # 에이전트 은행은 빼되, 추가 세트를 만들 때는 같은 주차의 먼저 만든 은행과 겹치지 않게 본다
+        if "-agent" in name and not (SET and name.startswith(week + "-agent")):
             continue
         for q in load(p).get("questions", []):
             out.append((os.path.basename(p), q.get("q", "")))
@@ -391,11 +404,11 @@ def cmd_assemble(a):
               "round1_pass1": s1.get("pass1"),
               "round2_pass1": load(os.path.join(ws(a.week, 2), "06_scores.json"), {}).get("pass1"),
               "drop_reasons": [{"id": q["id"], "cell": q["cell"], "q": q["q"][:60], "why": why} for q, why, _ in dropped]}
-    name = a.week + "-agent.json"
+    name = bank_name(a.week)
     save(os.path.join(QUIZ_DATA, name), {"week": a.week, "source": "agent", "generated": report["generated"],
                                          "note": "quiz-forge 하네스 출력. 사람 검토 전에는 PR 하지 않는다.",
                                          "questions": bank})
-    save(os.path.join(QUIZ_DATA, "reports", a.week + "-agent.report.json"), report)
+    save(os.path.join(QUIZ_DATA, "reports", report_name(a.week)), report)
     idx_p = os.path.join(QUIZ_DATA, "index.json")
     idx = load(idx_p, {"banks": []})
     if name not in idx["banks"]:
@@ -411,7 +424,10 @@ def main():
     p.add_argument("--week", required=True)
     p.add_argument("--round", type=int, default=1)
     p.add_argument("--target", type=int, default=30)
+    p.add_argument("--set", default="", help="추가 세트 이름(예: b). 기존 은행을 덮어쓰지 않는다")
     a = p.parse_args()
+    global SET
+    SET = a.set
     globals()["cmd_" + a.cmd](a)
 
 

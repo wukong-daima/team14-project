@@ -14,7 +14,7 @@ def test_health_ok():
 
 def test_bank_default_set_is_week09():
     s, b = http.handle("GET", "/api/bank", {}, b"")
-    assert s == 200 and b["set"] == "week09" and len(b["questions"]) == 18
+    assert s == 200 and b["set"] == "week09" and len(b["questions"]) == 25
 
 
 def test_bank_seed_set():

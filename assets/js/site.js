@@ -24,7 +24,9 @@
   function applyLevel(level) {
     document.body.classList.toggle("level-easy", level === "easy");
     document.querySelectorAll(".level-toggle").forEach(function (b) {
-      b.textContent = level === "easy" ? "🎓 전공 모드로" : "🧒 중학생 수준으로 이해하기";
+      b.innerHTML = level === "easy"
+        ? '🎓 <span class="lv-long">전공 모드로</span><span class="lv-short">전공 모드</span>'
+        : '🧒 <span class="lv-long">중학생 수준으로 이해하기</span><span class="lv-short">쉬운 설명</span>';
       b.setAttribute("aria-pressed", level === "easy" ? "true" : "false");
     });
   }

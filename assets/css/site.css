@@ -182,9 +182,19 @@ body { overflow-x: hidden; }
 table { display: block; overflow-x: auto; max-width: 100%; }
 .formula { max-width: 100%; overflow-x: auto; white-space: nowrap; }
 .readout { word-break: break-word; }
-@media (max-width: 600px) {
-  .site-header .wrap { gap: 8px; }
+.lv-short { display: none; }
+@media (max-width: 900px) {
+  /* 좁은 화면: 1줄째 로고 + 버튼, 2줄째 메뉴(넘치면 옆으로 밀어 보기). 예전에는 세 줄로 접혀 화면을 많이 가렸다 */
+  .site-header .wrap { gap: 4px 8px; min-height: 0; padding-top: 6px; padding-bottom: 4px; }
+  .site-header .nav-links { order: 3; flex: 0 0 100%; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; scrollbar-width: none; margin: 0 -6px; }
+  .site-header .nav-links::-webkit-scrollbar { display: none; }
+  .site-header .btn.small { padding: 4px 9px; font-size: .82rem; }
+  .site-header .brand { font-size: .92rem; gap: 6px; white-space: nowrap; }
+  .site-header .lv-long { display: none; }
+  .site-header .lv-short { display: inline; }
   .nav-links a { padding: 4px 8px; font-size: .85rem; }
+}
+@media (max-width: 600px) {
   .playground { padding: 14px; }
 }
 .layout > * { min-width: 0; }           /* grid 자식의 min-content 때문에 열이 넓어지는 것 방지 */

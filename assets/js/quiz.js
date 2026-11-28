@@ -155,10 +155,17 @@
     el.querySelectorAll(".chip").forEach(function (b) {
       b.addEventListener("click", function () {
         var id = b.getAttribute("data-id");
+        var all = ids.every(function (x) { return picked[x]; });
         if (id === "*") {
-          var all = ids.every(function (x) { return picked[x]; });
           ids.forEach(function (x) { picked[x] = !all; });
-        } else picked[id] = !picked[id];
+        } else if (all && ids.length > 1) {
+          // 전부 선택된 상태에서 한 주차를 누르면 "그 주차만" 고른다 (예전에는 그 주차가 빠져서 헷갈렸다)
+          ids.forEach(function (x) { picked[x] = x === id; });
+        } else {
+          picked[id] = !picked[id];
+          // 마지막 하나를 끄면 고를 문제가 없어지므로 전체 선택으로 돌린다
+          if (!ids.some(function (x) { return picked[x]; })) ids.forEach(function (x) { picked[x] = true; });
+        }
         renderChips(); renderPoolInfo();
       });
     });

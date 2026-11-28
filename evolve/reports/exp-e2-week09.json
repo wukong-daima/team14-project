@@ -1,0 +1,81 @@
+{
+ "exp": "e2",
+ "weeks": "week09",
+ "model": "claude-haiku-5-5",
+ "mock": false,
+ "date": "2026-11-28T21:50:38",
+ "backend": "claude-cli",
+ "cli_isolation": "--safe-mode",
+ "runs": [
+  {
+   "bank": "public",
+   "condition": "page",
+   "model": "claude-haiku-5-5",
+   "effort": "low",
+   "k": 10,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 0.9667,
+   "acc_ci95": [
+    0.9111,
+    1.0
+   ],
+   "n_nonbasic": 11,
+   "acc_nonbasic": 0.9455,
+   "pass_at_k": 1.0,
+   "pass_hat_k": 0.8889,
+   "unparsed": 0,
+   "by_week": {
+    "week09": 0.9667
+   },
+   "mock": false,
+   "elapsed_s": 1239.9,
+   "usage": {
+    "calls": 180,
+    "input_tokens": 2843691,
+    "output_tokens": 62312,
+    "usd": 0.3155,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 180,
+      "usd": 0.3155
+     }
+    }
+   }
+  }
+ ],
+ "condition": "page",
+ "suspect_broken": [],
+ "too_easy": [
+  "w09-passk-01",
+  "w09-passk-02",
+  "w09-eval-guide",
+  "w09a-c01",
+  "w09a-c03",
+  "w09a-c05",
+  "w09a-c07",
+  "w09a-c08",
+  "w09a-c09",
+  "w09a-c11",
+  "w09a-c13",
+  "w09a-c15",
+  "w09a-c21",
+  "w09a-c23",
+  "w09a-c24",
+  "w09a-c25"
+ ],
+ "usage": {
+  "calls": 180,
+  "input_tokens": 2843691,
+  "output_tokens": 62312,
+  "usd": 0.3155,
+  "by_model": {
+   "claude-haiku-5-5": {
+    "calls": 180,
+    "usd": 0.3155
+   }
+  }
+ }
+}

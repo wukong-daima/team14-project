@@ -1,0 +1,176 @@
+{
+ "exp": "e1",
+ "weeks": "week09",
+ "model": "claude-haiku-5-5",
+ "mock": false,
+ "date": "2026-11-28T21:50:37",
+ "backend": "claude-cli",
+ "cli_isolation": "--safe-mode",
+ "runs": [
+  {
+   "effort": "low",
+   "bank": "public",
+   "condition": "page",
+   "model": "claude-haiku-5-5",
+   "k": 3,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 0.9444,
+   "acc_ci95": [
+    0.8333,
+    1.0
+   ],
+   "n_nonbasic": 11,
+   "acc_nonbasic": 0.9091,
+   "pass_at_k": 0.9444,
+   "pass_hat_k": 0.9444,
+   "unparsed": 0,
+   "by_week": {
+    "week09": 0.9444
+   },
+   "mock": false,
+   "elapsed_s": 386.9,
+   "usage": {
+    "calls": 54,
+    "input_tokens": 853091,
+    "output_tokens": 17880,
+    "usd": 0.0942,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 54,
+      "usd": 0.0942
+     }
+    }
+   }
+  },
+  {
+   "effort": "medium",
+   "bank": "public",
+   "condition": "page",
+   "model": "claude-haiku-5-5",
+   "k": 3,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 1.0,
+   "acc_ci95": [
+    1.0,
+    1.0
+   ],
+   "n_nonbasic": 11,
+   "acc_nonbasic": 1.0,
+   "pass_at_k": 1.0,
+   "pass_hat_k": 1.0,
+   "unparsed": 0,
+   "by_week": {
+    "week09": 1.0
+   },
+   "mock": false,
+   "elapsed_s": 386.3,
+   "usage": {
+    "calls": 108,
+    "input_tokens": 1706182,
+    "output_tokens": 40024,
+    "usd": 0.1906,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 108,
+      "usd": 0.1906
+     }
+    }
+   }
+  },
+  {
+   "effort": "high",
+   "bank": "public",
+   "condition": "page",
+   "model": "claude-haiku-5-5",
+   "k": 3,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 0.9815,
+   "acc_ci95": [
+    0.9444,
+    1.0
+   ],
+   "n_nonbasic": 11,
+   "acc_nonbasic": 0.9697,
+   "pass_at_k": 1.0,
+   "pass_hat_k": 0.9444,
+   "unparsed": 0,
+   "by_week": {
+    "week09": 0.9815
+   },
+   "mock": false,
+   "elapsed_s": 385.2,
+   "usage": {
+    "calls": 162,
+    "input_tokens": 2559295,
+    "output_tokens": 67575,
+    "usd": 0.2897,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 162,
+      "usd": 0.2897
+     }
+    }
+   }
+  },
+  {
+   "effort": "xhigh",
+   "bank": "public",
+   "condition": "page",
+   "model": "claude-haiku-5-5",
+   "k": 3,
+   "weeks": [
+    "week09"
+   ],
+   "n": 18,
+   "acc": 0.9815,
+   "acc_ci95": [
+    0.9444,
+    1.0
+   ],
+   "n_nonbasic": 11,
+   "acc_nonbasic": 0.9697,
+   "pass_at_k": 1.0,
+   "pass_hat_k": 0.9444,
+   "unparsed": 0,
+   "by_week": {
+    "week09": 0.9815
+   },
+   "mock": false,
+   "elapsed_s": 434.0,
+   "usage": {
+    "calls": 216,
+    "input_tokens": 3412385,
+    "output_tokens": 108260,
+    "usd": 0.3954,
+    "by_model": {
+     "claude-haiku-5-5": {
+      "calls": 216,
+      "usd": 0.3954
+     }
+    }
+   }
+  }
+ ],
+ "condition": "page",
+ "usage": {
+  "calls": 216,
+  "input_tokens": 3412385,
+  "output_tokens": 108260,
+  "usd": 0.3954,
+  "by_model": {
+   "claude-haiku-5-5": {
+    "calls": 216,
+    "usd": 0.3954
+   }
+  }
+ }
+}

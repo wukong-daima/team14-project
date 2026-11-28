@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-25T18:49:08",
+ "generated": "2026-11-28T22:17:10",
  "rounds": [
   {
    "file": "round-01.json",
@@ -43,6 +43,30 @@
   }
  ],
  "experiments": [
+  {
+   "file": "exp-e1-week09-none.json",
+   "exp": "e1",
+   "weeks": "week09",
+   "mock": false
+  },
+  {
+   "file": "exp-e1-week09.json",
+   "exp": "e1",
+   "weeks": "week09",
+   "mock": false
+  },
+  {
+   "file": "exp-e2-week09-none.json",
+   "exp": "e2",
+   "weeks": "week09",
+   "mock": false
+  },
+  {
+   "file": "exp-e2-week09.json",
+   "exp": "e2",
+   "weeks": "week09",
+   "mock": false
+  },
   {
    "file": "exp-e3-week02_week04_week08.json",
    "exp": "e3",

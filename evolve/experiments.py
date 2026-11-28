@@ -3,6 +3,8 @@
   python evolve/experiments.py e3 --weeks week02,week04,week08      # 자료 없음/브리프/페이지
   python evolve/experiments.py e2 --weeks week09 --k 10              # pass@k vs pass^k
   python evolve/experiments.py e1 --weeks week04                     # effort low→xhigh (테스트타임 스케일링)
+  --condition none|brief|page  E1·E2 의 자료 조건(기본 page). page 는 9주차에서 94~100% 라 여지가 없어 none 에서도 잰다
+  --reps N                     E1 에서 문항당 풀이 횟수(기본 1)
   --mock 으로 API 없이 형식 확인
 """
 from __future__ import annotations
@@ -28,26 +30,30 @@ def main():
     ap.add_argument("--k", type=int, default=10)
     ap.add_argument("--model", default=WEAK_MODEL)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--condition", default="page", choices=["none", "brief", "page"], help="E1·E2 의 자료 조건")
+    ap.add_argument("--reps", type=int, default=1, help="E1 에서 문항당 풀이 횟수")
     ap.add_argument("--mock", action="store_true")
     a = ap.parse_args()
     llm = LLM(mock=a.mock)
     out = {"exp": a.exp, "weeks": a.weeks, "model": a.model, "mock": a.mock, "date": time.strftime("%Y-%m-%dT%H:%M:%S"),
            "backend": "mock" if a.mock else BACKEND, "cli_isolation": " ".join(CLI_ISOLATION) if BACKEND == "claude-cli" and not a.mock else None, "runs": []}
+    if a.exp != "e3":
+        out["condition"] = a.condition
     if a.exp == "e3":
         for cond in ("none", "brief", "page"):
             r = solve_run(ns(weeks=a.weeks, condition=cond, model=a.model, limit=a.limit, mock=a.mock), llm)
             out["runs"].append({"condition": cond, **r["summary"]})
     elif a.exp == "e2":
-        r = solve_run(ns(weeks=a.weeks, k=a.k, model=a.model, limit=a.limit, mock=a.mock), llm)
+        r = solve_run(ns(weeks=a.weeks, condition=a.condition, k=a.k, model=a.model, limit=a.limit, mock=a.mock), llm)
         out["runs"].append(r["summary"])
         out["suspect_broken"] = [x["id"] for x in r["results"] if x["n_correct"] == 0]
         out["too_easy"] = [x["id"] for x in r["results"] if x["n_correct"] == a.k]
     else:
         for eff in ("low", "medium", "high", "xhigh"):
-            r = solve_run(ns(weeks=a.weeks, effort=eff, model=a.model, limit=a.limit, mock=a.mock), llm)
+            r = solve_run(ns(weeks=a.weeks, condition=a.condition, k=a.reps, effort=eff, model=a.model, limit=a.limit, mock=a.mock), llm)
             out["runs"].append({"effort": eff, **r["summary"]})
     out["usage"] = llm.usage.to_dict()
-    p = REPORT_DIR / f"exp-{a.exp}-{a.weeks.replace(',', '_')}{'-mock' if a.mock else ''}.json"
+    p = REPORT_DIR / f"exp-{a.exp}-{a.weeks.replace(',', '_')}{'' if a.exp == 'e3' or a.condition == 'page' else '-' + a.condition}{'-mock' if a.mock else ''}.json"
     jdump(out, p)
     update_report_index()
     log(f"→ {p}")

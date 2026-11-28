@@ -43,6 +43,7 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
   line-height: 1.65; font-size: 16px; -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word; /* 띄어쓰기 없는 긴 URL 이 좁은 화면에서 페이지를 가로로 밀지 않게 */
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
